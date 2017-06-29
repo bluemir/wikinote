@@ -1,0 +1,9 @@
+{{define "contents"}}
+<article class="row users">
+	<ul>
+		{{ range .users }}
+		<li>ID: {{.Id}} - Email: {{.Email}}</li>
+		{{end}}
+	</ul>
+</article>
+{{end}}

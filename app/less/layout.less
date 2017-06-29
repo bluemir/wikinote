@@ -1,0 +1,83 @@
+// common header
+
+.container, .row {
+	position: relative;
+}
+header {
+	display: block;
+	height: 4rem;
+	.container, .row {
+		height: 4rem;
+	}
+}
+.page {
+	article {
+		padding-top: 1rem;
+		padding-bottom: 1rem;
+	}
+}
+
+@media @smartphone, @tablet {
+	// non fixed header
+	// fit to screen
+	.row {
+		margin: 0rem 1rem;
+	}
+}
+
+@media @narrow-pc {
+	// fixed header
+	// fit to screen
+	//
+	.row {
+		margin: 0rem 3rem;
+	}
+	header {
+		position: fixed;
+		top: 0rem;
+		right: 0rem;
+		left: 0rem;
+	}
+	.page {
+		position: fixed;
+		top: 4rem;
+		right: 0rem;
+		left: 0rem;
+		overflow-y: scroll;
+		bottom: 0rem;
+	}
+}
+@media @wide-pc, @UHD-pc {
+	// fixed header
+	.container {
+		max-width: 960px;
+		margin: auto;
+		.row {
+			position: relative;
+			margin: 0rem 3rem;
+		}
+	}
+	header {
+		position : fixed;
+		top: 0rem;
+		right: 0rem;
+		left: 0rem;
+
+		.container {
+			.row {
+				margin: 0rem 0.5rem;
+			}
+		}
+	}
+	.page {
+		position: fixed;
+		top: 4rem;
+		right: 0rem;
+		left: 0rem;
+		overflow-y: scroll;
+		bottom: 0rem;
+		.container {
+		}
+	}
+}
+

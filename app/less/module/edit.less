@@ -1,0 +1,40 @@
+/* editor */
+textarea {
+	width: 100%;
+	min-height: 50rem;
+	box-sizing: border-box;
+
+	font-size: 1rem;
+	overflow-y: visible;
+}
+
+.tab-control {
+	padding-top: 1rem;
+	menu {
+		margin:0px;
+		padding: 0.3rem 0rem;
+		border-bottom: 0.1rem solid @skyblue;
+		.btn {
+			padding: 0.3rem 1rem;
+		}
+	}
+
+	&.editor {
+		.panel.preview {
+			display: none;
+		}
+		menu .btn.editor {
+			background: @skyblue;
+			color: @black;
+		}
+	}
+	&.preview {
+		.panel.editor {
+			display: none;
+		}
+		menu .btn.preview {
+			background: @skyblue;
+			color: @black;
+		}
+	}
+}

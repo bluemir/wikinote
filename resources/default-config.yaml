@@ -1,0 +1,5 @@
+front-page: front-page.md
+auto-backup: false
+user:
+  default:
+    role: viewer

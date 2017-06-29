@@ -1,0 +1,22 @@
+{{define "contents"}}
+<article class="row edit">
+	<section class="tab-control editor">
+		<menu class="tab-header">
+			<a class="btn editor" href="#">Edit</a> <a class="btn preview" href="#">Preview</a>
+		</menu>
+		<section class="panel editor">
+			<form method="POST" action="{{.path}}">
+				<textarea>{{.data}}</textarea>
+				<input type="submit" value="Save"/>
+			</form>
+		</section>
+		<section class="panel preview">
+
+		</section>
+	</section>
+</article>
+{{end}}
+
+{{define "scripts"}}
+<script src="/!/static/js/edit.js"></script>
+{{end}}

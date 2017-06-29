@@ -1,0 +1,39 @@
+// external link
+a[href^="http:"], a[href^="https:"] {
+	position : relative;
+	padding-right : 10px;
+	&:after {
+		position : absolute;
+		top:0px;
+		display : inline-block;
+		font : normal normal normal 14px/1 FontAwesome;
+		font-size : 5px;
+		content : "\f08e";
+	}
+}
+
+// table
+table {
+	border-collapse : collapse;
+
+	th, td {
+		border : 1px solid gray;
+		padding : 5px;
+	}
+}
+
+// headers
+h1, h2, h3, h4, h5, h6, h7 {
+	margin: 0px;
+}
+h1 {
+	font-size: 2.5rem;
+	font-weight: bold;
+	text-shadow: 1px 1px 5px @gray;
+}
+h2 {
+	font-size: 2rem;
+	border-bottom: 1px solid @gray;
+}
+
+
