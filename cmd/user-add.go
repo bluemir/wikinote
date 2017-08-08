@@ -1,7 +1,12 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
+
+	"github.com/bluemir/wikinote/backend"
+	"github.com/bluemir/wikinote/backend/user"
 )
 
 func NewUserAddCommand() *cobra.Command {
@@ -12,8 +17,22 @@ func NewUserAddCommand() *cobra.Command {
 	var UserAddCmd = &cobra.Command{
 		Use: "add USERNAME",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			//b := backend.New(backendOpts)
-			return nil
+			b, err := backend.New(backendOpts)
+			if err != nil {
+				return err
+			}
+			if len(args) != 1 {
+				return fmt.Errorf("invaild name")
+			}
+			email := args[0] + "@wikinote"
+			//if not set
+			if cmd.Flags().Changed("port") {
+				email = UserAddConfig.email
+			}
+			return b.User().New(&user.User{
+				Id:    args[0],
+				Email: email,
+			})
 		},
 	}
 
