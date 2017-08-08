@@ -5,6 +5,7 @@ import (
 
 	"github.com/GeertJohan/go.rice"
 	"github.com/gin-contrib/sessions"
+	"github.com/gin-gonic/autotls"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 
@@ -21,6 +22,7 @@ const (
 
 type Config struct {
 	Address string
+	Domain  []string
 }
 
 func Run(b backend.Backend, conf *Config) error {
@@ -82,9 +84,14 @@ func Run(b backend.Backend, conf *Config) error {
 			HandleDelete(c)
 		}
 	})
-	logrus.Infof("Run Server on %s", conf.Address)
-	// TODO github.com/gin-gonic/autotls
-	return app.Run(conf.Address)
+	if len(conf.Domain) > 0 {
+		logrus.Infof("Enable Auto TLS @ %s", conf.Domain)
+		logrus.Infof("Run Server on %s", conf.Address)
+		return autotls.Run(app, conf.Domain...)
+	} else {
+		logrus.Infof("Run Server on %s", conf.Address)
+		return app.Run(conf.Address)
+	}
 }
 
 func Backend(c *gin.Context) backend.Backend {

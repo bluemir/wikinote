@@ -13,9 +13,10 @@ import (
 
 func NewServeCommand() *cobra.Command {
 	var ServeConfig = struct {
-		port uint
-		bind string
-		opts []string
+		port   uint
+		bind   string
+		opts   []string
+		domain []string
 	}{}
 
 	var ServeCmd = &cobra.Command{
@@ -28,6 +29,9 @@ func NewServeCommand() *cobra.Command {
 			} else {
 				conf.Address = ServeConfig.bind
 			}
+
+			conf.Domain = ServeConfig.domain
+
 			b, err := backend.New(backendOpts)
 			if err != nil {
 				return err
@@ -44,6 +48,7 @@ func NewServeCommand() *cobra.Command {
 	ServeCmd.Flags().UintVarP(&ServeConfig.port, "port", "p", 0, "listen port")
 	ServeCmd.Flags().StringVarP(&ServeConfig.bind, "bind", "b", "localhost:4000", "bind address")
 	ServeCmd.Flags().StringArrayVarP(&ServeConfig.opts, "opt", "o", []string{}, "live options")
+	ServeCmd.Flags().StringSliceVar(&ServeConfig.domain, "tls-domain", []string{}, "auto-tls domain")
 
 	return ServeCmd
 }
