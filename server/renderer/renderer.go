@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/GeertJohan/go.rice"
@@ -22,6 +23,10 @@ func NewRenderer() render.HTMLRender {
 	box := rice.MustFindBox("../../dist/html")
 	layout := template.New("layout")
 	box.Walk("/_layout", func(path string, info os.FileInfo, err error) error {
+		logrus.Debugf("[parse layout] name :%s, path: %s", info.Name(), path)
+		if (info.Name()[0] == '.') && path != "/" {
+			return filepath.SkipDir
+		}
 		if info.IsDir() || path[0] == '.' || !strings.HasSuffix(path, ".html") {
 			return nil
 		}
@@ -36,7 +41,11 @@ func NewRenderer() render.HTMLRender {
 
 	logrus.Debug(layout.DefinedTemplates())
 	box.Walk("/", func(path string, info os.FileInfo, err error) error {
-		if info.IsDir() || path[0] == '.' || path[0] == '_' || !strings.HasSuffix(path, ".html") {
+		logrus.Debugf("[parse template] name :%s, path: %s", info.Name(), path)
+		if (info.Name()[0] == '.' || info.Name()[0] == '_') && path != "/" {
+			return filepath.SkipDir
+		}
+		if info.IsDir() || path[0] == '_' || !strings.HasSuffix(path, ".html") {
 			return nil
 		}
 
