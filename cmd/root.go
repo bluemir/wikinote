@@ -30,8 +30,8 @@ func Execute() {
 		},
 	}
 	RootCmd.PersistentFlags().BoolVarP(&RootConfig.debug, "debug", "D", false, "debug mode")
-	RootCmd.PersistentFlags().StringVarP(&backendOpts.Wikipath, "wiki-path", "w", "$HOME/wiki", "wikipath (default: $HOME/wiki)")
-	RootCmd.PersistentFlags().StringVarP(&backendOpts.ConfigFile, "config", "c", "$HOME/wiki/.app/config.yaml", "config file (default is $HOME/.wikinote.yaml)")
+	RootCmd.PersistentFlags().StringVarP(&backendOpts.Wikipath, "wiki-path", "w", "$HOME/wiki", "wikipath")
+	RootCmd.PersistentFlags().StringVarP(&backendOpts.ConfigFile, "config", "c", "$HOME/wiki/.app/config.yaml", "config file")
 
 	RootCmd.AddCommand(
 		NewUserCommand(),
