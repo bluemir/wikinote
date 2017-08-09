@@ -85,8 +85,15 @@ func Run(b backend.Backend, conf *Config) error {
 		}
 	})
 	if len(conf.Domain) > 0 {
+		logrus.Warn("ignore bind or port option")
+		logrus.Info("Run http redirect server")
+		go http.ListenAndServe(":80", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			logrus.Infof("hit the http request: %s", r.RequestURI)
+			http.Redirect(w, r, "https://"+conf.Domain[0]+r.RequestURI, http.StatusPermanentRedirect)
+		}))
+
 		logrus.Infof("Enable Auto TLS @ %s", conf.Domain)
-		logrus.Infof("Run Server on %s", conf.Address)
+		logrus.Infof("Run Server")
 		return autotls.Run(app, conf.Domain...)
 	} else {
 		logrus.Infof("Run Server on %s", conf.Address)
