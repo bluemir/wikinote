@@ -1,0 +1,17 @@
+{{define "contents"}}
+<article class="row view">
+	<img src="{{.path}}?raw" />
+</article>
+<!-- plugins -->
+<aside class="row">
+	{{ range .footer}}
+	<div>
+		{{ if .Err }}
+			<p> Sorry! error on plugin</p>
+		{{ else }}
+			{{ .Data }}
+		{{ end }}
+	</div>
+	{{ end }}
+</aside>
+{{end}}
