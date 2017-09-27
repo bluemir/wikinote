@@ -2,6 +2,7 @@ package file
 
 import (
 	"io/ioutil"
+	"os"
 	"path/filepath"
 )
 
@@ -27,6 +28,11 @@ func (m *manager) Read(path string) ([]byte, error) {
 	return ioutil.ReadFile(m.GetFullPath(path))
 }
 func (m *manager) Write(path string, data []byte) error {
+	fullpath := m.GetFullPath(path)
+	dirpath := filepath.Dir(fullpath)
+	if err := os.MkdirAll(dirpath, 0755); err != nil {
+		return err
+	}
 	return ioutil.WriteFile(m.GetFullPath(path), data, 0644)
 }
 func (m *manager) GetFullPath(path string) string {
