@@ -10,6 +10,7 @@ import (
 
 type RenderData struct {
 	Path       string
+	IsSpecial  bool
 	Title      string
 	UserName   string
 	UserData   map[string]interface{}

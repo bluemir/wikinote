@@ -18,6 +18,7 @@ const (
 	BACKEND  = "backend"
 	ROLE     = "role"
 	USERNAME = "username"
+	SPECAIL  = "special-route"
 )
 
 type Config struct {
@@ -45,27 +46,33 @@ func Run(b backend.Backend, conf *Config) error {
 	app.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusTemporaryRedirect, b.Config().FrontPage)
 	})
-	app.StaticFS("/!/static/", rice.MustFindBox("../dist").HTTPBox())
-	//app.Group("/!/api")
-	app.GET("/!/api/edit/*path")
-	app.POST("/!/api/preview", Action("edit"), HandlePreview) // render body
+	special := app.Group("/!")
+	{
+		special.Use(func(c *gin.Context) {
+			c.Set(SPECAIL, true)
+		})
+		special.StaticFS("/static/", rice.MustFindBox("../dist").HTTPBox())
 
-	app.GET("/!/edit/*path", Action("edit"), HandleEditForm) // TODO must change base name because preview
-	app.GET("/!/attach/*path", Action("edit"), HandleAttachForm)
-	app.GET("/!/search", Action("view"), HandleSearch)
-	app.GET("/!/history/*path")
-	app.GET("/!/ws/*path")
+		special.GET("/api/edit/*path")
+		special.POST("/api/preview", Action("edit"), HandlePreview) // render body
 
-	//auth
-	app.GET("/!/auth/login", HandleLoginForm)
-	app.POST("/!/auth/login", HandleLogin)
-	app.GET("/!/auth/register", HandleRegisterForm)
-	app.POST("/!/auth/register", HandleRegister)
-	app.GET("/!/auth/logout", HandleLogout)
+		special.GET("/edit/*path", Action("edit"), HandleEditForm) // TODO must change base name because preview
+		special.GET("/attach/*path", Action("edit"), HandleAttachForm)
+		special.GET("/search", Action("view"), HandleSearch)
+		special.GET("/history/*path")
+		special.GET("/ws/*path")
 
-	app.GET("/!/user", Action("user"), HandleUserList)
-	app.GET("/!/user/:id")
-	app.PUT("/!/user")
+		//auth
+		special.GET("/auth/login", HandleLoginForm)
+		special.POST("/auth/login", HandleLogin)
+		special.GET("/auth/register", HandleRegisterForm)
+		special.POST("/auth/register", HandleRegister)
+		special.GET("/auth/logout", HandleLogout)
+
+		special.GET("/user", Action("user"), HandleUserList)
+		special.GET("/user/:id")
+		special.PUT("/user")
+	}
 
 	app.NoRoute(func(c *gin.Context) {
 		// GET            render file
@@ -84,6 +91,7 @@ func Run(b backend.Backend, conf *Config) error {
 			HandleDelete(c)
 		}
 	})
+
 	if len(conf.Domain) > 0 {
 		logrus.Warn("ignore bind or port option")
 		logrus.Info("Run http redirect server")

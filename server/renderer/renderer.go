@@ -90,6 +90,7 @@ func (r *RenderContext) Render(w http.ResponseWriter) error {
 		return fmt.Errorf("template '%s' no found", r.name)
 	}
 
+	_, isSpecial := data.context.Get("special-route")
 	session := sessions.Default(data.context)
 
 	// FIXME use const in server pkg
@@ -104,6 +105,7 @@ func (r *RenderContext) Render(w http.ResponseWriter) error {
 
 	return r.template.Execute(w, &RenderData{
 		Path:       getWikipath(data.context),
+		IsSpecial:  isSpecial,
 		Breadcrumb: parseBreadcrumb(getWikipath(data.context)),
 		UserName:   username,
 		MsgInfo:    MsgInfo,

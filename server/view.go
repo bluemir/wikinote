@@ -11,15 +11,16 @@ import (
 )
 
 func HandleView(c *gin.Context) {
+	//logrus.Debugf("path: %s, accept: %+v", c.Request.URL.Path, c.GetHeader("Accept"))
+
 	// if raw exist
 	if _, ok := c.GetQuery("raw"); ok {
-		logrus.Info("raw file")
+		logrus.Infof("[View] serve raw file: '%s'", Backend(c).File().GetFullPath(c.Request.URL.Path))
 		c.File(Backend(c).File().GetFullPath(c.Request.URL.Path))
 		return
-	} else {
-		logrus.Info("raw file fail")
 	}
 
+	// plugin renderer?
 	switch {
 	// TODO check file type
 	case checkExt(c, ".md"):
@@ -43,7 +44,8 @@ func HandleView(c *gin.Context) {
 		// markdown
 	case checkExt(c, ".jpg", ".png", ".bmp", ".gif"):
 		// image
-		c.HTML(http.StatusOK, "view/image.html", gin.H{})
+		// check exist?
+		c.HTML(http.StatusOK, "/view/image.html", Data(c))
 	case checkExt(c, ".mp4"):
 		// video
 	case checkExt(c, ".mp3"):
