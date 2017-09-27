@@ -13,7 +13,8 @@ import (
 
 var backendOpts = &backend.Options{}
 
-func Execute() {
+func Execute(version string) {
+	backendOpts.Version = version
 	var RootConfig = struct {
 		debug bool
 	}{}

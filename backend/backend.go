@@ -38,6 +38,7 @@ type Backend interface {
 type Options struct {
 	Wikipath   string
 	ConfigFile string
+	Version    string
 }
 
 func init() {
@@ -45,6 +46,7 @@ func init() {
 }
 
 func New(o *Options) (Backend, error) {
+	logrus.Infof("VERSION: %s", o.Version)
 	// first, parse config from file
 	wikipath := os.ExpandEnv(o.Wikipath)
 	configFile := os.ExpandEnv(o.ConfigFile)
