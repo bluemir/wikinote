@@ -7,5 +7,7 @@ import (
 )
 
 func HandleAttachForm(c *gin.Context) {
-	c.HTML(http.StatusOK, "attach.html", Data(c))
+	c.HTML(http.StatusOK, "/attach.html", Data(c).
+		Set("path", c.Param("path")),
+	)
 }

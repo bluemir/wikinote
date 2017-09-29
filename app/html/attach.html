@@ -1,5 +1,13 @@
 {{define "contents"}}
 <article class="row attach">
-	<h2>Attach Files<h2>
+	<h2>Attach Files</h2>
+	<div id="dropzone" x-path="{{.path}}">
+		<!-- TODO icon -->
+		Drop Here
+	</div>
 </article>
+{{end}}
+
+{{define "scripts"}}
+<script src="/!/static/js/attach.js"></script>
 {{end}}

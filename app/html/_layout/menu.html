@@ -6,11 +6,11 @@
 	<li>
 		<a href="">More</a>
 		<ul class="sub">
-			<li><a href="/!/delete/{{ .Path }}">Delete</a></li>
-			<li><a href="/!/attach/{{ .Path }}">Attach</a></li>
-			<li><a href="/!/move/{{ .Path }}">Move</a></li>
-			<li><a href="/!/history/{{ .Path }}">History</a></li>
-			<li><a href="/!/backlink/{{ .Path }}">Back Links</a></li>
+			<li><a href="/!/delete{{ .Path }}">Delete</a></li>
+			<li><a href="/!/attach{{ .Path }}">Attach</a></li>
+			<li><a href="/!/move{{ .Path }}">Move</a></li>
+			<li><a href="/!/history{{ .Path }}">History</a></li>
+			<li><a href="/!/backlink{{ .Path }}">Back Links</a></li>
 			<hr>
 			<!-- TODO make split -->
 			{{ if .IsLogin }}

@@ -16,7 +16,7 @@ HTML_SOURCES = $(shell find app/html -type f -name '*.html' -print)
 CSS_SOURCES = $(shell find app/less -type f -name "*.less" -print)
 WEB_LIBS = $(shell find app/lib -type f -type f -print)
 
-DISTS  = dist/js/common.js dist/js/edit.js
+DISTS  = dist/js/common.js dist/js/edit.js dist/js/attach.js
 DISTS += $(HTML_SOURCES:app/html/%=dist/html/%)
 DISTS += dist/css/common.css
 DISTS += $(WEB_LIBS:app/lib/%=dist/lib/%)
