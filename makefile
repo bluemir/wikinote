@@ -3,7 +3,8 @@ BIN_NAME=$(notdir $(IMPORT_PATH))
 
 default: $(BIN_NAME)
 
-GIT_COMMIT_ID = $(shell git rev-parse --short HEAD)
+GIT_COMMIT_ID:=$(shell git rev-parse --short HEAD)
+VERSION:=$(GIT_COMMIT_ID)-$(shell date +"%Y%m%d.%H%M%S")
 
 # if gopath not set, make inside current dir
 ifeq ($(GOPATH),)
@@ -47,7 +48,7 @@ reset:
 $(BIN_NAME).bin: $(GO_SOURCES) $(GOPATH)/src/$(IMPORT_PATH)
 	go get -v -d $(IMPORT_PATH)            # can replace with glide
 	go build \
-		-ldflags "-X main.Version=$(GIT_COMMIT_ID)-$(shell date +"%Y%m%d.%H%M%S")" \
+		-ldflags "-X main.Version=$(VERSION)" \
 		-o $(BIN_NAME).bin .
 	@echo Build DONE
 
