@@ -4,11 +4,14 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/sirupsen/logrus"
 )
 
 type Manager interface {
 	Read(path string) ([]byte, error)
 	Write(path string, data []byte) error
+	List(path string) ([]os.FileInfo, error)
 	Search(query string) (interface{}, error)
 
 	GetFullPath(path string) string
@@ -37,4 +40,11 @@ func (m *manager) Write(path string, data []byte) error {
 }
 func (m *manager) GetFullPath(path string) string {
 	return filepath.Join(m.basepath, path)
+}
+func (m *manager) List(path string) ([]os.FileInfo, error) {
+	p := m.GetFullPath(path)
+	ext := filepath.Ext(path)
+	p = p[:len(p)-len(ext)]
+	logrus.Debug(p)
+	return ioutil.ReadDir(p)
 }

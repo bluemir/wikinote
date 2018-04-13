@@ -1,10 +1,18 @@
 {{define "contents"}}
 <article class="row attach">
 	<h2>Attach Files</h2>
+	<ul>
+		{{range .files }}
+		{{if not .IsDir }}
+		<li>File Name: {{ .Name }}</li>
+		{{end}}
+		{{end}}
+	</ul>
 	<div id="dropzone" x-path="{{.path}}">
 		<!-- TODO icon -->
 		Drop Here
 	</div>
+
 </article>
 {{end}}
 
