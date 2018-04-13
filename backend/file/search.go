@@ -28,6 +28,11 @@ func (m *manager) Search(query string) (interface{}, error) {
 		if info.Name()[0] == '.' {
 			return nil
 		}
+		switch filepath.Ext(info.Name()) {
+		case ".pdf", ".mp4", ".mp3":
+			// if binary
+			return nil
+		}
 
 		res, err := fileSearch(path, query)
 		if err != nil {
