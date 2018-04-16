@@ -31,6 +31,6 @@ window.addEventListener("load", function(){
 		if (location.pathname.substr(0, 3) == "/!/") {
 			return // skip special page
 		}
-		location.href = "/!/edit" + location.pathname;
+		location.href = location.pathname+"?edit";
 	}
 })

@@ -1,7 +1,7 @@
 {{define "menu"}}
 <ul>
 	{{ if not .IsSpecial }}
-	<li><a href="/!/edit{{ .Path }}">Edit</a></li>
+	<li><a href="{{ .Path }}?edit">Edit</a></li>
 	{{ end }}
 	<li>
 		<a href="">More</a>

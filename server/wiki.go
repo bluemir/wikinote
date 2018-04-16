@@ -8,6 +8,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func HandleEditForm(c *gin.Context) {
+	backend := Backend(c)
+	data, err := backend.File().Read(c.Request.URL.Path)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+	}
+	c.HTML(http.StatusOK, "/edit.html", Data(c).
+		Set("data", string(data)).
+		Set("path", c.Param("path")),
+	)
+}
 func HandleUpdateForm(c *gin.Context) {
 	p := c.Request.URL.Path
 	data, ok := c.GetPostForm("data")

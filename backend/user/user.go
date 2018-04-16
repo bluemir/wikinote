@@ -30,6 +30,9 @@ func (p *Password) Set(b string) {
 }
 
 func (p *Password) Check(b string) bool {
+	if p == nil {
+		return false
+	}
 	return p.Data == encodePassword(b, p.Salt)
 }
 

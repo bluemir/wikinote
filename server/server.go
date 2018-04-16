@@ -2,7 +2,6 @@ package server
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/GeertJohan/go.rice"
 	"github.com/gin-contrib/sessions"
@@ -54,26 +53,19 @@ func Run(b backend.Backend, conf *Config) error {
 		})
 		special.StaticFS("/static/", rice.MustFindBox("../dist").HTTPBox())
 
-		special.GET("/api/edit/*path")
 		special.POST("/api/preview", Action("edit"), HandlePreview) // render body
-
-		special.GET("/edit/*path", Action("edit"), HandleEditForm) // TODO must change base name because preview
-		special.GET("/attach/*path", Action("edit"), HandleAttachForm)
 		special.GET("/search", Action("view"), HandleSearch)
-		special.GET("/history/*path")
-		special.GET("/ws/*path")
 
 		//auth
-		special.GET("/auth/login", HandleLoginForm)
-		special.POST("/auth/login", HandleLogin)
+		special.GET("/auth/login", HandleLogin)
 		special.GET("/auth/register", HandleRegisterForm)
 		special.POST("/auth/register", HandleRegister)
-		special.GET("/auth/logout", HandleLogout)
 
 		special.GET("/user", Action("user"), HandleUserList)
 		special.GET("/user/:id")
 		special.PUT("/user")
 	}
+	app.Use(BasicAuth)
 
 	app.NoRoute(func(c *gin.Context) {
 		// GET            render file or render functional page
@@ -83,6 +75,7 @@ func Run(b backend.Backend, conf *Config) error {
 
 		switch c.Request.Method {
 		case http.MethodGet:
+			// check param
 			if _, ok := c.GetQuery("edit"); ok {
 				HandleEditForm(c)
 				return
@@ -91,7 +84,6 @@ func Run(b backend.Backend, conf *Config) error {
 				HandleAttachForm(c)
 				return
 			}
-			// if raw exist
 			if _, ok := c.GetQuery("raw"); ok {
 				HandleRaw(c)
 				return
@@ -114,7 +106,8 @@ func Run(b backend.Backend, conf *Config) error {
 		case http.MethodPut:
 			HandleUpdate(c)
 		case http.MethodDelete:
-			HandleDelete(c)
+			c.String(http.StatusNotImplemented, "text/plain", "not implemeted")
+			return
 		}
 	})
 
@@ -146,83 +139,16 @@ func FlashMessage(c *gin.Context) renderer.MessageContext {
 }
 func Action(actions ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		role := Session(c).Role()
-		for _, action := range actions {
-			if Backend(c).Auth().IsAllow(role, action) {
-				return //pass
+		/*
+			role := Session(c).Role()
+			for _, action := range actions {
+				if Backend(c).Auth().IsAllow(role, action) {
+					return //pass
+				}
 			}
-		}
-		logrus.Debugf("403 role: %s, actions: %+v", role, actions)
-		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", Data(c))
-		c.Abort()
+			logrus.Debugf("403 role: %s, actions: %+v", role, actions)
+			c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", Data(c))
+			c.Abort()
+		*/
 	}
-}
-func BasicAuth(c *gin.Context) {
-	str := c.GetHeader("Authorization")
-	if str == "" {
-		return // JUST pass for unlogined user
-	}
-	if str[:len("Basic ")] != "Basic " {
-		// TODO unsupported
-		c.HTML(http.StatusBadRequest, "/errors/unauthorized.html", Data(c))
-		c.Abort()
-		return
-	}
-	arr := strings.SplitN(str[len("Basic "):], ":", 2)
-	username := arr[0]
-	password := arr[1]
-	user, err := Backend(c).User().Get(username)
-	if err != nil {
-		FlashMessage(c).Warn("Error on get user: %s", err.Error())
-		c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
-		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", Data(c))
-		c.Abort()
-		return
-	}
-
-	if !user.Password.Check(password) {
-		FlashMessage(c).Warn("wrong password")
-		c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
-		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", Data(c))
-		c.Abort()
-		return
-	}
-	c.Set(USERNAME, username)
-	return
-}
-func tryLogin(c *gin.Context) {
-	str := c.GetHeader("Authorization")
-	if str == "" {
-		c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
-		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", Data(c))
-		c.Abort()
-		return
-	}
-	if str[:len("Basic ")] != "Basic " {
-		// TODO unsupported
-		c.HTML(http.StatusBadRequest, "/errors/unauthorized.html", Data(c))
-		c.Abort()
-		return
-	}
-	arr := strings.SplitN(str[len("Basic "):], ":", 2)
-	username := arr[0]
-	password := arr[1]
-	user, err := Backend(c).User().Get(username)
-	if err != nil {
-		FlashMessage(c).Warn("Error on get user: %s", err.Error())
-		c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
-		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", Data(c))
-		c.Abort()
-		return
-	}
-
-	if !user.Password.Check(password) {
-		FlashMessage(c).Warn("wrong password")
-		c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
-		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", Data(c))
-		c.Abort()
-		return
-	}
-	c.Set(USERNAME, username)
-	return
 }
