@@ -10,17 +10,13 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+func HandleRaw(c *gin.Context) {
+	logrus.Infof("[View] serve raw file: '%s'", Backend(c).File().GetFullPath(c.Request.URL.Path))
+	c.File(Backend(c).File().GetFullPath(c.Request.URL.Path))
+	return
+}
 func HandleView(c *gin.Context) {
 	//logrus.Debugf("path: %s, accept: %+v", c.Request.URL.Path, c.GetHeader("Accept"))
-
-	// if raw exist
-	if _, ok := c.GetQuery("raw"); ok {
-		logrus.Infof("[View] serve raw file: '%s'", Backend(c).File().GetFullPath(c.Request.URL.Path))
-		c.File(Backend(c).File().GetFullPath(c.Request.URL.Path))
-		return
-	}
-
-	// plugin renderer?
 	switch {
 	// TODO check file type
 	case checkExt(c, ".md"):

@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/GeertJohan/go.rice"
 	"github.com/gin-contrib/sessions"
@@ -75,13 +76,38 @@ func Run(b backend.Backend, conf *Config) error {
 	}
 
 	app.NoRoute(func(c *gin.Context) {
-		// GET            render file
+		// GET            render file or render functional page
 		// POST           create or update file with form submit
 		// PUT            create or update file with ajax
 		// DELETE         delete file
 
 		switch c.Request.Method {
 		case http.MethodGet:
+			if _, ok := c.GetQuery("edit"); ok {
+				HandleEditForm(c)
+				return
+			}
+			if _, ok := c.GetQuery("attach"); ok {
+				HandleAttachForm(c)
+				return
+			}
+			// if raw exist
+			if _, ok := c.GetQuery("raw"); ok {
+				HandleRaw(c)
+				return
+			}
+			if _, ok := c.GetQuery("history"); ok {
+				c.String(http.StatusNotImplemented, "text/plain", "not implemeted")
+				return
+			}
+			if _, ok := c.GetQuery("backlinks"); ok {
+				c.String(http.StatusNotImplemented, "text/plain", "not implemeted")
+				return
+			}
+			if _, ok := c.GetQuery("move"); ok {
+				c.String(http.StatusNotImplemented, "text/plain", "not implemeted")
+				return
+			}
 			HandleView(c)
 		case http.MethodPost:
 			HandleUpdateForm(c)
@@ -130,4 +156,73 @@ func Action(actions ...string) gin.HandlerFunc {
 		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", Data(c))
 		c.Abort()
 	}
+}
+func BasicAuth(c *gin.Context) {
+	str := c.GetHeader("Authorization")
+	if str == "" {
+		return // JUST pass for unlogined user
+	}
+	if str[:len("Basic ")] != "Basic " {
+		// TODO unsupported
+		c.HTML(http.StatusBadRequest, "/errors/unauthorized.html", Data(c))
+		c.Abort()
+		return
+	}
+	arr := strings.SplitN(str[len("Basic "):], ":", 2)
+	username := arr[0]
+	password := arr[1]
+	user, err := Backend(c).User().Get(username)
+	if err != nil {
+		FlashMessage(c).Warn("Error on get user: %s", err.Error())
+		c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
+		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", Data(c))
+		c.Abort()
+		return
+	}
+
+	if !user.Password.Check(password) {
+		FlashMessage(c).Warn("wrong password")
+		c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
+		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", Data(c))
+		c.Abort()
+		return
+	}
+	c.Set(USERNAME, username)
+	return
+}
+func tryLogin(c *gin.Context) {
+	str := c.GetHeader("Authorization")
+	if str == "" {
+		c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
+		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", Data(c))
+		c.Abort()
+		return
+	}
+	if str[:len("Basic ")] != "Basic " {
+		// TODO unsupported
+		c.HTML(http.StatusBadRequest, "/errors/unauthorized.html", Data(c))
+		c.Abort()
+		return
+	}
+	arr := strings.SplitN(str[len("Basic "):], ":", 2)
+	username := arr[0]
+	password := arr[1]
+	user, err := Backend(c).User().Get(username)
+	if err != nil {
+		FlashMessage(c).Warn("Error on get user: %s", err.Error())
+		c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
+		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", Data(c))
+		c.Abort()
+		return
+	}
+
+	if !user.Password.Check(password) {
+		FlashMessage(c).Warn("wrong password")
+		c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
+		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", Data(c))
+		c.Abort()
+		return
+	}
+	c.Set(USERNAME, username)
+	return
 }

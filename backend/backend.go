@@ -7,6 +7,9 @@ import (
 	"github.com/docker/libkv"
 	"github.com/docker/libkv/store"
 	"github.com/docker/libkv/store/boltdb"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/backend/auth"
@@ -67,6 +70,10 @@ func New(o *Options) (Backend, error) {
 	if err != nil {
 		return nil, err
 	}
+	db, err := gorm.Open("sqlite3", "test.db")
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to connect database")
+	}
 
 	// make backend structor
 	b := &backend{
@@ -74,6 +81,7 @@ func New(o *Options) (Backend, error) {
 		conf:       conf,
 		configPath: configFile,
 		kv:         kv,
+		db:         db,
 	}
 
 	// initialize components
@@ -99,6 +107,7 @@ type backend struct {
 	conf       *config.Config
 	configPath string
 	kv         store.Store
+	db         *gorm.DB
 
 	authManager   auth.Manager
 	fileManager   file.Manager
