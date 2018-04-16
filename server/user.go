@@ -13,5 +13,4 @@ func HandleUserList(c *gin.Context) {
 		return
 	}
 	c.HTML(http.StatusOK, "users.html", Data(c).Set("users", users))
-
 }

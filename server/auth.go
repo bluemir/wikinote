@@ -14,9 +14,7 @@ import (
 func BasicAuth(c *gin.Context) {
 	str := c.GetHeader("Authorization")
 	if str == "" {
-		//c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
-		//c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", Data(c))
-		//c.Abort()
+		// Skip auth
 		return
 	}
 
@@ -59,9 +57,11 @@ func HandleRegister(c *gin.Context) {
 		Email    string `form:"email"`
 		Confirm  string `form:"confirm"`
 	}{}
-	err := c.Bind(registeForm)
+	err := c.ShouldBind(registeForm)
 	if err != nil {
-		logrus.Error(err)
+		FlashMessage(c).Warn("bad Request")
+		c.Redirect(http.StatusSeeOther, "/!/auth/register")
+		c.Abort()
 		return
 	}
 
