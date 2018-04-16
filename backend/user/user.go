@@ -5,42 +5,36 @@ import (
 	"crypto"
 	_ "crypto/sha512"
 	"encoding/base64"
+	"encoding/hex"
+
+	"github.com/jinzhu/gorm"
 )
 
 type User struct {
-	Id       string
-	Password *Password
-	Email    string
-	Role     string
+	gorm.Model
+	Name  string
+	Email string
+	Role  string
+}
+type Token struct {
+	gorm.Model
+	UserID    uint
+	HashedKey string
 }
 
-type Password struct {
-	Data string
-	Salt string
+func hash(username string, key string) string {
+	salt := rawHashHex(key + "__salt__" + username)
+	return rawHashBase64(salt[:512] + key + salt[512:])
 }
-
-func NewPassword(origin string) *Password {
-	p := &Password{}
-	p.Set(origin)
-	return p
-}
-func (p *Password) Set(b string) {
-	p.Salt = RandomString(12)
-	p.Data = encodePassword(b, p.Salt)
-}
-
-func (p *Password) Check(b string) bool {
-	if p == nil {
-		return false
-	}
-	return p.Data == encodePassword(b, p.Salt)
-}
-
-func encodePassword(origin, salt string) string {
+func rawHashBase64(input string) string {
 	buf := bytes.NewBuffer([]byte{})
 	e := base64.NewEncoder(base64.StdEncoding, buf)
-	e.Write(crypto.SHA512.New().Sum([]byte(origin + salt)))
+	e.Write(crypto.SHA512.New().Sum([]byte(input)))
 	e.Close()
 
 	return buf.String()
+}
+func rawHashHex(str string) string {
+	hashed := crypto.SHA512.New().Sum([]byte(str))
+	return hex.EncodeToString(hashed)
 }

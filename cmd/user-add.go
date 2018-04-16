@@ -30,9 +30,9 @@ func NewUserAddCommand() *cobra.Command {
 				email = UserAddConfig.email
 			}
 			return b.User().New(&user.User{
-				Id:    args[0],
+				Name:  args[0],
 				Email: email,
-			})
+			}, "")
 		},
 	}
 

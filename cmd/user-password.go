@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/bluemir/wikinote/backend"
-	usertype "github.com/bluemir/wikinote/backend/user"
 )
 
 func NewUserPasswordCommand() *cobra.Command {
@@ -33,7 +32,7 @@ func NewUserPasswordCommand() *cobra.Command {
 			}
 
 			// if cmd.Flags().Changed("password")
-			u.Password = usertype.NewPassword(UserPasswordConfig.Password)
+			//u.Password = usertype.NewPassword(UserPasswordConfig.Password)
 			// else ask password
 			return b.User().Put(u)
 		},

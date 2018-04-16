@@ -2,9 +2,7 @@ package backend
 
 import (
 	"os"
-	"time"
 
-	"github.com/docker/libkv"
 	"github.com/docker/libkv/store"
 	"github.com/docker/libkv/store/boltdb"
 	"github.com/jinzhu/gorm"
@@ -33,7 +31,7 @@ type Backend interface {
 
 	//Plugins().Footer() ([]RenderResult)
 
-	Store() store.Store
+	//Store() store.Store
 
 	Close()
 }
@@ -58,19 +56,10 @@ func New(o *Options) (Backend, error) {
 		return nil, err
 	}
 
-	// second init kv store for user
-	kv, err := libkv.NewStore(
-		store.BOLTDB,
-		[]string{wikipath + "/.app/wikinote.kvstore.db"},
-		&store.Config{
-			ConnectionTimeout: 10 * time.Second,
-			Bucket:            "wikinote",
-		},
-	)
 	if err != nil {
 		return nil, err
 	}
-	db, err := gorm.Open("sqlite3", "test.db")
+	db, err := gorm.Open("sqlite3", wikipath+"/.app/wikinote.db")
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to connect database")
 	}
@@ -80,7 +69,6 @@ func New(o *Options) (Backend, error) {
 		basePath:   wikipath,
 		conf:       conf,
 		configPath: configFile,
-		kv:         kv,
 		db:         db,
 	}
 
@@ -91,7 +79,7 @@ func New(o *Options) (Backend, error) {
 	if b.fileManager, err = file.New(wikipath); err != nil {
 		return nil, err
 	}
-	if b.userManager, err = user.NewManager(kv, conf); err != nil {
+	if b.userManager, err = user.NewManager(db, conf); err != nil {
 		return nil, err
 	}
 	if b.pluginManager, err = plugin.New(conf.Plugins); err != nil {
@@ -116,7 +104,7 @@ type backend struct {
 }
 
 func (b *backend) Close() {
-	b.Store().Close()
+	b.db.Close()
 	b.SaveConfig(b.Config())
 }
 
@@ -126,9 +114,10 @@ func (b *backend) Config() *config.Config {
 func (b *backend) SaveConfig(conf *config.Config) error {
 	return b.conf.Save(b.configPath)
 }
-func (b *backend) Store() store.Store {
+
+/*func (b *backend) Store() store.Store {
 	return b.kv
-}
+}*/
 
 func (b *backend) Auth() auth.Manager {
 	return b.authManager

@@ -25,7 +25,7 @@ func NewUserListCommand() *cobra.Command {
 			table := termtables.CreateTable()
 			table.AddHeaders("Name", "Email", "Role")
 			for _, u := range users {
-				table.AddRow(u.Id, u.Email, u.Role)
+				table.AddRow(u.Name, u.Email, u.Role)
 			}
 
 			fmt.Println(table.Render())

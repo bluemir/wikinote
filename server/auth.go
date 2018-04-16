@@ -38,25 +38,8 @@ func BasicAuth(c *gin.Context) {
 		password = arr[1]
 	}
 
-	user, err := Backend(c).User().Get(username)
-	if err != nil {
-		FlashMessage(c).Warn("Error on get user: %s", err.Error())
-		c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
-		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", Data(c))
-		c.Abort()
-		return
-	}
-
-	if user == nil {
-		FlashMessage(c).Warn("Error on get user: %s", err.Error())
-		c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
-		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", Data(c))
-		c.Abort()
-		return
-
-	}
-	if !user.Password.Check(password) {
-		FlashMessage(c).Warn("wrong password")
+	if !Backend(c).User().Auth(username, password) {
+		FlashMessage(c).Warn("Error on auth, id password not matched")
 		c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
 		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", Data(c))
 		c.Abort()
@@ -89,10 +72,9 @@ func HandleRegister(c *gin.Context) {
 		return
 	}
 	err = Backend(c).User().New(&user.User{
-		Id:       registeForm.Id,
-		Email:    registeForm.Email,
-		Password: user.NewPassword(registeForm.Password),
-	})
+		Name:  registeForm.Id,
+		Email: registeForm.Email,
+	}, registeForm.Password)
 	if err != nil {
 		FlashMessage(c).Warn("fail to register: %s", err.Error())
 		c.Redirect(http.StatusSeeOther, "/!/auth/register")

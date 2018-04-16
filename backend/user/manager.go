@@ -1,10 +1,9 @@
 package user
 
 import (
-	"encoding/json"
 	"fmt"
 
-	"github.com/docker/libkv/store"
+	"github.com/jinzhu/gorm"
 	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/backend/config"
@@ -14,19 +13,20 @@ type Manager interface {
 	Get(username string) (*User, error)
 	Put(user *User) error
 	List() ([]User, error)
-	New(user *User) error
+	New(user *User, token string) error
 	Delete(username string) error
+	Auth(username string, password string) bool
 }
 
-func NewManager(kv store.Store, conf *config.Config) (Manager, error) {
+func NewManager(db *gorm.DB, conf *config.Config) (Manager, error) {
 	return &manager{
-		kv:   kv,
+		db:   db,
 		conf: conf,
 	}, nil
 }
 
 type manager struct {
-	kv   store.Store
+	db   *gorm.DB
 	conf *config.Config
 }
 
@@ -35,69 +35,35 @@ func (m *manager) key(id string) string {
 }
 
 func (m *manager) Get(id string) (*User, error) {
-	logrus.Debugf("find %s on kv store", id)
+	logrus.Debugf("find %s db", id)
 	user := &User{}
-	pair, err := m.kv.Get(m.key(id))
-	if err != nil {
-		return nil, err
-	}
+	m.db.Where("name = ?", id).Take(user)
 
-	logrus.Debugf("[USER GET] %s - %s:", pair.Key, pair.Value)
-	err = json.Unmarshal(pair.Value, user)
-	if err != nil {
-		return nil, err
-	}
 	return user, nil
 }
 func (m *manager) List() ([]User, error) {
-	v, err := m.kv.List("/user")
-	if err != nil {
-		if isNotFound(err) {
-			return []User{}, nil
-		}
-		return nil, err
-	}
-	result := []User{}
-	for _, pair := range v {
-		u := &User{}
 
-		err := json.Unmarshal(pair.Value, u)
-		if err != nil {
-			return nil, err
-		}
+	users := []User{}
+	m.db.Find(users)
 
-		result = append(result, *u)
-	}
-	return result, nil
+	return users, nil
 }
-func (m *manager) New(user *User) error {
-	user.Role = m.conf.User.Default.Role
-
-	u, err := m.Get(user.Id)
-	if err != nil && !isNotFound(err) {
-		return err
-	}
-	if u != nil {
-		return fmt.Errorf("user already exist: %s", u.Id)
-	}
-
-	buf, err := json.Marshal(user)
-	if err != nil {
-		return err
-	}
-	logrus.Debugf("save user %s", buf)
-	return m.kv.Put(m.key(user.Id), buf, nil)
+func (m *manager) New(user *User, token string) error {
+	m.db.Create(user)
+	m.db.Create(&Token{
+		UserID:    user.ID,
+		HashedKey: hash(token, user.Name),
+	})
+	return nil
 }
 func (m *manager) Put(user *User) error {
-	if buf, err := json.Marshal(user); err != nil {
-		return err
-	} else {
-		return m.kv.Put(m.key(user.Id), buf, nil)
-	}
+	return m.db.Save(user).Error
 }
 func (m *manager) Delete(username string) error {
-	return m.kv.Delete(m.key(username))
+	return m.db.Where("name = ?", username).Delete(&User{}).Error
 }
-func isNotFound(err error) bool {
-	return err == store.ErrKeyNotFound
+func (m *manager) Auth(username string, password string) bool {
+	cnt := 0
+	m.db.Joins("JOIN users, tokens").Where("users.name = ? AND tokens.hashed_key = ?", username, hash(username, password)).Count(&cnt)
+	return cnt > 0
 }
