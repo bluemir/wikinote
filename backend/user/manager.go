@@ -19,6 +19,8 @@ type Manager interface {
 }
 
 func NewManager(db *gorm.DB, conf *config.Config) (Manager, error) {
+	db.AutoMigrate(&User{})
+	db.AutoMigrate(&Token{})
 	return &manager{
 		db:   db,
 		conf: conf,
@@ -44,16 +46,25 @@ func (m *manager) Get(id string) (*User, error) {
 func (m *manager) List() ([]User, error) {
 
 	users := []User{}
-	m.db.Find(users)
+	result := m.db.Find(users)
 
-	return users, nil
+	return users, result.Error
 }
 func (m *manager) New(user *User, token string) error {
-	m.db.Create(user)
-	m.db.Create(&Token{
+	result := m.db.Create(user)
+	if result.Error != nil {
+		return result.Error
+	}
+	logrus.Info(user)
+
+	result = m.db.Create(&Token{
 		UserID:    user.ID,
 		HashedKey: hash(token, user.Name),
 	})
+	if result.Error != nil {
+		return result.Error
+	}
+
 	return nil
 }
 func (m *manager) Put(user *User) error {

@@ -1,11 +1,11 @@
 package user
 
 import (
-	"bytes"
 	"crypto"
 	_ "crypto/sha512"
 	"encoding/base64"
 	"encoding/hex"
+	"io"
 
 	"github.com/jinzhu/gorm"
 )
@@ -24,17 +24,15 @@ type Token struct {
 
 func hash(username string, key string) string {
 	salt := rawHashHex(key + "__salt__" + username)
-	return rawHashBase64(salt[:512] + key + salt[512:])
+	return rawHashBase64(salt[:64] + key + salt[64:])
 }
 func rawHashBase64(input string) string {
-	buf := bytes.NewBuffer([]byte{})
-	e := base64.NewEncoder(base64.StdEncoding, buf)
-	e.Write(crypto.SHA512.New().Sum([]byte(input)))
-	e.Close()
-
-	return buf.String()
+	h := crypto.SHA512.New()
+	io.WriteString(h, input)
+	return base64.StdEncoding.EncodeToString(h.Sum(nil))
 }
 func rawHashHex(str string) string {
-	hashed := crypto.SHA512.New().Sum([]byte(str))
-	return hex.EncodeToString(hashed)
+	h := crypto.SHA512.New()
+	io.WriteString(h, str)
+	return hex.EncodeToString(h.Sum(nil))
 }
