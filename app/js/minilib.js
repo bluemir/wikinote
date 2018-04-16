@@ -1,14 +1,14 @@
 //mininal lib
-var $ = {
-	get: function(target, query) {
+class $ {
+	static get(target, query) {
 		if(typeof target.querySelector !== "function") {return $.get(document, target)}
 		return target.querySelector(query);
-	},
-	all: function(target, query) {
+	}
+	static all(target, query) {
 		if(typeof target.querySelectorAll !== "function") {return $.all(document, target)}
 		return Array.prototype.slice.call(target.querySelectorAll(query));
-	},
-	create: function(tagname, attr) {
+	}
+	static create(tagname, attr) {
 		var newTag = document.createElement(tagname);
 		if (attr && attr.$text){
 			newTag.appendChild(document.createTextNode(attr.$text));
@@ -23,8 +23,8 @@ var $ = {
 			newTag.setAttribute(key, attr[key]);
 		}
 		return newTag;
-	},
-	request: async function $request(method, url, options) {
+	}
+	static async request(method, url, options) {
 		var opts = options || {}
 
 		return new Promise(function(resolve, reject) {
@@ -46,15 +46,23 @@ var $ = {
 						}
 						resolve(result)
 					} else {
+						if(req.getResponseHeader("Content-Type").includes("application/json")) {
+							result.json = JSON.parse(result.text);
+						}
 						reject(result);
 					}
 				}
 			});
 
-			req.open(method, resolveParam(url, opts.params) + queryString(opts.query), true);
+			if (opts.$auth) {
+				req.open(method, resolveParam(url, opts.params) + queryString(opts.query), true, opts.$auth.user, opts.$auth.password);
+			} else {
+				req.open(method, resolveParam(url, opts.params) + queryString(opts.query), true);
+			}
 
 			switch (typeof opts.body) {
 				case "object":
+					req.setRequestHeader("Content-Type", "application/json")
 					req.send(JSON.stringify(opts.body))
 					break;
 				case "string":
@@ -69,7 +77,25 @@ var $ = {
 			}
 		});
 	}
-
+	static async timeout(ms) {
+		return new Promise(function(resolve, reject){
+			setTimeout(resolve, ms);
+		});
+	}
+	defer() {
+		var ret = {}
+		ret.promise = new Promise(function(resolve, reject){
+			ret.resolve = resolve;
+			ret.reject = reject;
+		});
+		return ret;
+	}
+	prevent(func){
+		return function(evt){
+			evt.preventDefault();
+			return func();
+		}
+	}
 }
 
 function resolveParam(url, params) {
@@ -80,6 +106,7 @@ function resolveParam(url, params) {
 		if (params[name]) {
 			return params[name];
 		}
+		console.warn("[$.reqeust] find param pattern '"+name+"', but not provided");
 		return matched;
 	});
 }
@@ -94,8 +121,27 @@ function queryString(obj) {
 }
 
 
-var elementProto = {
-	"remove" : function(){
+
+function extend(TargetClass, proto){
+	Object.keys(proto).forEach(function(name) {
+		if (name  in TargetClass.prototype) {
+			console.warn("cannot extend prototype: '"+name+"' already exist")
+			return; // skip
+		}
+		TargetClass.prototype[name] = proto[name];
+	});
+}
+
+extend(Element, {
+	attr: function(name, value){
+		if (value !== undefined) {
+			this.setAttribute(name, value)
+			return value;
+		} else {
+			return this.getAttribute(name)
+		}
+	},
+	"removeThis" : function(){
 		this.parentElement.removeChild(this);
 	},
 	"clear" : function(){
@@ -103,24 +149,27 @@ var elementProto = {
 			this.removeChild(this.childNodes[0]);
 		}
 	}
-};
-Object.keys(elementProto).forEach(function(name) {
-	if (name  in Element.prototype) {
-		return; // skip
-	}
-	Element.prototype[name] = elementProto[name];
-});
+})
 
-var htmlElementProto = {
+extend(EventTarget, {
 	"on" : function() {
 		this.addEventListener.apply(this, arguments);
 		return this;
 	}
-}
-Object.keys(htmlElementProto).forEach(function(name) {
-	if (name in HTMLElement.prototype) {
-		return; // skip
-	}
-	HTMLElement.prototype[name] = htmlElementProto[name];
 });
+
+extend(NodeList, {
+	"map": Array.prototype.map,
+	//"forEach": Array.prototype.forEach,
+});
+extend(Array, {
+	"all": function all() { return Promise.all(this); },
+	"race": function race() { return Promise.race(this); },
+
+	// with the lovely addiction of ...
+	"any": function any() { return Promise.any(this); },
+});
+
+
+// XXX preloading for custom elements
 export default $;

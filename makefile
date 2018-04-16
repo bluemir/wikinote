@@ -17,7 +17,7 @@ HTML_SOURCES = $(shell find app/html -type f -name '*.html' -print)
 CSS_SOURCES = $(shell find app/less -type f -name "*.less" -print)
 WEB_LIBS = $(shell find app/lib -type f -type f -print)
 
-DISTS  = dist/js/common.js dist/js/edit.js dist/js/attach.js
+DISTS  = $(JS_SOURCES:app/js/%=dist/js/%)
 DISTS += $(HTML_SOURCES:app/html/%=dist/html/%)
 DISTS += dist/css/common.css
 DISTS += $(WEB_LIBS:app/lib/%=dist/lib/%)
@@ -33,7 +33,7 @@ DIRS = $(shell find . -name dist -prune -o -name ".git" -prune -o -type d -print
 		$(CSS_SOURCES) \
 		$(WEB_LIBS)| tr " " "\n"
 run: $(BIN_NAME)
-	go test ./backend/...
+	#go test -v ./backend/...
 	./$(BIN_NAME) -D serve
 	#./$(BIN_NAME) -D -w ~/src/shipdock/shipdock serve -o front-page=readme.md
 auto-run:
@@ -47,7 +47,7 @@ reset:
 ## Binary build
 $(BIN_NAME).bin: $(GO_SOURCES) $(GOPATH)/src/$(IMPORT_PATH)
 	go get -v -d $(IMPORT_PATH)            # can replace with glide
-	go build \
+	go build -v \
 		-ldflags "-X main.Version=$(VERSION)" \
 		-o $(BIN_NAME).bin .
 	@echo Build DONE
@@ -62,19 +62,12 @@ $(BIN_NAME): $(BIN_NAME).bin $(DISTS)
 	@echo Embed resources DONE
 
 ## Web dist
-dist/js/%.js: $(JS_SOURCES)
-	traceur \
-		--async-functions \
-		--modules inline \
-		--source-maps=file \
-		--inline $(@:dist/js/%.js=app/js/%.js) \
-		--out $@
 dist/html/%.html: app/html/%.html
 	@mkdir -p $(basename $@)
 	cp $< $@
 dist/css/common.css: $(CSS_SOURCES)
 	lessc app/less/main.less $@
-dist/lib/%: app/lib/%
+dist/%: app/%
 	@mkdir -p $(basename $@)
 	cp $< $@
 
