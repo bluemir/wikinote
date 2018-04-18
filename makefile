@@ -47,7 +47,7 @@ reset:
 ## Binary build
 $(BIN_NAME).bin: $(GO_SOURCES) $(GOPATH)/src/$(IMPORT_PATH)
 	go get -v -d $(IMPORT_PATH)            # can replace with glide
-	go build -v \
+	go build -i -v \
 		-ldflags "-X main.Version=$(VERSION)" \
 		-o $(BIN_NAME).bin .
 	@echo Build DONE
