@@ -10,15 +10,16 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/backend"
+	"github.com/bluemir/wikinote/backend/user"
 	"github.com/bluemir/wikinote/server/renderer"
 )
 
 // gin context or session keys
 const (
-	BACKEND  = "backend"
-	ROLE     = "role"
-	USERNAME = "username"
-	SPECAIL  = "special-route"
+	BACKEND = "backend"
+	ROLE    = "role"
+	SPECAIL = "special-route"
+	USER    = "user"
 )
 
 type Config struct {
@@ -76,8 +77,12 @@ func Run(b backend.Backend, conf *Config) error {
 		switch c.Request.Method {
 		case http.MethodGet:
 			// check param
+			// TODO auth
 			if _, ok := c.GetQuery("edit"); ok {
-				HandleEditForm(c)
+				Action("edit")(c)
+				if !c.IsAborted() {
+					HandleEditForm(c)
+				}
 				return
 			}
 			if _, ok := c.GetQuery("attach"); ok {
@@ -131,24 +136,35 @@ func Run(b backend.Backend, conf *Config) error {
 func Backend(c *gin.Context) backend.Backend {
 	return c.MustGet(BACKEND).(backend.Backend)
 }
-func Data(c *gin.Context) renderer.Data {
-	return renderer.NewData(c)
+func User(c *gin.Context) *user.User {
+	u, ok := c.Get(USER)
+	if ok {
+		return u.(*user.User)
+	}
+	return nil
 }
+
 func FlashMessage(c *gin.Context) renderer.MessageContext {
-	return renderer.NewMessageContext(c)
+	return renderer.Of(c)
 }
 func Action(actions ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		/*
-			role := Session(c).Role()
-			for _, action := range actions {
-				if Backend(c).Auth().IsAllow(role, action) {
-					return //pass
-				}
+		// TODO refactor
+		u, ok := c.Get(USER)
+		role := ""
+		if ok {
+			role = u.(*user.User).Role
+		}
+
+		for _, action := range actions {
+			if Backend(c).Auth().IsAllow(role, action) {
+				return //pass
 			}
-			logrus.Debugf("403 role: %s, actions: %+v", role, actions)
-			c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", Data(c))
-			c.Abort()
-		*/
+		}
+
+		logrus.Debugf("403 role: %s, actions: %+v", role, actions)
+
+		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
+		c.Abort()
 	}
 }

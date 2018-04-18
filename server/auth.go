@@ -9,6 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/backend/user"
+	"github.com/bluemir/wikinote/server/renderer"
 )
 
 func BasicAuth(c *gin.Context) {
@@ -19,13 +20,13 @@ func BasicAuth(c *gin.Context) {
 	}
 
 	if str[:len("Basic ")] != "Basic " {
-		c.HTML(http.StatusBadRequest, "/errors/unauthorized.html", Data(c))
+		c.HTML(http.StatusBadRequest, "/errors/unauthorized.html", renderer.Data{}.With(c))
 		c.Abort()
 		return
 	}
 	buf, err := base64.StdEncoding.DecodeString(str[len("Basic "):])
 	if err != nil {
-		c.HTML(http.StatusBadRequest, "/errors/unauthorized.html", Data(c))
+		c.HTML(http.StatusBadRequest, "/errors/unauthorized.html", renderer.Data{}.With(c))
 		c.Abort()
 		return
 	}
@@ -35,20 +36,24 @@ func BasicAuth(c *gin.Context) {
 	if len(arr) > 1 {
 		password = arr[1]
 	}
-
-	if !Backend(c).User().Auth(username, password) {
-		FlashMessage(c).Warn("Error on auth, id password not matched")
-		c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
-		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", Data(c))
+	user, ok, err := Backend(c).User().Auth(username, password)
+	if err != nil {
+		c.HTML(http.StatusBadRequest, "/errors/unauthorized.html", renderer.Data{}.With(c))
 		c.Abort()
 		return
 	}
-	c.Set(USERNAME, username)
+	if !ok {
+		FlashMessage(c).Warn("Error on auth, id password not matched")
+		c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
+		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
+		c.Abort()
+		return
+	}
+	c.Set(USER, user)
 	return
-
 }
 func HandleRegisterForm(c *gin.Context) {
-	c.HTML(http.StatusOK, "/register.html", Data(c))
+	c.HTML(http.StatusOK, "/register.html", renderer.Data{}.With(c))
 }
 func HandleRegister(c *gin.Context) {
 	registeForm := &struct {
@@ -88,10 +93,10 @@ func HandleLogin(c *gin.Context) {
 	str := c.GetHeader("Authorization")
 	if str == "" {
 		c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
-		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", Data(c))
+		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
 		c.Abort()
 		return
 	}
-
+	// TODO redirect prev page
 	c.Redirect(http.StatusTemporaryRedirect, "/")
 }

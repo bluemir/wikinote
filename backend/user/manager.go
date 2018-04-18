@@ -15,7 +15,7 @@ type Manager interface {
 	List() ([]User, error)
 	New(user *User, token string) error
 	Delete(username string) error
-	Auth(username string, password string) bool
+	Auth(username string, password string) (*User, bool, error)
 }
 
 func NewManager(db *gorm.DB, conf *config.Config) (Manager, error) {
@@ -73,14 +73,14 @@ func (m *manager) Put(user *User) error {
 func (m *manager) Delete(username string) error {
 	return m.db.Where("name = ?", username).Delete(&User{}).Error
 }
-func (m *manager) Auth(username string, password string) bool {
-	cnt := 0
-	result := m.db.Table("tokens").
-		Joins("JOIN users ON users.id = tokens.user_id").
-		Where("users.name = ? AND tokens.hashed_key = ?", username, hash(username, password)).Count(&cnt)
+func (m *manager) Auth(username string, password string) (*User, bool, error) {
+	user := &User{}
+	result := m.db.
+		Joins("JOIN tokens ON users.id = tokens.user_id").
+		Where("users.name = ? AND tokens.hashed_key = ?", username, hash(username, password)).First(user)
 	if result.Error != nil {
 		// TODO maybe warning...
-		return false
+		return nil, false, result.Error
 	}
-	return cnt > 0
+	return user, true, nil
 }

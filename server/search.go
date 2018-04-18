@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 
+	"github.com/bluemir/wikinote/server/renderer"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,5 +16,7 @@ func HandleSearch(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
-	c.HTML(http.StatusOK, "/search.html", Data(c).Set("result", result))
+	c.HTML(http.StatusOK, "/search.html", renderer.Data{
+		"result": result,
+	}.With(c))
 }

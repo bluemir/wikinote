@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/GeertJohan/go.rice"
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin/render"
 	"github.com/sirupsen/logrus"
 )
@@ -66,8 +65,9 @@ func NewRenderer() render.HTMLRender {
 
 func (r *LayoutRenderer) Instance(name string, data interface{}) render.Render {
 	// https://github.com/michelloworld/ez-gin-template
+	// just pass all data to RenderContext
+	// because I can't return error here
 
-	// Attach default data(like title)
 	return &RenderContext{
 		name:     name,
 		data:     data,
@@ -82,7 +82,7 @@ type RenderContext struct {
 }
 
 func (r *RenderContext) Render(w http.ResponseWriter) error {
-	data, ok := r.data.(*UserData)
+	data, ok := r.data.(*renderData)
 	if !ok {
 		return fmt.Errorf("wrong type, data is not *UserData*")
 	}
@@ -90,28 +90,12 @@ func (r *RenderContext) Render(w http.ResponseWriter) error {
 		return fmt.Errorf("template '%s' no found", r.name)
 	}
 
-	_, isSpecial := data.context.Get("special-route")
-	session := sessions.Default(data.context)
-
-	// FIXME use const in server pkg
-	username, ok := session.Get("username").(string)
-	if !ok {
-		username = ""
+	err := data.Prepare()
+	if err != nil {
+		return err
 	}
 
-	MsgInfo := session.Flashes(MSG_INFO)
-	MsgWarn := session.Flashes(MSG_WARN)
-	session.Save()
-
-	return r.template.Execute(w, &RenderData{
-		Path:       getWikipath(data.context),
-		IsSpecial:  isSpecial,
-		Breadcrumb: parseBreadcrumb(getWikipath(data.context)),
-		UserName:   username,
-		MsgInfo:    MsgInfo,
-		MsgWarn:    MsgWarn,
-		UserData:   data.data,
-	})
+	return r.template.Execute(w, data)
 }
 func (r *RenderContext) WriteContentType(w http.ResponseWriter) {
 	header := w.Header()

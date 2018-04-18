@@ -18,7 +18,7 @@ type MessageContext interface {
 	Warn(format string, v ...interface{})
 }
 
-func NewMessageContext(c *gin.Context) MessageContext {
+func Of(c *gin.Context) MessageContext {
 	return &msgContext{
 		session: sessions.Default(c),
 	}

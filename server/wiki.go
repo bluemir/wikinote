@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/bluemir/wikinote/server/renderer"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
@@ -20,25 +21,29 @@ func HandleView(c *gin.Context) {
 		data, err := Backend(c).File().Read(c.Request.URL.Path)
 		if err != nil {
 			logrus.Warnf("md file not found, %s", err)
-			c.HTML(http.StatusNotFound, "/errors/not-found.html", Data(c))
+			c.HTML(http.StatusNotFound, "/errors/not-found.html", renderer.Data{}.With(c))
 			return
 		}
 		renderedData, err := Backend(c).Render(data)
 		if err != nil {
-			c.HTML(http.StatusInternalServerError, "/view/internal-error.html", Data(c))
+			c.HTML(http.StatusInternalServerError, "/view/internal-error.html", renderer.Data{}.With(c))
 			return
 		}
 
-		// error will be
-		c.HTML(http.StatusOK, "/view/markdown.html", Data(c).
-			Set("data", template.HTML(renderedData)).
-			Set("footer", Backend(c).Plugin().Footer(c.Request.URL.Path)),
-		)
+		//renderer.Of(c).AddFlashInfo(sdaasd)
+		/*c.HTML(http.StatusOK, "/view/markdown.html", &renderer.Data{
+			"data": template.HTML(renderedData),
+			"footer": Backend(c).Plugin().Fotter(c.Request.URL.Path)),
+		}.With(c))*/
+		c.HTML(http.StatusOK, "/view/markdown.html", renderer.Data{
+			"data":   template.HTML(renderedData),
+			"footer": Backend(c).Plugin().Footer(c.Request.URL.Path),
+		}.With(c))
 		// markdown
 	case checkExt(c, ".jpg", ".png", ".bmp", ".gif"):
 		// image
 		// check exist?
-		c.HTML(http.StatusOK, "/view/image.html", Data(c))
+		c.HTML(http.StatusOK, "/view/image.html", renderer.Data{}.With(c))
 	case checkExt(c, ".mp4"):
 		// video
 	case checkExt(c, ".mp3"):
@@ -69,11 +74,12 @@ func HandleEditForm(c *gin.Context) {
 	data, err := backend.File().Read(c.Request.URL.Path)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
+		// TODO add flash message
 	}
-	c.HTML(http.StatusOK, "/edit.html", Data(c).
-		Set("data", string(data)).
-		Set("path", c.Param("path")),
-	)
+	c.HTML(http.StatusOK, "/edit.html", renderer.Data{
+		"data": string(data),
+		"path": c.Param("path"),
+	}.With(c))
 }
 func HandleUpdateForm(c *gin.Context) {
 	p := c.Request.URL.Path
@@ -106,7 +112,8 @@ func HandleAttachForm(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	c.HTML(http.StatusOK, "/attach.html", Data(c).
-		Set("path", c.Param("path")).
-		Set("files", list))
+	c.HTML(http.StatusOK, "/attach.html", renderer.Data{
+		"path":  c.Param("path"),
+		"files": list,
+	}.With(c))
 }
