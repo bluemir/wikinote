@@ -59,7 +59,7 @@ func (m *manager) New(user *User, token string) error {
 
 	result = m.db.Create(&Token{
 		UserID:    user.ID,
-		HashedKey: hash(token, user.Name),
+		HashedKey: hash(user.Name, token),
 	})
 	if result.Error != nil {
 		return result.Error
@@ -75,6 +75,12 @@ func (m *manager) Delete(username string) error {
 }
 func (m *manager) Auth(username string, password string) bool {
 	cnt := 0
-	m.db.Joins("JOIN users, tokens").Where("users.name = ? AND tokens.hashed_key = ?", username, hash(username, password)).Count(&cnt)
+	result := m.db.Table("tokens").
+		Joins("JOIN users ON users.id = tokens.user_id").
+		Where("users.name = ? AND tokens.hashed_key = ?", username, hash(username, password)).Count(&cnt)
+	if result.Error != nil {
+		// TODO maybe warning...
+		return false
+	}
 	return cnt > 0
 }

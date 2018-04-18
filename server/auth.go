@@ -93,5 +93,5 @@ func HandleLogin(c *gin.Context) {
 		return
 	}
 
-	c.Redirect(http.StatusTemporaryRedirect, Backend(c).Config().FrontPage)
+	c.Redirect(http.StatusTemporaryRedirect, "/")
 }
