@@ -53,21 +53,24 @@ func Run(b backend.Backend, conf *Config) error {
 			c.Set(SPECAIL, true)
 		})
 		special.StaticFS("/static/", rice.MustFindBox("../dist").HTTPBox())
-
-		special.POST("/api/preview", Action("edit"), HandlePreview) // render body
-		special.GET("/search", Action("view"), HandleSearch)
-
 		//auth
 		special.GET("/auth/login", HandleLogin)
 		special.GET("/auth/register", HandleRegisterForm)
 		special.POST("/auth/register", HandleRegister)
 
+		special.Use(BasicAuth)
+		special.POST("/api/preview", Action("edit"), HandlePreview) // render body
+		special.GET("/search", Action("view", "search"), HandleSearch)
+
 		special.GET("/user", Action("user"), HandleUserList)
 		special.GET("/user/:id")
 		special.PUT("/user")
+
+		//special.GET("/api/users", Action("user"), HandleAPIUesrList)
+		//special.GET("/api/users/:id", Action("user"), HandleAPIUesr)
+		//specail.PUT("/api/users/:id/role", Action("user"), HandleAPIUserUpdateRole)
 	}
 	app.Use(BasicAuth)
-
 	app.NoRoute(func(c *gin.Context) {
 		// GET            render file or render functional page
 		// POST           create or update file with form submit
@@ -79,21 +82,15 @@ func Run(b backend.Backend, conf *Config) error {
 			// check param
 			// TODO auth
 			if _, ok := c.GetQuery("edit"); ok {
-				if can(c, "edit") {
-					HandleEditForm(c)
-				}
+				Do(c, HandleEditForm, "edit")
 				return
 			}
 			if _, ok := c.GetQuery("attach"); ok {
-				if can(c, "attach") {
-					HandleAttachForm(c)
-				}
+				Do(c, HandleAttachForm, "attach")
 				return
 			}
 			if _, ok := c.GetQuery("raw"); ok {
-				if can(c, "view") {
-					HandleRaw(c)
-				}
+				Do(c, HandleRaw, "view")
 				return
 			}
 			if _, ok := c.GetQuery("history"); ok {
@@ -174,9 +171,17 @@ func Action(actions ...string) gin.HandlerFunc {
 		c.Abort()
 	}
 }
+func Do(c *gin.Context, handler gin.HandlerFunc, actions ...string) {
+	if can(c, actions...) {
+		handler(c)
+	} else {
+		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
+		c.Abort()
+	}
+}
 func can(c *gin.Context, actions ...string) bool {
 	u, ok := c.Get(USER)
-	role := ""
+	role := "guest"
 	if ok {
 		role = u.(*user.User).Role
 	}
