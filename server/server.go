@@ -79,39 +79,56 @@ func Run(b backend.Backend, conf *Config) error {
 			// check param
 			// TODO auth
 			if _, ok := c.GetQuery("edit"); ok {
-				Action("edit")(c)
-				if !c.IsAborted() {
+				if can(c, "edit") {
 					HandleEditForm(c)
 				}
 				return
 			}
 			if _, ok := c.GetQuery("attach"); ok {
-				HandleAttachForm(c)
+				if can(c, "attach") {
+					HandleAttachForm(c)
+				}
 				return
 			}
 			if _, ok := c.GetQuery("raw"); ok {
-				HandleRaw(c)
+				if can(c, "view") {
+					HandleRaw(c)
+				}
 				return
 			}
 			if _, ok := c.GetQuery("history"); ok {
-				c.String(http.StatusNotImplemented, "text/plain", "not implemeted")
+				if can(c, "view") {
+					c.String(http.StatusNotImplemented, "text/plain", "not implemeted")
+				}
 				return
 			}
 			if _, ok := c.GetQuery("backlinks"); ok {
-				c.String(http.StatusNotImplemented, "text/plain", "not implemeted")
-				return
+				if can(c, "view") {
+					c.String(http.StatusNotImplemented, "text/plain", "not implemeted")
+					return
+				}
 			}
 			if _, ok := c.GetQuery("move"); ok {
-				c.String(http.StatusNotImplemented, "text/plain", "not implemeted")
-				return
+				if can(c, "edit") {
+					c.String(http.StatusNotImplemented, "text/plain", "not implemeted")
+					return
+				}
 			}
-			HandleView(c)
+			if can(c, "view") {
+				HandleView(c)
+			}
 		case http.MethodPost:
-			HandleUpdateForm(c)
+			if can(c, "edit") {
+				HandleUpdateForm(c)
+			}
 		case http.MethodPut:
-			HandleUpdate(c)
+			if can(c, "edit") {
+				HandleUpdate(c)
+			}
 		case http.MethodDelete:
-			c.String(http.StatusNotImplemented, "text/plain", "not implemeted")
+			if can(c, "edit") {
+				c.String(http.StatusNotImplemented, "text/plain", "not implemeted")
+			}
 			return
 		}
 	})
@@ -149,22 +166,20 @@ func FlashMessage(c *gin.Context) renderer.MessageContext {
 }
 func Action(actions ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// TODO refactor
-		u, ok := c.Get(USER)
-		role := ""
-		if ok {
-			role = u.(*user.User).Role
+		if can(c, actions...) {
+			return //pass
 		}
-
-		for _, action := range actions {
-			if Backend(c).Auth().IsAllow(role, action) {
-				return //pass
-			}
-		}
-
-		logrus.Debugf("403 role: %s, actions: %+v", role, actions)
 
 		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
 		c.Abort()
 	}
+}
+func can(c *gin.Context, actions ...string) bool {
+	u, ok := c.Get(USER)
+	role := ""
+	if ok {
+		role = u.(*user.User).Role
+	}
+	logrus.Debugf("403 role: %s, actions: %+v", role, actions)
+	return Backend(c).Auth().IsAllow(role, actions...)
 }

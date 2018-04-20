@@ -10,7 +10,7 @@ type Manager interface {
 	GetRules() []Rule
 	PutRule(role string, action ...string)
 
-	IsAllow(role, action string) bool
+	IsAllow(role string, actions ...string) bool
 }
 
 func NewManager() (Manager, error) {
@@ -62,7 +62,15 @@ func (m *manager) GetRules() []Rule {
 func (m *manager) PutRule(role string, allow ...string) {
 
 }
-func (m *manager) IsAllow(role, action string) bool {
+func (m *manager) IsAllow(role string, actions ...string) bool {
+	for _, action := range actions {
+		if !m.isAllow(role, action) {
+			return false
+		}
+	}
+	return true
+}
+func (m *manager) isAllow(role, action string) bool {
 	rule, ok := m.rules[role]
 	logrus.Debugf("isAllow: %s - %s %+v", role, action, rule)
 	if ok {
@@ -72,6 +80,5 @@ func (m *manager) IsAllow(role, action string) bool {
 			}
 		}
 	}
-
 	return false
 }
