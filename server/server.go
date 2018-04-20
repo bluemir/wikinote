@@ -68,7 +68,8 @@ func Run(b backend.Backend, conf *Config) error {
 
 		//special.GET("/api/users", Action("user"), HandleAPIUesrList)
 		//special.GET("/api/users/:id", Action("user"), HandleAPIUesr)
-		//specail.PUT("/api/users/:id/role", Action("user"), HandleAPIUserUpdateRole)
+		special.PUT("/api/users/:name/role", Action("user"), HandleAPIUserUpdateRole)
+		// TODO make Action for API
 	}
 	app.Use(BasicAuth)
 	app.NoRoute(func(c *gin.Context) {
