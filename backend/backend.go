@@ -3,8 +3,6 @@ package backend
 import (
 	"os"
 
-	"github.com/docker/libkv/store"
-	"github.com/docker/libkv/store/boltdb"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/pkg/errors"
@@ -28,10 +26,7 @@ type Backend interface {
 
 	// renderer
 	Render(data []byte) ([]byte, error)
-
 	//Plugins().Footer() ([]RenderResult)
-
-	//Store() store.Store
 
 	Close()
 }
@@ -40,10 +35,6 @@ type Options struct {
 	Wikipath   string
 	ConfigFile string
 	Version    string
-}
-
-func init() {
-	boltdb.Register()
 }
 
 func New(o *Options) (Backend, error) {
@@ -94,7 +85,6 @@ type backend struct {
 	basePath   string
 	conf       *config.Config
 	configPath string
-	kv         store.Store
 	db         *gorm.DB
 
 	authManager   auth.Manager
