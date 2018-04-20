@@ -95,38 +95,25 @@ func Run(b backend.Backend, conf *Config) error {
 				return
 			}
 			if _, ok := c.GetQuery("history"); ok {
-				if can(c, "view") {
-					c.String(http.StatusNotImplemented, "text/plain", "not implemeted")
-				}
+				c.String(http.StatusNotImplemented, "text/plain", "not implemeted")
 				return
 			}
 			if _, ok := c.GetQuery("backlinks"); ok {
-				if can(c, "view") {
-					c.String(http.StatusNotImplemented, "text/plain", "not implemeted")
-					return
-				}
+				c.String(http.StatusNotImplemented, "text/plain", "not implemeted")
+				return
 			}
 			if _, ok := c.GetQuery("move"); ok {
-				if can(c, "edit") {
-					c.String(http.StatusNotImplemented, "text/plain", "not implemeted")
-					return
-				}
-			}
-			if can(c, "view") {
-				HandleView(c)
-			}
-		case http.MethodPost:
-			if can(c, "edit") {
-				HandleUpdateForm(c)
-			}
-		case http.MethodPut:
-			if can(c, "edit") {
-				HandleUpdate(c)
-			}
-		case http.MethodDelete:
-			if can(c, "edit") {
 				c.String(http.StatusNotImplemented, "text/plain", "not implemeted")
+				return
 			}
+			Do(c, HandleView, "view")
+		case http.MethodPost:
+			Do(c, HandleUpdateForm, "edit")
+		case http.MethodPut:
+			Do(c, HandleUpdate, "edit")
+		case http.MethodDelete:
+			//Do(c, HandleDelte, "edit")
+			c.String(http.StatusNotImplemented, "text/plain", "not implemeted")
 			return
 		}
 	})
@@ -164,28 +151,48 @@ func FlashMessage(c *gin.Context) renderer.MessageContext {
 }
 func Action(actions ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if can(c, actions...) {
-			return //pass
+		// check user
+		//      if not logined return 401
+		//      if logined but not have permission return 403
+		u, ok := c.Get(USER)
+		if ok {
+			role := u.(*user.User).Role
+			if Backend(c).Auth().IsAllow(role, actions...) {
+				return //pass
+			} else {
+				// TODO make fordidden page
+				c.HTML(http.StatusForbidden, "/errors/unauthorized.html", renderer.Data{}.With(c))
+				c.Abort()
+			}
+		} else {
+			if Backend(c).Auth().IsAllow("guest", actions...) {
+				return //pass
+			} else {
+				c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
+				c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
+				c.Abort()
+			}
 		}
-
-		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
-		c.Abort()
 	}
+
 }
 func Do(c *gin.Context, handler gin.HandlerFunc, actions ...string) {
-	if can(c, actions...) {
-		handler(c)
-	} else {
-		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
-		c.Abort()
-	}
-}
-func can(c *gin.Context, actions ...string) bool {
 	u, ok := c.Get(USER)
-	role := "guest"
 	if ok {
-		role = u.(*user.User).Role
+		role := u.(*user.User).Role
+		if Backend(c).Auth().IsAllow(role, actions...) {
+			handler(c)
+		} else {
+			c.HTML(http.StatusForbidden, "/errors/unauthorized.html", renderer.Data{}.With(c))
+			c.Abort()
+		}
+	} else {
+		if Backend(c).Auth().IsAllow("guest", actions...) {
+			handler(c)
+		} else {
+			c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
+			c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
+			c.Abort()
+		}
 	}
-	logrus.Debugf("403 role: %s, actions: %+v", role, actions)
-	return Backend(c).Auth().IsAllow(role, actions...)
 }

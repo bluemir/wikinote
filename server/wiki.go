@@ -73,7 +73,8 @@ func HandleEditForm(c *gin.Context) {
 	backend := Backend(c)
 	data, err := backend.File().Read(c.Request.URL.Path)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		//c.AbortWithError(http.StatusNotFound, err)
+		renderer.Of(c).Info("Create new note")
 		// TODO add flash message
 	}
 	c.HTML(http.StatusOK, "/edit.html", renderer.Data{

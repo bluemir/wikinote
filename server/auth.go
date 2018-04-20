@@ -16,6 +16,7 @@ func BasicAuth(c *gin.Context) {
 	str := c.GetHeader("Authorization")
 	if str == "" {
 		// Skip auth
+		logrus.Debug("skip auth")
 		return
 	}
 
@@ -49,6 +50,7 @@ func BasicAuth(c *gin.Context) {
 		c.Abort()
 		return
 	}
+	logrus.Debug("Login user :", user)
 	c.Set(USER, user)
 	return
 }
