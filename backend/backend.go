@@ -47,6 +47,7 @@ func New(o *Options) (Backend, error) {
 		return nil, err
 	}
 
+	err = os.MkdirAll(wikipath+"/.app", 0755)
 	if err != nil {
 		return nil, err
 	}
