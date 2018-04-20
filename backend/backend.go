@@ -70,7 +70,7 @@ func New(o *Options) (Backend, error) {
 	if b.fileManager, err = file.New(wikipath); err != nil {
 		return nil, err
 	}
-	if b.userManager, err = user.NewManager(db, conf); err != nil {
+	if b.userManager, err = user.NewManager(db, conf, wikipath); err != nil {
 		return nil, err
 	}
 	if b.pluginManager, err = plugin.New(conf.Plugins); err != nil {
@@ -104,10 +104,6 @@ func (b *backend) Config() *config.Config {
 func (b *backend) SaveConfig(conf *config.Config) error {
 	return b.conf.Save(b.configPath)
 }
-
-/*func (b *backend) Store() store.Store {
-	return b.kv
-}*/
 
 func (b *backend) Auth() auth.Manager {
 	return b.authManager

@@ -2,6 +2,8 @@ package user
 
 import (
 	"fmt"
+	"io/ioutil"
+	"path"
 
 	"github.com/jinzhu/gorm"
 	"github.com/sirupsen/logrus"
@@ -18,9 +20,24 @@ type Manager interface {
 	Auth(username string, password string) (*User, bool, error)
 }
 
-func NewManager(db *gorm.DB, conf *config.Config) (Manager, error) {
+func NewManager(db *gorm.DB, conf *config.Config, wikipath string) (Manager, error) {
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&Token{})
+
+	root := &User{
+		Name:  "root",
+		Email: "root@wikinote",
+		Role:  "root",
+	}
+	db.FirstOrCreate(root)
+	key := RandomString(16)
+	// always make new token. If forget root key? just restart it
+	db.Where(&Token{UserID: root.ID}).Assign(&Token{HashedKey: hash("root", key)}).FirstOrCreate(&Token{})
+
+	// Save to File
+	// QUESTION or just print stdout?
+	ioutil.WriteFile(path.Join(wikipath, ".app", ".root_token"), []byte(key), 0644)
+
 	return &manager{
 		db:   db,
 		conf: conf,

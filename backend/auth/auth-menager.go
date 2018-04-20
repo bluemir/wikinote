@@ -42,7 +42,7 @@ func parseRule() map[string][]string {
 const (
 	defaultRule = `
 admin: view, edit, user
-editor: view, edit
+editor: view, edit, attach
 viewer: view
 guest: view
 	`
@@ -60,9 +60,13 @@ func (m *manager) GetRules() []Rule {
 	return nil
 }
 func (m *manager) PutRule(role string, allow ...string) {
+	// write to file?
 
 }
 func (m *manager) IsAllow(role string, actions ...string) bool {
+	if role == "root" {
+		return true
+	}
 	for _, action := range actions {
 		if !m.isAllow(role, action) {
 			return false
