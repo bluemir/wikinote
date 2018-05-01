@@ -68,6 +68,10 @@ func (m *manager) List() ([]User, error) {
 	return users, result.Error
 }
 func (m *manager) New(user *User, token string) error {
+	if user.Role == "" {
+		user.Role = m.conf.User.Default.Role
+	}
+
 	result := m.db.Create(user)
 	if result.Error != nil {
 		return result.Error
