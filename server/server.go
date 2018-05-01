@@ -57,6 +57,7 @@ func Run(b backend.Backend, conf *Config) error {
 		special.GET("/auth/login", HandleLogin)
 		special.GET("/auth/register", HandleRegisterForm)
 		special.POST("/auth/register", HandleRegister)
+		special.GET("/auth/logout", HandleLogout)
 
 		special.Use(BasicAuth)
 		special.POST("/api/preview", Action("edit"), HandlePreview) // render body

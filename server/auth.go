@@ -114,3 +114,13 @@ func HandleLogin(c *gin.Context) {
 	// TODO redirect prev page
 	c.Redirect(http.StatusTemporaryRedirect, "/")
 }
+func HandleLogout(c *gin.Context) {
+	str := c.GetHeader("Authorization")
+	if str != "Basic Og==" { // empty id pass word
+		c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
+		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
+		c.Abort()
+		return
+	}
+	c.Redirect(http.StatusTemporaryRedirect, "/")
+}
