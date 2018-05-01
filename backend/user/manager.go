@@ -29,7 +29,7 @@ func NewManager(db *gorm.DB, conf *config.Config, wikipath string) (Manager, err
 		Email: "root@wikinote",
 		Role:  "root",
 	}
-	db.FirstOrCreate(root)
+	db.Where("name=?", "root").FirstOrCreate(root)
 	key := RandomString(16)
 	// always make new token. If forget root key? just restart it
 	db.Where(&Token{UserID: root.ID}).Assign(&Token{HashedKey: hash("root", key)}).FirstOrCreate(&Token{})
@@ -96,7 +96,9 @@ func (m *manager) Auth(username string, password string) (*User, bool, error) {
 		Joins("JOIN tokens ON users.id = tokens.user_id").
 		Where("users.name = ? AND tokens.hashed_key = ?", username, hash(username, password)).First(user)
 	if result.Error != nil {
-		// TODO maybe warning...
+		if result.RecordNotFound() {
+			return nil, false, nil
+		}
 		return nil, false, result.Error
 	}
 	return user, true, nil

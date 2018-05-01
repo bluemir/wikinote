@@ -107,6 +107,7 @@ func Run(b backend.Backend, conf *Config) error {
 				return
 			}
 			Do(c, HandleView, "view")
+
 		case http.MethodPost:
 			Do(c, HandleUpdateForm, "edit")
 		case http.MethodPut:
@@ -149,50 +150,56 @@ func User(c *gin.Context) *user.User {
 func FlashMessage(c *gin.Context) renderer.MessageContext {
 	return renderer.Of(c)
 }
-func Action(actions ...string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// check user
-		//      if not logined return 401
-		//      if logined but not have permission return 403
-		u, ok := c.Get(USER)
-		if ok {
-			role := u.(*user.User).Role
-			if Backend(c).Auth().IsAllow(role, actions...) {
-				return //pass
-			} else {
-				// TODO make fordidden page
-				c.HTML(http.StatusForbidden, "/errors/unauthorized.html", renderer.Data{}.With(c))
-				c.Abort()
-			}
-		} else {
-			if Backend(c).Auth().IsAllow("guest", actions...) {
-				return //pass
-			} else {
-				c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
-				c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
-				c.Abort()
-			}
-		}
-	}
 
-}
-func Do(c *gin.Context, handler gin.HandlerFunc, actions ...string) {
+func authCheck(c *gin.Context, actions ...string) int {
+	// check user
+	//      if not logined return 401
+	//      if logined but not have permission return 403
 	u, ok := c.Get(USER)
 	if ok {
 		role := u.(*user.User).Role
 		if Backend(c).Auth().IsAllow(role, actions...) {
-			handler(c)
+			return http.StatusOK //pass
 		} else {
-			c.HTML(http.StatusForbidden, "/errors/unauthorized.html", renderer.Data{}.With(c))
-			c.Abort()
+			return http.StatusForbidden
 		}
 	} else {
 		if Backend(c).Auth().IsAllow("guest", actions...) {
-			handler(c)
+			return http.StatusOK //pass
 		} else {
+			return http.StatusUnauthorized
+		}
+	}
+}
+
+func Action(actions ...string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		switch authCheck(c, actions...) {
+		case http.StatusForbidden:
+			// TODO make fordidden page
+			c.HTML(http.StatusForbidden, "/errors/forbidden.html", renderer.Data{}.With(c))
+			c.Abort()
+		case http.StatusUnauthorized:
 			c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
 			c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
 			c.Abort()
+		case http.StatusOK:
+			return // pass
 		}
+	}
+}
+func Do(c *gin.Context, handler gin.HandlerFunc, actions ...string) {
+	switch authCheck(c, actions...) {
+	case http.StatusForbidden:
+		// TODO make fordidden page
+		c.HTML(http.StatusForbidden, "/errors/forbidden.html", renderer.Data{}.With(c))
+		c.Abort()
+	case http.StatusUnauthorized:
+		c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
+		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
+		c.Abort()
+	case http.StatusOK:
+		handler(c)
+		return // pass
 	}
 }

@@ -20,18 +20,29 @@ func BasicAuth(c *gin.Context) {
 		return
 	}
 
-	if str[:len("Basic ")] != "Basic " {
+	arr := strings.SplitN(str, " ", 2)
+
+	if len(arr) != 2 {
 		c.HTML(http.StatusBadRequest, "/errors/unauthorized.html", renderer.Data{}.With(c))
 		c.Abort()
 		return
 	}
-	buf, err := base64.StdEncoding.DecodeString(str[len("Basic "):])
+
+	if arr[0] != "Basic" {
+		FlashMessage(c).Warn("Token type is not 'Basic'")
+		c.HTML(http.StatusBadRequest, "/errors/unauthorized.html", renderer.Data{}.With(c))
+		c.Abort()
+		return
+	}
+	buf, err := base64.StdEncoding.DecodeString(arr[1])
 	if err != nil {
+		FlashMessage(c).Warn("Connot decode auth token")
 		c.HTML(http.StatusBadRequest, "/errors/unauthorized.html", renderer.Data{}.With(c))
 		c.Abort()
 		return
 	}
-	arr := strings.SplitN(string(buf), ":", 2)
+
+	arr = strings.SplitN(string(buf), ":", 2)
 	username := arr[0]
 	password := ""
 	if len(arr) > 1 {
@@ -39,7 +50,8 @@ func BasicAuth(c *gin.Context) {
 	}
 	user, ok, err := Backend(c).User().Auth(username, password)
 	if err != nil {
-		c.HTML(http.StatusBadRequest, "/errors/unauthorized.html", renderer.Data{}.With(c))
+		FlashMessage(c).Warn("Somethings Wrong. plz contact system admin")
+		c.HTML(http.StatusInternalServerError, "/errors/unauthorized.html", renderer.Data{}.With(c))
 		c.Abort()
 		return
 	}
