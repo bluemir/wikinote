@@ -3,6 +3,7 @@ package auth
 import (
 	"strings"
 
+	"github.com/jinzhu/gorm"
 	"github.com/sirupsen/logrus"
 )
 
@@ -13,30 +14,9 @@ type Manager interface {
 	IsAllow(role string, actions ...string) bool
 }
 
-func NewManager() (Manager, error) {
-
-	return &manager{
-		parseRule(),
-	}, nil
-}
-func parseRule() map[string][]string {
-	result := map[string][]string{}
-	lines := strings.Split(defaultRule, "\n")
-	for _, line := range lines {
-		p := strings.SplitN(line, ":", 2)
-		if len(p) < 2 {
-			// skip error line
-			continue
-		}
-		role := p[0]
-		rules := strings.Split(p[1], ",")
-		for _, rule := range rules {
-			result[role] = append(result[role], strings.Trim(rule, " \t\n\r"))
-		}
-	}
-
-	logrus.Debugf("parse default rules: %+v", result)
-	return result
+type Rule struct {
+	Role   string
+	Action string
 }
 
 const (
@@ -48,12 +28,31 @@ guest: view
 	`
 )
 
-type Rule struct {
-	role    string
-	allowed []string
+func NewManager(db *gorm.DB) (Manager, error) {
+	if !db.HasTable(&Rule{}) {
+		// only first time
+		db.CreateTable(&Rule{})
+		lines := strings.Split(defaultRule, "\n")
+		for _, line := range lines {
+			p := strings.SplitN(line, ":", 2)
+			if len(p) < 2 {
+				// skip error line
+				continue
+			}
+			role := p[0]
+			actions := strings.Split(p[1], ",")
+			for _, action := range actions {
+				rule := &Rule{Role: role, Action: strings.Trim(action, " ")}
+				db.Where(rule).FirstOrCreate(rule)
+			}
+		}
+	}
+
+	return &manager{db}, nil
 }
+
 type manager struct {
-	rules map[string][]string
+	db *gorm.DB
 }
 
 func (m *manager) GetRules() []Rule {
@@ -63,26 +62,21 @@ func (m *manager) PutRule(role string, allow ...string) {
 	// write to file?
 
 }
+
+// IsAllow, actions are 'and' condition
 func (m *manager) IsAllow(role string, actions ...string) bool {
 	if role == "root" {
 		return true
 	}
 	for _, action := range actions {
-		if !m.isAllow(role, action) {
+		logrus.Debugf("check auth %s:%s", role, action)
+		rule := &Rule{Role: role, Action: action}
+		c := 0
+		m.db.Model(&Rule{}).Where(rule).Count(&c)
+		if c == 0 {
+			logrus.Debugf("check auth %s:%s %d", role, action, c)
 			return false
 		}
 	}
 	return true
-}
-func (m *manager) isAllow(role, action string) bool {
-	rule, ok := m.rules[role]
-	logrus.Debugf("isAllow: %s - %s %+v", role, action, rule)
-	if ok {
-		for _, a := range rule {
-			if action == a {
-				return true
-			}
-		}
-	}
-	return false
 }

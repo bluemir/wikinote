@@ -65,7 +65,7 @@ func New(o *Options) (Backend, error) {
 	}
 
 	// initialize components
-	if b.authManager, err = auth.NewManager(); err != nil {
+	if b.authManager, err = auth.NewManager(db); err != nil {
 		return nil, err
 	}
 	if b.fileManager, err = file.New(wikipath); err != nil {
