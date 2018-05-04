@@ -57,7 +57,7 @@ func BasicAuth(c *gin.Context) {
 	}
 	if !ok {
 		FlashMessage(c).Warn("Error on auth, id password not matched")
-		c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
+		c.Header("WWW-Authenticate", AuthenicateString)
 		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
 		c.Abort()
 		return
@@ -106,7 +106,7 @@ func HandleRegister(c *gin.Context) {
 func HandleLogin(c *gin.Context) {
 	str := c.GetHeader("Authorization")
 	if str == "" {
-		c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
+		c.Header("WWW-Authenticate", AuthenicateString)
 		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
 		c.Abort()
 		return
@@ -117,7 +117,7 @@ func HandleLogin(c *gin.Context) {
 func HandleLogout(c *gin.Context) {
 	str := c.GetHeader("Authorization")
 	if str != "Basic Og==" { // empty id pass word
-		c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
+		c.Header("WWW-Authenticate", AuthenicateString)
 		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
 		c.Abort()
 		return

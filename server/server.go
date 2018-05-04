@@ -20,6 +20,9 @@ const (
 	ROLE    = "role"
 	SPECAIL = "special-route"
 	USER    = "user"
+
+	Relam             = "Wikinote"
+	AuthenicateString = `Basic realm="` + Relam + `"`
 )
 
 type Config struct {
@@ -181,7 +184,7 @@ func Action(actions ...string) gin.HandlerFunc {
 			c.HTML(http.StatusForbidden, "/errors/forbidden.html", renderer.Data{}.With(c))
 			c.Abort()
 		case http.StatusUnauthorized:
-			c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
+			c.Header("WWW-Authenticate", AuthenicateString)
 			c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
 			c.Abort()
 		case http.StatusOK:
@@ -196,7 +199,8 @@ func Do(c *gin.Context, handler gin.HandlerFunc, actions ...string) {
 		c.HTML(http.StatusForbidden, "/errors/forbidden.html", renderer.Data{}.With(c))
 		c.Abort()
 	case http.StatusUnauthorized:
-		c.Header("WWW-Authenticate", "Basic realm=\"Auth required!\"")
+
+		c.Header("WWW-Authenticate", AuthenicateString)
 		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
 		c.Abort()
 	case http.StatusOK:
