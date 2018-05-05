@@ -15,6 +15,14 @@ import (
 func BasicAuth(c *gin.Context) {
 	str := c.GetHeader("Authorization")
 	if str == "" {
+		_, err := c.Cookie("logined")
+		if err != http.ErrNoCookie {
+			logrus.Debug("cookie found but auth not found")
+			c.Header("WWW-Authenticate", AuthenicateString)
+			c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
+			c.Abort()
+			return
+		}
 		// Skip auth
 		logrus.Debug("skip auth")
 		return
@@ -48,6 +56,10 @@ func BasicAuth(c *gin.Context) {
 	if len(arr) > 1 {
 		password = arr[1]
 	}
+	if username == "" && password == "" {
+		c.SetCookie("logined", "", -1, "", "", false, true)
+		return // just pass, it is a guest
+	}
 	user, ok, err := Backend(c).User().Auth(username, password)
 	if err != nil {
 		FlashMessage(c).Warn("Somethings Wrong. plz contact system admin")
@@ -63,6 +75,7 @@ func BasicAuth(c *gin.Context) {
 		return
 	}
 	logrus.Debug("Login user :", user)
+	c.SetCookie("logined", user.Name, 0, "", "", false, true)
 	c.Set(USER, user)
 	return
 }
@@ -111,7 +124,6 @@ func HandleLogin(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	// TODO redirect prev page
 	c.Redirect(http.StatusTemporaryRedirect, "/")
 }
 func HandleLogout(c *gin.Context) {

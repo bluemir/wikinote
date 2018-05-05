@@ -56,13 +56,16 @@ func Run(b backend.Backend, conf *Config) error {
 			c.Set(SPECAIL, true)
 		})
 		special.StaticFS("/static/", rice.MustFindBox("../dist").HTTPBox())
-		//auth
-		special.GET("/auth/login", HandleLogin)
+
+		// register
 		special.GET("/auth/register", HandleRegisterForm)
 		special.POST("/auth/register", HandleRegister)
+
+		//auth
+		special.Use(BasicAuth)
+		special.GET("/auth/login", HandleLogin)
 		special.GET("/auth/logout", HandleLogout)
 
-		special.Use(BasicAuth)
 		special.POST("/api/preview", Action("edit"), HandlePreview) // render body
 		special.GET("/search", Action("view", "search"), HandleSearch)
 
@@ -199,7 +202,6 @@ func Do(c *gin.Context, handler gin.HandlerFunc, actions ...string) {
 		c.HTML(http.StatusForbidden, "/errors/forbidden.html", renderer.Data{}.With(c))
 		c.Abort()
 	case http.StatusUnauthorized:
-
 		c.Header("WWW-Authenticate", AuthenicateString)
 		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
 		c.Abort()
