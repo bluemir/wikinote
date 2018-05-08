@@ -32,6 +32,10 @@ func (m *manager) Search(query string) (interface{}, error) {
 		case ".pdf", ".mp4", ".mp3":
 			// if binary
 			return nil
+		case ".md":
+			break
+		default:
+			return nil
 		}
 
 		res, err := fileSearch(path, query)

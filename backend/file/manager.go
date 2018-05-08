@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/jinzhu/gorm"
 	"github.com/sirupsen/logrus"
 )
 
@@ -17,14 +18,16 @@ type Manager interface {
 	GetFullPath(path string) string
 }
 
-func New(basepath string) (Manager, error) {
+func New(basepath string, db *gorm.DB) (Manager, error) {
 	return &manager{
 		basepath: basepath,
+		db:       db,
 	}, nil
 }
 
 type manager struct {
 	basepath string
+	db       *gorm.DB
 }
 
 func (m *manager) Read(path string) ([]byte, error) {
@@ -36,7 +39,16 @@ func (m *manager) Write(path string, data []byte) error {
 	if err := os.MkdirAll(dirpath, 0755); err != nil {
 		return err
 	}
-	return ioutil.WriteFile(m.GetFullPath(path), data, 0644)
+	err := ioutil.WriteFile(m.GetFullPath(path), data, 0644)
+	if err != nil {
+		return err
+	}
+	// TODO save to git and save commit id to db
+	err = m.saveTime(path)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 func (m *manager) GetFullPath(path string) string {
 	return filepath.Join(m.basepath, path)
