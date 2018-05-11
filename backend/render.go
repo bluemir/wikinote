@@ -1,7 +1,9 @@
 package backend
 
 import (
-	"github.com/russross/blackfriday"
+	//"github.com/russross/blackfriday"
+	"gopkg.in/russross/blackfriday.v1"
+	// TODO change to v2
 )
 
 func (b *backend) Render(input []byte) ([]byte, error) {
