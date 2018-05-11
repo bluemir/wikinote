@@ -27,6 +27,6 @@ func (m *manager) saveTime(path string) error {
 	}
 	return nil
 }
-func (m *manger) RecentChanges(n int) ([]MetaInfo, error) {
+func (m *manager) RecentChanges(n int) ([]MetaInfo, error) {
 	return nil, nil
 }

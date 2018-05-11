@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 
+	"github.com/jinzhu/gorm"
 	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/plugins"
@@ -17,7 +18,7 @@ type PluginResult struct {
 	Err  error
 }
 
-func New(pluginsConf map[interface{}]interface{}) (Manager, error) {
+func New(db *gorm.DB, pluginsConf map[interface{}]interface{}) (Manager, error) {
 	pluginNames := plugins.List()
 
 	pm := &pluginManager{}
@@ -29,7 +30,8 @@ func New(pluginsConf map[interface{}]interface{}) (Manager, error) {
 			pc = map[interface{}]interface{}{}
 		}
 
-		p, err := plugins.New(name, flat(pc)) // TODO config
+		p, err := plugins.New(name, db, flat(pc)) // TODO config
+		//p, err := plugins.New(name, db, flat(pc)) // TODO config
 		if err != nil {
 			logrus.Error(err)
 		}
@@ -58,7 +60,8 @@ func flat(conf map[interface{}]interface{}) map[string]string {
 }
 
 type pluginManager struct {
-	footer []plugins.FooterPlugin
+	footer        []plugins.FooterPlugin
+	afterWikiSave []plugins.AfterWikiSavePlugin
 }
 
 func (pm *pluginManager) Footer(path string) []PluginResult {
@@ -70,4 +73,13 @@ func (pm *pluginManager) Footer(path string) []PluginResult {
 		})
 	}
 	return result
+}
+func (pm *pluginManager) AfterWikiSave(path string, data []byte) error {
+	for _, p := range pm.afterWikiSave {
+		e := p.AfterWikiSave(path, data)
+		if e != nil {
+			return e
+		}
+	}
+	return nil
 }

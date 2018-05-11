@@ -74,7 +74,7 @@ func New(o *Options) (Backend, error) {
 	if b.userManager, err = user.NewManager(db, conf, wikipath); err != nil {
 		return nil, err
 	}
-	if b.pluginManager, err = plugin.New(conf.Plugins); err != nil {
+	if b.pluginManager, err = plugin.New(db, conf.Plugins); err != nil {
 		return nil, err
 	}
 	logrus.Info("Backend Initialized")
