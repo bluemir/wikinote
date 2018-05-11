@@ -10,7 +10,6 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/backend"
-	"github.com/bluemir/wikinote/backend/user"
 	"github.com/bluemir/wikinote/server/renderer"
 )
 
@@ -146,10 +145,10 @@ func Run(b backend.Backend, conf *Config) error {
 func Backend(c *gin.Context) backend.Backend {
 	return c.MustGet(BACKEND).(backend.Backend)
 }
-func User(c *gin.Context) *user.User {
+func User(c *gin.Context) *backend.User {
 	u, ok := c.Get(USER)
 	if ok {
-		return u.(*user.User)
+		return u.(*backend.User)
 	}
 	return nil
 }
@@ -164,7 +163,7 @@ func authCheck(c *gin.Context, actions ...string) int {
 	//      if logined but not have permission return 403
 	u, ok := c.Get(USER)
 	if ok {
-		role := u.(*user.User).Role
+		role := u.(*backend.User).Role
 		if Backend(c).Auth().IsAllow(role, actions...) {
 			return http.StatusOK //pass
 		} else {

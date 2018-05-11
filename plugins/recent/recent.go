@@ -47,5 +47,12 @@ func (rc *RecentChanges) AfterWikiSave(path string, data []byte) error {
 }
 
 func (rc *RecentChanges) RegisterRoute(r *gin.IRoute) {
-
+	/*metas := []MetaInfo{}
+	  +
+	  +       result := m.db.Order("updated_at desc").Limit(n).Find(&metas)
+	  +       if result.Error != nil {
+	  +               return nil, result.Error
+	  +       }
+	  +       return metas, nil
+	*/
 }

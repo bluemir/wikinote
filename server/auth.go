@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 
-	"github.com/bluemir/wikinote/backend/user"
+	"github.com/bluemir/wikinote/backend"
 	"github.com/bluemir/wikinote/server/renderer"
 )
 
@@ -103,7 +103,7 @@ func HandleRegister(c *gin.Context) {
 		c.Redirect(http.StatusSeeOther, "/!/auth/register")
 		return
 	}
-	err = Backend(c).User().New(&user.User{
+	err = Backend(c).User().New(&backend.User{
 		Name:  registeForm.Id,
 		Email: registeForm.Email,
 	}, registeForm.Password)

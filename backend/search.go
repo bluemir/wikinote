@@ -1,4 +1,4 @@
-package file
+package backend
 
 import (
 	"bufio"
@@ -14,10 +14,10 @@ type SearchResult struct {
 	Text string
 }
 
-func (m *manager) Search(query string) (interface{}, error) {
-	//TODO query to pattern(regexp)
+func search(basepath string, query string) (interface{}, error) {
+
 	result := map[string]([]SearchResult){}
-	err := filepath.Walk(m.basepath, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(basepath, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() && info.Name()[0] == '.' {
 			logrus.Debug(info.Name())
 			return filepath.SkipDir
@@ -43,7 +43,7 @@ func (m *manager) Search(query string) (interface{}, error) {
 			return err
 		}
 		if len(res) != 0 {
-			result[path[len(m.basepath):]] = res
+			result[path[len(basepath):]] = res
 		}
 		return nil
 	})

@@ -8,21 +8,18 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
-	"github.com/bluemir/wikinote/backend/auth"
 	"github.com/bluemir/wikinote/backend/config"
-	"github.com/bluemir/wikinote/backend/file"
-	"github.com/bluemir/wikinote/backend/plugin"
-	"github.com/bluemir/wikinote/backend/user"
+	"github.com/bluemir/wikinote/plugins"
 )
 
 type Backend interface {
 	Config() *config.Config
 	SaveConfig(conf *config.Config) error
 
-	File() file.Manager
-	User() user.Manager
-	Auth() auth.Manager
-	Plugin() plugin.Manager
+	File() FileClause
+	User() UserClause
+	Auth() AuthClause
+	Plugin() PluginClause
 
 	// renderer
 	Render(data []byte) ([]byte, error)
@@ -58,14 +55,23 @@ func New(o *Options) (Backend, error) {
 
 	// make backend structor
 	b := &backend{
-		basePath:   wikipath,
-		conf:       conf,
-		configPath: configFile,
-		db:         db,
+		basePath: wikipath,
+		conf:     conf,
+		db:       db,
+
+		plugins: struct {
+			footer        []plugins.FooterPlugin
+			afterWikiSave []plugins.AfterWikiSavePlugin
+		}{
+			footer:        []plugins.FooterPlugin{},
+			afterWikiSave: []plugins.AfterWikiSavePlugin{},
+		},
 	}
 
 	// initialize components
-	if b.authManager, err = auth.NewManager(db); err != nil {
+	dbInit(db)
+	b.loadPlugins()
+	/*if b.authManager, err = auth.NewManager(db); err != nil {
 		return nil, err
 	}
 	if b.fileManager, err = file.New(wikipath, db); err != nil {
@@ -77,6 +83,7 @@ func New(o *Options) (Backend, error) {
 	if b.pluginManager, err = plugin.New(db, conf.Plugins); err != nil {
 		return nil, err
 	}
+	*/
 	logrus.Info("Backend Initialized")
 
 	return b, nil
@@ -88,10 +95,10 @@ type backend struct {
 	configPath string
 	db         *gorm.DB
 
-	authManager   auth.Manager
-	fileManager   file.Manager
-	userManager   user.Manager
-	pluginManager plugin.Manager
+	plugins struct {
+		footer        []plugins.FooterPlugin
+		afterWikiSave []plugins.AfterWikiSavePlugin
+	}
 }
 
 func (b *backend) Close() {
@@ -105,16 +112,15 @@ func (b *backend) Config() *config.Config {
 func (b *backend) SaveConfig(conf *config.Config) error {
 	return b.conf.Save(b.configPath)
 }
-
-func (b *backend) Auth() auth.Manager {
-	return b.authManager
+func (b *backend) Auth() AuthClause {
+	return (*authClause)(b)
 }
-func (b *backend) File() file.Manager {
-	return b.fileManager
+func (b *backend) File() FileClause {
+	return (*fileClause)(b)
 }
-func (b *backend) User() user.Manager {
-	return b.userManager
+func (b *backend) User() UserClause {
+	return (*userClause)(b)
 }
-func (b *backend) Plugin() plugin.Manager {
-	return b.pluginManager
+func (b *backend) Plugin() PluginClause {
+	return (*pluginClause)(b)
 }

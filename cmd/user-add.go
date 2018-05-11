@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/bluemir/wikinote/backend"
-	"github.com/bluemir/wikinote/backend/user"
 )
 
 func NewUserAddCommand() *cobra.Command {
@@ -29,7 +28,7 @@ func NewUserAddCommand() *cobra.Command {
 			if cmd.Flags().Changed("port") {
 				email = UserAddConfig.email
 			}
-			return b.User().New(&user.User{
+			return b.User().New(&backend.User{
 				Name:  args[0],
 				Email: email,
 			}, "")

@@ -4,10 +4,9 @@ import (
 	"path"
 	"strings"
 
+	"github.com/bluemir/wikinote/backend"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-
-	"github.com/bluemir/wikinote/backend/user"
 )
 
 // using outside of renderer
@@ -53,7 +52,7 @@ func (rd *renderData) Username() string {
 	if !ok {
 		return ""
 	} else {
-		return u.(*user.User).Name
+		return u.(*backend.User).Name
 	}
 }
 func (rd *renderData) IsLogin() bool {
