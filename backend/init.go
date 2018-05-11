@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/bluemir/wikinote/backend/config"
 	"github.com/bluemir/wikinote/plugins"
 	"github.com/jinzhu/gorm"
 	"github.com/sirupsen/logrus"
@@ -60,31 +61,45 @@ func dbInit(db *gorm.DB) error {
 	return nil
 }
 
-func (b *backend) loadPlugins() error {
+type pluginList struct {
+	footer         []plugins.FooterPlugin
+	afterWikiSave  []plugins.AfterWikiSavePlugin
+	registerRouter map[string]plugins.RegisterRouterPlugin
+}
+
+func loadPlugins(db *gorm.DB, conf *config.Config) (*pluginList, error) {
+	// TODO can on/off
 	pluginNames := plugins.List()
+	pl := &pluginList{
+		footer:         []plugins.FooterPlugin{},
+		afterWikiSave:  []plugins.AfterWikiSavePlugin{},
+		registerRouter: map[string]plugins.RegisterRouterPlugin{},
+	}
 
 	for _, name := range pluginNames {
-		logrus.Debugf("pluginconf %+v, %+v %s", b.conf.Plugins[name], name)
-		pc, ok := b.conf.Plugins[name].(map[interface{}]interface{})
+		logrus.Debugf("pluginconf %+v, %s", conf.Plugins[name], name)
+		pc, ok := conf.Plugins[name].(map[interface{}]interface{})
 		if !ok {
 			pc = map[interface{}]interface{}{}
 		}
 
-		p, err := plugins.New(name, b.db, flat(pc)) // TODO config
-		//p, err := plugins.New(name, db, flat(pc)) // TODO config
+		p, err := plugins.New(name, db, flat(pc)) // TODO config
 		if err != nil {
 			logrus.Error(err)
-			return err
+			return nil, err
 		}
 		logrus.Debugf("plugin '%s' is initialize", name)
 		if f, ok := p.(plugins.FooterPlugin); ok {
-			b.plugins.footer = append(b.plugins.footer, f)
+			pl.footer = append(pl.footer, f)
 		}
 		if a, ok := p.(plugins.AfterWikiSavePlugin); ok {
-			b.plugins.afterWikiSave = append(b.plugins.afterWikiSave, a)
+			pl.afterWikiSave = append(pl.afterWikiSave, a)
+		}
+		if a, ok := p.(plugins.RegisterRouterPlugin); ok {
+			pl.registerRouter[name] = a
 		}
 	}
-	return nil
+	return pl, nil
 }
 func flat(conf map[interface{}]interface{}) map[string]string {
 	result := map[string]string{}

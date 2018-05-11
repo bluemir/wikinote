@@ -9,7 +9,6 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/backend/config"
-	"github.com/bluemir/wikinote/plugins"
 )
 
 type Backend interface {
@@ -58,32 +57,20 @@ func New(o *Options) (Backend, error) {
 		basePath: wikipath,
 		conf:     conf,
 		db:       db,
-
-		plugins: struct {
-			footer        []plugins.FooterPlugin
-			afterWikiSave []plugins.AfterWikiSavePlugin
-		}{
-			footer:        []plugins.FooterPlugin{},
-			afterWikiSave: []plugins.AfterWikiSavePlugin{},
-		},
+		plugins:  nil,
 	}
 
 	// initialize components
-	dbInit(db)
-	b.loadPlugins()
-	/*if b.authManager, err = auth.NewManager(db); err != nil {
+	err = dbInit(db)
+	if err != nil {
 		return nil, err
 	}
-	if b.fileManager, err = file.New(wikipath, db); err != nil {
+	pl, err := loadPlugins(db, conf)
+	if err != nil {
 		return nil, err
 	}
-	if b.userManager, err = user.NewManager(db, conf, wikipath); err != nil {
-		return nil, err
-	}
-	if b.pluginManager, err = plugin.New(db, conf.Plugins); err != nil {
-		return nil, err
-	}
-	*/
+	b.plugins = pl
+
 	logrus.Info("Backend Initialized")
 
 	return b, nil
@@ -95,10 +82,7 @@ type backend struct {
 	configPath string
 	db         *gorm.DB
 
-	plugins struct {
-		footer        []plugins.FooterPlugin
-		afterWikiSave []plugins.AfterWikiSavePlugin
-	}
+	plugins *pluginList
 }
 
 func (b *backend) Close() {

@@ -1,10 +1,15 @@
 package backend
 
-import "html/template"
+import (
+	"html/template"
+
+	"github.com/gin-gonic/gin"
+)
 
 type PluginClause interface {
 	Footer(path string) []PluginResult
 	AfterWikiSave(path string, data []byte) error
+	RegisterRouter(r gin.IRouter)
 }
 
 type pluginClause backend
@@ -27,6 +32,11 @@ func (b *pluginClause) AfterWikiSave(path string, data []byte) error {
 		}
 	}
 	return nil
+}
+func (b *pluginClause) RegisterRouter(r gin.IRouter) {
+	for name, p := range b.plugins.registerRouter {
+		p.RegisterRouter(r.Group(name))
+	}
 }
 
 type PluginResult struct {

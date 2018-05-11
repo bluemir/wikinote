@@ -1,8 +1,10 @@
 package recent
 
 import (
+	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"github.com/sirupsen/logrus"
 
@@ -14,7 +16,6 @@ func init() {
 }
 
 func New(db *gorm.DB, opts map[string]string) plugins.Plugin {
-
 	db.AutoMigrate(&LastChange{})
 	logrus.Debugf("init recent-changes, %+v", opts)
 	return &RecentChanges{
@@ -46,13 +47,15 @@ func (rc *RecentChanges) AfterWikiSave(path string, data []byte) error {
 	return nil
 }
 
-func (rc *RecentChanges) RegisterRoute(r *gin.IRoute) {
-	/*metas := []MetaInfo{}
-	  +
-	  +       result := m.db.Order("updated_at desc").Limit(n).Find(&metas)
-	  +       if result.Error != nil {
-	  +               return nil, result.Error
-	  +       }
-	  +       return metas, nil
-	*/
+func (rc *RecentChanges) RegisterRouter(r gin.IRouter) {
+	r.GET("/", func(c *gin.Context) {
+		lcs := []LastChange{}
+		result := rc.db.Order("updated_at desc").Limit(10).Find(&lcs)
+		if result.Error != nil {
+			c.AbortWithError(http.StatusInternalServerError, result.Error)
+			return
+		}
+
+		c.JSON(http.StatusOK, lcs)
+	})
 }

@@ -46,6 +46,8 @@ func Run(b backend.Backend, conf *Config) error {
 		c.Set(BACKEND, b)
 	})
 
+	b.Plugin().RegisterRouter(app.Group("/!/plugins"))
+
 	app.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusTemporaryRedirect, b.Config().FrontPage)
 	})
@@ -77,6 +79,7 @@ func Run(b backend.Backend, conf *Config) error {
 		special.PUT("/api/users/:name/role", Action("user"), HandleAPIUserUpdateRole)
 		// TODO make Action for API
 	}
+
 	app.Use(BasicAuth)
 	app.NoRoute(func(c *gin.Context) {
 		// GET            render file or render functional page
