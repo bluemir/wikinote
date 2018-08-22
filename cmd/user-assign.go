@@ -1,11 +1,13 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/spf13/cobra"
 
+	"github.com/bluemir/go-utils/auth"
 	"github.com/bluemir/wikinote/backend"
 )
 
@@ -31,13 +33,18 @@ func NewUserAssignCommand() *cobra.Command {
 				return err
 			}
 
-			u, err := b.User().Get(username)
+			u, ok, err := b.Auth().GetUser(username)
 			if err != nil {
 				return err
 			}
+			if !ok {
+				return errors.New("user not found")
+			}
 
-			u.Role = role
-			return b.User().Put(u)
+			u.Role = auth.Role(role)
+
+			return b.Auth().UpdateUser(u)
+
 		},
 	}
 	// vaildate

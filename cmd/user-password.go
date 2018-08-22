@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -26,15 +27,18 @@ func NewUserPasswordCommand() *cobra.Command {
 				return err
 			}
 
-			u, err := b.User().Get(name)
+			u, ok, err := b.Auth().GetUser(name)
 			if err != nil {
 				return err
+			}
+			if !ok {
+				return errors.New("user not found")
 			}
 
 			// if cmd.Flags().Changed("password")
 			//u.Password = usertype.NewPassword(UserPasswordConfig.Password)
 			// else ask password
-			return b.User().Put(u)
+			return b.Auth().UpdateUser(u)
 		},
 	}
 	UserPasswordCmd.Flags().StringVarP(&UserPasswordConfig.Password, "password", "p", "", "Password. WANNING!")

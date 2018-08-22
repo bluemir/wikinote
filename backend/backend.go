@@ -3,6 +3,8 @@ package backend
 import (
 	"os"
 
+	"github.com/bluemir/go-utils/auth"
+	_ "github.com/bluemir/go-utils/auth/gorm"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/pkg/errors"
@@ -16,8 +18,8 @@ type Backend interface {
 	SaveConfig(conf *config.Config) error
 
 	File() FileClause
-	User() UserClause
-	Auth() AuthClause
+	// User() UserClause
+	Auth() auth.Manager
 	Plugin() PluginClause
 
 	// renderer
@@ -48,8 +50,25 @@ func New(o *Options) (Backend, error) {
 		return nil, err
 	}
 	db, err := gorm.Open("sqlite3", wikipath+"/.app/wikinote.db")
+	//db, err := gorm.Open("sqlite3", ":memory:")
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to connect database")
+	}
+
+	authMng, err := auth.New(&auth.Options{
+		StoreDriver: "gorm",
+		DefaultRole: "editor",
+		DriverOpts: map[string]interface{}{
+			"db": db,
+		},
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to init auth manager")
+	}
+
+	err = UserInit(authMng)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to init auth manager")
 	}
 
 	// make backend structor
@@ -57,6 +76,7 @@ func New(o *Options) (Backend, error) {
 		basePath: wikipath,
 		conf:     conf,
 		db:       db,
+		auth:     authMng,
 		plugins:  nil,
 	}
 
@@ -82,6 +102,8 @@ type backend struct {
 	configPath string
 	db         *gorm.DB
 
+	auth auth.Manager
+
 	plugins *pluginList
 }
 
@@ -96,15 +118,13 @@ func (b *backend) Config() *config.Config {
 func (b *backend) SaveConfig(conf *config.Config) error {
 	return b.conf.Save(b.configPath)
 }
-func (b *backend) Auth() AuthClause {
-	return (*authClause)(b)
+func (b *backend) Auth() auth.Manager {
+	return b.auth
 }
 func (b *backend) File() FileClause {
 	return (*fileClause)(b)
 }
-func (b *backend) User() UserClause {
-	return (*userClause)(b)
-}
+
 func (b *backend) Plugin() PluginClause {
 	return (*pluginClause)(b)
 }

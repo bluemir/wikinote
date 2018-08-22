@@ -6,11 +6,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/bluemir/go-utils/auth"
 	"github.com/bluemir/wikinote/server/renderer"
 )
 
 func HandleUserList(c *gin.Context) {
-	users, err := Backend(c).User().List()
+	users, err := Backend(c).Auth().ListUser()
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -19,15 +20,22 @@ func HandleUserList(c *gin.Context) {
 }
 
 func HandleAPIUserUpdateRole(c *gin.Context) {
-	u, err := Backend(c).User().Get(c.Param("name"))
+	u, ok, err := Backend(c).Auth().GetUser(c.Param("name"))
 	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"msg": "user not found"})
+		c.Abort()
+		return
+	}
+	if !ok {
 		c.JSON(http.StatusNotFound, gin.H{"msg": err.Error()})
 		c.Abort()
 		return
 	}
+
 	role, err := ioutil.ReadAll(c.Request.Body)
-	u.Role = string(role)
-	if err := Backend(c).User().Put(u); err != nil {
+	u.Role = auth.Role(role)
+
+	if err := Backend(c).Auth().UpdateUser(u); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"msg": err.Error()})
 		c.Abort()
 		return

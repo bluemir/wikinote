@@ -4,7 +4,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/bluemir/wikinote/backend"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
@@ -48,12 +47,15 @@ func (rd *renderData) Breadcrumb() []Breadcrumb {
 	return parseBreadcrumb(rd.WikiPath())
 }
 func (rd *renderData) Username() string {
-	u, ok := rd.context.Get("user")
-	if !ok {
-		return ""
-	} else {
-		return u.(*backend.User).Name
-	}
+	return "dummy"
+	/*
+		u, ok := rd.context.Get("user")
+		if !ok {
+			return ""
+		} else {
+			return u.(*backend.User).Name
+		}
+	*/
 }
 func (rd *renderData) IsLogin() bool {
 	_, ok := rd.context.Get("user")

@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/bluemir/go-utils/auth"
 	"github.com/spf13/cobra"
 
 	"github.com/bluemir/wikinote/backend"
@@ -23,15 +24,20 @@ func NewUserAddCommand() *cobra.Command {
 			if len(args) != 1 {
 				return fmt.Errorf("invaild name")
 			}
-			email := args[0] + "@wikinote"
-			//if not set
-			if cmd.Flags().Changed("port") {
-				email = UserAddConfig.email
-			}
-			return b.User().New(&backend.User{
+			/*
+				email := args[0] + "@wikinote"
+				//if not set
+				if cmd.Flags().Changed("port") {
+					email = UserAddConfig.email
+				}
+			*/
+			return b.Auth().CreateUser(&auth.User{
+				Name: args[0],
+			})
+			/*return b.User().New(&backend.User{
 				Name:  args[0],
 				Email: email,
-			}, "")
+			}, "")*/
 		},
 	}
 

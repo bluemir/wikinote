@@ -17,7 +17,8 @@ func NewUserListCommand() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			users, err := b.User().List()
+			users, err := b.Auth().ListUser()
+			//users, err := b.User().List()
 			if err != nil {
 				return err
 			}
@@ -25,7 +26,7 @@ func NewUserListCommand() *cobra.Command {
 			table := termtables.CreateTable()
 			table.AddHeaders("Name", "Email", "Role")
 			for _, u := range users {
-				table.AddRow(u.Name, u.Email, u.Role)
+				table.AddRow(u.Name, "dummy-email" /*u.Email*/, u.Role)
 			}
 
 			fmt.Println(table.Render())

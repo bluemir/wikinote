@@ -4,7 +4,9 @@ import (
 	"net/http"
 
 	"github.com/GeertJohan/go.rice"
+	"github.com/bluemir/go-utils/auth"
 	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/autotls"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -16,9 +18,8 @@ import (
 // gin context or session keys
 const (
 	BACKEND = "backend"
-	ROLE    = "role"
 	SPECAIL = "special-route"
-	USER    = "user"
+	TOKEN   = "token"
 
 	Relam             = "Wikinote"
 	AuthenicateString = `Basic realm="` + Relam + `"`
@@ -39,7 +40,7 @@ func Run(b backend.Backend, conf *Config) error {
 	app.HTMLRender = renderer.NewRenderer()
 
 	// TODO rendom string or config
-	store := sessions.NewCookieStore([]byte("__wikinote__"))
+	store := cookie.NewStore([]byte("__wikinote__"))
 	app.Use(sessions.Sessions("session", store))
 
 	app.Use(func(c *gin.Context) {
@@ -148,13 +149,16 @@ func Run(b backend.Backend, conf *Config) error {
 func Backend(c *gin.Context) backend.Backend {
 	return c.MustGet(BACKEND).(backend.Backend)
 }
+
+/*
 func User(c *gin.Context) *backend.User {
-	u, ok := c.Get(USER)
+	token, ok := c.Get(TOKEN)
 	if ok {
+		Backend(c).Auth().GetUDate
 		return u.(*backend.User)
 	}
 	return nil
-}
+}*/
 
 func FlashMessage(c *gin.Context) renderer.MessageContext {
 	return renderer.Of(c)
@@ -164,20 +168,22 @@ func authCheck(c *gin.Context, actions ...string) int {
 	// check user
 	//      if not logined return 401
 	//      if logined but not have permission return 403
-	u, ok := c.Get(USER)
+	token, ok := c.Get(TOKEN)
 	if ok {
-		role := u.(*backend.User).Role
-		if Backend(c).Auth().IsAllow(role, actions...) {
-			return http.StatusOK //pass
-		} else {
-			return http.StatusForbidden
+		for _, action := range actions {
+			if !Backend(c).Auth().Is(token).Allow(auth.Action(action)) {
+				return http.StatusForbidden
+			}
 		}
+		return http.StatusOK
 	} else {
-		if Backend(c).Auth().IsAllow("guest", actions...) {
-			return http.StatusOK //pass
-		} else {
-			return http.StatusUnauthorized
+		for _, action := range actions {
+			if !Backend(c).Auth().Is(auth.Role("guest")).Allow(auth.Action(action)) {
+				logrus.Debugf("guest not allow %s", action)
+				return http.StatusUnauthorized
+			}
 		}
+		return http.StatusOK
 	}
 }
 

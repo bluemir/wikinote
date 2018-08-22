@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/bluemir/wikinote/backend"
@@ -25,7 +26,15 @@ func NewUserRemoveCommand() *cobra.Command {
 				return err
 			}
 
-			return b.User().Delete(username)
+			u, ok, err := b.Auth().GetUser(username)
+			if err != nil {
+				return err
+			}
+			if !ok {
+				return errors.New("user not found")
+			}
+
+			return b.Auth().DeleteUser(u)
 		},
 	}
 	return UserRemoveCmd
