@@ -10,18 +10,35 @@ import (
 	"github.com/bluemir/wikinote/server/renderer"
 )
 
+func isLogined(c *gin.Context) bool {
+	_, err := c.Cookie("logined")
+	if err == http.ErrNoCookie {
+		return false
+	}
+	return true
+}
+
 func BasicAuth(c *gin.Context) {
 	token, err := Backend(c).Auth().HttpAuth(c.GetHeader("Authorization"))
 
-	switch err.Code() {
+	switch auth.ErrorCode(err) {
 	case auth.ErrorNone:
 		logrus.Debug("Login user :", token.Username)
 		c.SetCookie("logined", token.Username, 0, "", "", false, true)
 		c.Set(TOKEN, token)
 		return
+	case auth.ErrorEmptyAccount: // it means logout
+		logrus.Debug("Empty Account")
+		if isLogined(c) {
+			c.SetCookie("logined", "", -1, "", "", false, true)
+		} else {
+			c.Header("WWW-Authenticate", AuthenicateString)
+			c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
+			c.Abort()
+		}
+		return
 	case auth.ErrorEmptyHeader:
-		_, err := c.Cookie("logined")
-		if err != http.ErrNoCookie {
+		if isLogined(c) {
 			logrus.Debug("cookie found but auth not found")
 			c.Header("WWW-Authenticate", AuthenicateString)
 			c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
@@ -36,13 +53,6 @@ func BasicAuth(c *gin.Context) {
 		c.HTML(http.StatusBadRequest, "/errors/unauthorized.html", renderer.Data{}.With(c))
 		c.Abort()
 		return
-	case auth.ErrorEmptyAccount:
-		logrus.Debug("Empty Account")
-		c.SetCookie("logined", "", -1, "", "", false, true)
-		c.Header("WWW-Authenticate", AuthenicateString)
-		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
-		c.Abort()
-		return // just pass, it is a guest or logout user
 	case auth.ErrorUnauthorized:
 		logrus.Debug("unauthorized")
 		FlashMessage(c).Warn("Error on auth, id password not matched")
@@ -116,7 +126,6 @@ func HandleLogout(c *gin.Context) {
 	str := c.GetHeader("Authorization")
 	if str != "Basic Og==" { // empty id pass word
 		c.Header("WWW-Authenticate", AuthenicateString)
-		c.SetCookie("logined", "", -1, "", "", false, true)
 		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
 		c.Abort()
 		return
