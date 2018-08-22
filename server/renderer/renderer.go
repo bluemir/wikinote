@@ -82,7 +82,7 @@ type RenderContext struct {
 }
 
 func (r *RenderContext) Render(w http.ResponseWriter) error {
-	data, ok := r.data.(*renderData)
+	data, ok := r.data.(*userData)
 	if !ok {
 		return fmt.Errorf("wrong type, data is not *UserData*")
 	}
@@ -90,12 +90,12 @@ func (r *RenderContext) Render(w http.ResponseWriter) error {
 		return fmt.Errorf("template '%s' no found", r.name)
 	}
 
-	err := data.Prepare()
+	rd, err := data.Pack()
 	if err != nil {
 		return err
 	}
 
-	return r.template.Execute(w, data)
+	return r.template.Execute(w, rd)
 }
 func (r *RenderContext) WriteContentType(w http.ResponseWriter) {
 	header := w.Header()

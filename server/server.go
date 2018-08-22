@@ -18,8 +18,8 @@ import (
 // gin context or session keys
 const (
 	BACKEND = "backend"
-	SPECAIL = "special-route"
-	TOKEN   = "token"
+	SPECAIL = renderer.KEY_SPECIAL_ROUTE
+	TOKEN   = renderer.KEY_TOKEN
 
 	Relam             = "Wikinote"
 	AuthenicateString = `Basic realm="` + Relam + `"`
@@ -149,16 +149,6 @@ func Run(b backend.Backend, conf *Config) error {
 func Backend(c *gin.Context) backend.Backend {
 	return c.MustGet(BACKEND).(backend.Backend)
 }
-
-/*
-func User(c *gin.Context) *backend.User {
-	token, ok := c.Get(TOKEN)
-	if ok {
-		Backend(c).Auth().GetUDate
-		return u.(*backend.User)
-	}
-	return nil
-}*/
 
 func FlashMessage(c *gin.Context) renderer.MessageContext {
 	return renderer.Of(c)
