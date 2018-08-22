@@ -16,7 +16,7 @@ func HandleUserList(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	c.HTML(http.StatusOK, "users.html", renderer.Data{"users": users}.With(c))
+	c.HTML(http.StatusOK, "/users.html", renderer.Data{"users": users}.With(c))
 }
 
 func HandleAPIUserUpdateRole(c *gin.Context) {

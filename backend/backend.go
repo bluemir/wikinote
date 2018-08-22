@@ -58,6 +58,7 @@ func New(o *Options) (Backend, error) {
 	authMng, err := auth.New(&auth.Options{
 		StoreDriver: "gorm",
 		DefaultRole: "editor",
+		RootRole:    "root",
 		DriverOpts: map[string]interface{}{
 			"db": db,
 		},
@@ -81,10 +82,6 @@ func New(o *Options) (Backend, error) {
 	}
 
 	// initialize components
-	err = dbInit(db)
-	if err != nil {
-		return nil, err
-	}
 	pl, err := loadPlugins(db, conf)
 	if err != nil {
 		return nil, err

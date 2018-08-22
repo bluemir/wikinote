@@ -75,6 +75,16 @@ func UserInit(authMng auth.Manager) error {
 	}
 
 	// always make new token. If forget root key? just restart it
+	if tokens, err := authMng.ListToken("root"); err != nil {
+		return err
+	} else {
+		for _, token := range tokens {
+			if err := authMng.RevokeToken(token.RevokeKey); err != nil {
+				return err
+			}
+		}
+	}
+
 	key := RandomString(16)
 	_, err = authMng.IssueToken("root", key)
 	if err != nil {
@@ -83,49 +93,6 @@ func UserInit(authMng auth.Manager) error {
 
 	// QUESTION save file or just print stdout?
 	logrus.Infof("Root Token: %s", key)
-	return nil
-}
-
-func dbInit(db *gorm.DB) error {
-	/*
-		// Auth
-		if !db.HasTable(&Rule{}) {
-			// only first time
-			db.CreateTable(&Rule{})
-			lines := strings.Split(defaultRule, "\n")
-			for _, line := range lines {
-				p := strings.SplitN(line, ":", 2)
-				if len(p) < 2 {
-					// skip error line
-					continue
-				}
-				role := p[0]
-				actions := strings.Split(p[1], ",")
-				for _, action := range actions {
-					rule := &Rule{Role: role, Action: strings.Trim(action, " ")}
-					db.Where(rule).FirstOrCreate(rule)
-				}
-			}
-		}
-
-		// User & Token
-		db.AutoMigrate(&User{})
-		db.AutoMigrate(&Token{})
-
-		root := &User{
-			Name:  "root",
-			Email: "root@wikinote",
-			Role:  "root",
-		}
-		db.Where("name=?", "root").FirstOrCreate(root)
-		key := RandomString(16)
-		// always make new token. If forget root key? just restart it
-		db.Where(&Token{UserID: root.ID}).Assign(&Token{HashedKey: hash("root", key)}).FirstOrCreate(&Token{})
-
-		// Save to File
-		// QUESTION save file or just print stdout?
-		logrus.Infof("Root Token: %s", key)
-	*/
 	return nil
 }
 

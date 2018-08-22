@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"github.com/GeertJohan/go.rice"
+	"github.com/ghodss/yaml"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
 )
 
 type Config struct {
