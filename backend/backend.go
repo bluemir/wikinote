@@ -18,13 +18,11 @@ type Backend interface {
 	SaveConfig(conf *config.Config) error
 
 	File() FileClause
-	// User() UserClause
 	Auth() auth.Manager
 	Plugin() PluginClause
 
 	// renderer
 	Render(data []byte) ([]byte, error)
-	//Plugins().Footer() ([]RenderResult)
 
 	Close()
 }
@@ -119,9 +117,9 @@ func (b *backend) Auth() auth.Manager {
 	return b.auth
 }
 func (b *backend) File() FileClause {
-	return (*fileClause)(b)
+	return &fileClause{b}
 }
 
 func (b *backend) Plugin() PluginClause {
-	return (*pluginClause)(b)
+	return &pluginClause{b}
 }

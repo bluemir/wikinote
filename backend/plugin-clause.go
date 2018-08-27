@@ -12,7 +12,9 @@ type PluginClause interface {
 	RegisterRouter(r gin.IRouter)
 }
 
-type pluginClause backend
+type pluginClause struct {
+	*backend
+}
 
 func (b *pluginClause) Footer(path string) []PluginResult {
 	result := []PluginResult{}

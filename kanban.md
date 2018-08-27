@@ -7,5 +7,10 @@
 
 ## jobs
 * [x]: default config in go source code(current: resource yaml)
-* [ ]: plugin on/off by config
-* [ ]: last change time in footer
+* [x]: plugin on/off by config
+* [x]: last change time in footer
+* [x]: add test plugins
+* [ ]: build with docker
+* [ ]: show plugin error
+* [ ]: style in LastChange
+* [ ]: view style

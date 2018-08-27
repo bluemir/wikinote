@@ -1,6 +1,7 @@
 package recent
 
 import (
+	"html/template"
 	"net/http"
 	"time"
 
@@ -58,4 +59,11 @@ func (rc *RecentChanges) RegisterRouter(r gin.IRouter) {
 
 		c.JSON(http.StatusOK, lcs)
 	})
+}
+func (rc *RecentChanges) Footer(path string) (template.HTML, error) {
+	last := &LastChange{}
+	if err := rc.db.Where("path = ?", path).First(last).Error; err != nil {
+		return template.HTML(""), err
+	}
+	return template.HTML("last update: " + last.UpdatedAt.Format(time.RFC3339)), nil
 }

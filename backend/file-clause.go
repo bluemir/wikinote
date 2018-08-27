@@ -17,7 +17,9 @@ type FileClause interface {
 	GetFullPath(path string) string
 }
 
-type fileClause backend
+type fileClause struct {
+	*backend
+}
 
 func (b *fileClause) Read(path string) ([]byte, error) {
 	return ioutil.ReadFile(b.GetFullPath(path))
@@ -30,6 +32,11 @@ func (b *fileClause) Write(path string, data []byte) error {
 		return err
 	}
 	err := ioutil.WriteFile(b.GetFullPath(path), data, 0644)
+	if err != nil {
+		return err
+	}
+
+	err = b.Plugin().AfterWikiSave(path, data)
 	if err != nil {
 		return err
 	}

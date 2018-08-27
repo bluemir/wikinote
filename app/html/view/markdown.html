@@ -7,7 +7,7 @@
 	{{ range .footer}}
 	<div>
 		{{ if .Err }}
-			<p> Sorry! error on plugin</p>
+			<p> Sorry! error on plugin: {{.Err}}</p>
 		{{ else }}
 			{{ .Data }}
 		{{ end }}

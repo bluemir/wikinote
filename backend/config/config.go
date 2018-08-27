@@ -17,6 +17,11 @@ auto-backup: false
 user:
   default:
     role: viewer
+plugins:
+  __test__:
+    testmap:
+      v1: "foo"
+      v2: "bar"
 `
 
 type Config struct {
@@ -27,7 +32,7 @@ type Config struct {
 			Role string
 		}
 	}
-	Plugins map[string]interface{}
+	Plugins map[string]interface{} `json:"plugins"`
 }
 
 func ParseConfig(path string) (*Config, error) {
@@ -35,7 +40,11 @@ func ParseConfig(path string) (*Config, error) {
 	// Default Value
 
 	conf := &Config{}
-	yaml.Unmarshal([]byte(defaultConfig), conf)
+	defer logrus.Debugf("%+v", conf)
+	err := yaml.Unmarshal([]byte(defaultConfig), conf)
+	if err != nil {
+		return conf, err
+	}
 
 	buf, err := ioutil.ReadFile(path)
 	if err != nil {

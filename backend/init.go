@@ -28,7 +28,6 @@ func UserInit(authMng auth.Manager) error {
 	}
 	if !ok {
 		// it means first time
-
 		logrus.Debug("put default rules")
 		lines := strings.Split(defaultRule, "\n")
 		for _, line := range lines {
@@ -104,18 +103,16 @@ type pluginList struct {
 
 func loadPlugins(db *gorm.DB, conf *config.Config) (*pluginList, error) {
 	// TODO can on/off
-	pluginNames := plugins.List()
 	pl := &pluginList{
 		footer:         []plugins.FooterPlugin{},
 		afterWikiSave:  []plugins.AfterWikiSavePlugin{},
 		registerRouter: map[string]plugins.RegisterRouterPlugin{},
 	}
 
-	for _, name := range pluginNames {
-		logrus.Debugf("pluginconf %+v, %s", conf.Plugins[name], name)
-		pc, ok := conf.Plugins[name].(map[interface{}]interface{})
+	for name, pconf := range conf.Plugins {
+		pc, ok := pconf.(map[string]interface{})
 		if !ok {
-			pc = map[interface{}]interface{}{}
+			pc = map[string]interface{}{}
 		}
 
 		p, err := plugins.New(name, db, flat(pc)) // TODO config
@@ -136,17 +133,17 @@ func loadPlugins(db *gorm.DB, conf *config.Config) (*pluginList, error) {
 	}
 	return pl, nil
 }
-func flat(conf map[interface{}]interface{}) map[string]string {
+func flat(conf map[string]interface{}) map[string]string {
 	result := map[string]string{}
 	for k, v := range conf {
 		switch val := v.(type) {
-		case map[interface{}]interface{}:
+		case map[string]interface{}:
 			res := flat(val)
 			for resk, resv := range res {
-				result[k.(string)+"."+resk] = resv
+				result[k+"."+resk] = resv
 			}
 		default:
-			result[k.(string)] = fmt.Sprint(v)
+			result[k] = fmt.Sprint(v)
 		}
 	}
 	return result
