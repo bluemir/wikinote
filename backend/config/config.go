@@ -7,28 +7,35 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/GeertJohan/go.rice"
 	"github.com/ghodss/yaml"
 	"github.com/sirupsen/logrus"
 )
 
+var defaultConfig = `
+front-page: front-page.md
+auto-backup: false
+user:
+  default:
+    role: viewer
+`
+
 type Config struct {
-	FrontPage  string `yaml:"front-page"`
-	AutoBackup bool   `yaml:"auto-backup"`
+	FrontPage  string `json:"front-page"`
+	AutoBackup bool   `json:"auto-backup"`
 	User       struct {
 		Default struct {
-			Role string `yaml:"role"`
-		} `yaml:"default"`
-	} `yaml:"user"`
-	Plugins map[interface{}]interface{} `yaml:"plugins"`
+			Role string
+		}
+	}
+	Plugins map[string]interface{}
 }
 
 func ParseConfig(path string) (*Config, error) {
-	resources := rice.MustFindBox("../../resources")
+	//resources := rice.MustFindBox("../../resources")
 	// Default Value
 
 	conf := &Config{}
-	yaml.Unmarshal(resources.MustBytes("default-config.yaml"), conf)
+	yaml.Unmarshal([]byte(defaultConfig), conf)
 
 	buf, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -67,7 +74,7 @@ func (conf *Config) Set(path, value string) error {
 				cur[v] = value
 				return nil
 			}
-			cur = cur[v].(map[interface{}]interface{})
+			cur = cur[v].(map[string]interface{})
 		}
 	default:
 		v := reflect.ValueOf(conf)

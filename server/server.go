@@ -50,6 +50,7 @@ func Run(b backend.Backend, conf *Config) error {
 	b.Plugin().RegisterRouter(app.Group("/!/plugins"))
 
 	app.GET("/", func(c *gin.Context) {
+		logrus.Debugf("redirect to front page: %s", b.Config().FrontPage)
 		c.Redirect(http.StatusTemporaryRedirect, b.Config().FrontPage)
 	})
 	special := app.Group("/!")

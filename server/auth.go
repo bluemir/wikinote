@@ -38,6 +38,7 @@ func BasicAuth(c *gin.Context) {
 		}
 		return
 	case auth.ErrorEmptyHeader:
+		logrus.Debug("Empty header")
 		if isLogined(c) {
 			logrus.Debug("cookie found but auth not found")
 			c.Header("WWW-Authenticate", AuthenicateString)
