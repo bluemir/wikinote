@@ -10,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
-	"github.com/bluemir/wikinote/backend/config"
+	"github.com/bluemir/wikinote/pkgs/config"
 )
 
 type Backend interface {

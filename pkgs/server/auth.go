@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 
-	"github.com/bluemir/wikinote/server/renderer"
+	"github.com/bluemir/wikinote/pkgs/renderer"
 )
 
 func isLogined(c *gin.Context) bool {

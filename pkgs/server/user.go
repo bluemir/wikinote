@@ -7,7 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/bluemir/go-utils/auth"
-	"github.com/bluemir/wikinote/server/renderer"
+
+	"github.com/bluemir/wikinote/pkgs/renderer"
 )
 
 func HandleUserList(c *gin.Context) {

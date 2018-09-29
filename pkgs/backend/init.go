@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/bluemir/go-utils/auth"
-	"github.com/bluemir/wikinote/backend/config"
+	"github.com/bluemir/wikinote/pkgs/config"
 	"github.com/bluemir/wikinote/plugins"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"

@@ -3,8 +3,9 @@ package server
 import (
 	"net/http"
 
-	"github.com/bluemir/wikinote/server/renderer"
 	"github.com/gin-gonic/gin"
+
+	"github.com/bluemir/wikinote/pkgs/renderer"
 )
 
 func HandleSearch(c *gin.Context) {

@@ -8,9 +8,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/bluemir/wikinote/server/renderer"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+
+	"github.com/bluemir/wikinote/pkgs/renderer"
 )
 
 func HandleView(c *gin.Context) {

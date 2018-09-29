@@ -11,8 +11,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 
-	"github.com/bluemir/wikinote/backend"
-	"github.com/bluemir/wikinote/server/renderer"
+	"github.com/bluemir/wikinote/pkgs/backend"
+	"github.com/bluemir/wikinote/pkgs/renderer"
 )
 
 // gin context or session keys
@@ -58,7 +58,7 @@ func Run(b backend.Backend, conf *Config) error {
 		special.Use(func(c *gin.Context) {
 			c.Set(SPECAIL, true)
 		})
-		special.StaticFS("/static/", rice.MustFindBox("../dist").HTTPBox())
+		special.StaticFS("/static/", rice.MustFindBox("../../dist").HTTPBox())
 
 		// register
 		special.GET("/auth/register", HandleRegisterForm)

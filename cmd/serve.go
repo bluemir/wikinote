@@ -4,8 +4,8 @@ import (
 	docopt "github.com/docopt/docopt-go"
 	"github.com/sirupsen/logrus"
 
-	"github.com/bluemir/wikinote/backend"
-	"github.com/bluemir/wikinote/server"
+	"github.com/bluemir/wikinote/pkgs/backend"
+	"github.com/bluemir/wikinote/pkgs/server"
 )
 
 func doServe(argv []string, version string) error {

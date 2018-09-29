@@ -55,9 +55,9 @@ $(BIN_NAME).bin: $(GO_SOURCES) $(GOPATH)/src/$(IMPORT_PATH)
 $(BIN_NAME): $(BIN_NAME).bin $(DISTS)
 	cp $(BIN_NAME).bin $(BIN_NAME).tmp
 	rice append -v --exec $(BIN_NAME).tmp \
-		-i $(IMPORT_PATH)/server  \
-		-i $(IMPORT_PATH)/server/renderer \
-		-i $(IMPORT_PATH)/backend/config
+		-i $(IMPORT_PATH)/pkgs/server  \
+		-i $(IMPORT_PATH)/pkgs/renderer \
+		-i $(IMPORT_PATH)/pkgs/config
 	mv $(BIN_NAME).tmp $(BIN_NAME)
 	@echo Embed resources DONE
 
