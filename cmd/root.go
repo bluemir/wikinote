@@ -1,48 +1,41 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
+	"errors"
 
+	docopt "github.com/docopt/docopt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
-
-	"github.com/bluemir/wikinote/backend"
 )
 
-var backendOpts = &backend.Options{}
+func Execute(version string) error {
+	logrus.SetLevel(logrus.DebugLevel)
 
-func Execute(version string) {
-	backendOpts.Version = version
-	var RootConfig = struct {
-		debug bool
-	}{}
-	var RootCmd = &cobra.Command{
-		Use:   "wikinote",
-		Short: "A simple markdown renderer",
-		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			if RootConfig.debug {
-				logrus.Info("Turn on debug mode")
-				logrus.SetLevel(logrus.DebugLevel)
-			} else {
-				gin.SetMode(gin.ReleaseMode)
-			}
-		},
+	//docopt.Parse(doc, argv, help, version, optionsFirst)
+	args, err := docopt.Parse(usage, nil, true, version, true)
+	if err != nil {
+		logrus.Panicf("error on parse usage %s", err)
+		return err
 	}
-	RootCmd.PersistentFlags().BoolVarP(&RootConfig.debug, "debug", "D", false, "debug mode")
-	RootCmd.PersistentFlags().StringVarP(&backendOpts.Wikipath, "wiki-path", "w", "$HOME/wiki", "wikipath")
-	RootCmd.PersistentFlags().StringVarP(&backendOpts.ConfigFile, "config", "c", "$HOME/wiki/.app/config.yaml", "config file")
 
-	RootCmd.AddCommand(
-		NewUserCommand(),
-		NewConfigCommand(),
-		NewServeCommand(),
-	)
-
-	// make backend?
-	if err := RootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(-1)
+	logrus.Debug(args)
+	if args["--debug"].(bool) {
+		logrus.Info("Turn on debug mode")
+		logrus.SetLevel(logrus.DebugLevel)
+	} else {
+		gin.SetMode(gin.ReleaseMode)
 	}
+
+	switch args["<command>"] {
+	case "serve":
+		if err := doServe(args["<args>"].([]string), version); err != nil {
+			return err
+		}
+	case "user", "config":
+		// proxy
+		return errors.New("Not Implements")
+	default:
+		return errors.New("Not Implements")
+	}
+	return nil
 }
