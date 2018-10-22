@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"os"
 
 	docopt "github.com/docopt/docopt-go"
 	"github.com/gin-gonic/gin"
@@ -9,10 +10,8 @@ import (
 )
 
 func Execute(version string) error {
-	logrus.SetLevel(logrus.DebugLevel)
-
 	//docopt.Parse(doc, argv, help, version, optionsFirst)
-	args, err := docopt.Parse(usage, nil, true, version, true)
+	args, err := docopt.Parse(usage, os.Args[1:], true, version, true)
 	if err != nil {
 		logrus.Panicf("error on parse usage %s", err)
 		return err

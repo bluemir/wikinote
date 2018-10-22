@@ -9,9 +9,11 @@ import (
 )
 
 func doServe(argv []string, version string) error {
-
-	args, err := docopt.Parse(serveUsage, append([]string{"serve"}, argv...), true, version, true)
+	argv = append([]string{"serve"}, argv...)
+	logrus.Debug(argv)
+	args, err := docopt.Parse(serveUsage, argv, true, version, false)
 	if err != nil {
+		logrus.Errorf("%+q", err)
 		return err
 	}
 	logrus.Debug(args)
@@ -29,6 +31,10 @@ func doServe(argv []string, version string) error {
 	conf := &server.Config{
 		Address: args["--bind"].(string),
 		//Domain:  []string{args["--tls-domain"].(string)},
+	}
+
+	if domain, ok := args["--tls-domain"].(string); ok {
+		conf.Domain = []string{domain}
 	}
 
 	return server.Run(b, conf)

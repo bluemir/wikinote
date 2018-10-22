@@ -55,7 +55,7 @@ func New(o *Options) (Backend, error) {
 
 	authMng, err := auth.New(&auth.Options{
 		StoreDriver: "gorm",
-		DefaultRole: "editor",
+		DefaultRole: conf.User.Default.Role,
 		RootRole:    "root",
 		DriverOpts: map[string]interface{}{
 			"db": db,

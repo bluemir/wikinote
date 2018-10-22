@@ -29,13 +29,18 @@ Examples:
 `
 var serveUsage = `
 Usage:
-	wikinote serve [--config=<config-file>] [--wiki-path=<wiki-path>] [--bind=<bind-addr>]
+	wikinote serve [options]
 
-options:
-	--config=<config-file>, -c=<config-file>  config file path     [default: $HOME/wiki/.app/config.yaml]
-	--wiki-path=<wiki-path>, -w=<wiki-path>   wiki path            [default: $HOME/wiki]
-	--bind=<bind-addr>                        bind address         [default: :4000]
+Options:
+	--config=<configfile>, -c=<configfile>  config file path [default: $HOME/wiki/.app/config.yaml]
+	--wiki-path=<wikipath>, -w=<wikipath>   wiki path        [default: $HOME/wiki]
+	--bind=<bind_addr>                      bind address     [default: :4000]
+	--tls-domain=<domain>   tls domain
+
+Example:
+	wikinote -D serve  -c ~/wiki/.app/config.yaml
 `
+
 var userUsage = `
 Usage:
 	wikinote user add <name> [-p=<password>]

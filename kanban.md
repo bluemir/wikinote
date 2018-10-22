@@ -23,4 +23,4 @@
 * [ ] Attach page
 * [ ] history page
 * [ ] backlink
-* [-] Refactor backend and server
+* [x] Refactor backend and server
