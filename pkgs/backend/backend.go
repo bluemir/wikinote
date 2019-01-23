@@ -5,6 +5,7 @@ import (
 
 	"github.com/bluemir/go-utils/auth"
 	_ "github.com/bluemir/go-utils/auth/gorm"
+	"github.com/ghodss/yaml"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/pkg/errors"
@@ -53,7 +54,7 @@ func New(o *Options) (Backend, error) {
 		return nil, errors.Wrap(err, "failed to connect database")
 	}
 
-	authMng, err := auth.New(&auth.Options{
+	authMng, first, err := auth.New(&auth.Options{
 		StoreDriver: "gorm",
 		DefaultRole: conf.User.Default.Role,
 		RootRole:    "root",
@@ -65,10 +66,31 @@ func New(o *Options) (Backend, error) {
 		return nil, errors.Wrap(err, "failed to init auth manager")
 	}
 
-	err = UserInit(authMng)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to init auth manager")
+	if first {
+		// add default rules...
+		rules := &struct {
+			Rules map[string][]string
+		}{}
+		err := yaml.Unmarshal([]byte(defaultRule), rules)
+		if err != nil {
+			return nil, errors.Wrap(err, "parse default rule failed")
+		}
+
+		for k, v := range rules.Rules {
+			err := authMng.PutRule(k, v...)
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to put default rule")
+			}
+		}
 	}
+
+	token, err := authMng.Root("root")
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to ensure root")
+	}
+
+	// QUESTION save file or just print stdout?
+	logrus.Infof("Root Token: %s", token)
 
 	// make backend structor
 	b := &backend{

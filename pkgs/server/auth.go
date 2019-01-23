@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/bluemir/go-utils/auth"
+	"github.com/bluemir/go-utils/auth/codes"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 
@@ -22,12 +23,12 @@ func BasicAuth(c *gin.Context) {
 	token, err := Backend(c).Auth().HttpAuth(c.GetHeader("Authorization"))
 
 	switch auth.ErrorCode(err) {
-	case auth.ErrorNone:
+	case codes.None:
 		logrus.Debug("Login user :", token.Username)
 		c.SetCookie("logined", token.Username, 0, "", "", false, true)
 		c.Set(TOKEN, token)
 		return
-	case auth.ErrorEmptyAccount: // it means logout
+	case codes.EmptyAccount: // it means logout
 		logrus.Debug("Empty Account")
 		if isLogined(c) {
 			c.SetCookie("logined", "", -1, "", "", false, true)
@@ -37,7 +38,7 @@ func BasicAuth(c *gin.Context) {
 			c.Abort()
 		}
 		return
-	case auth.ErrorEmptyHeader:
+	case codes.EmptyHeader:
 		logrus.Debug("Empty header")
 		if isLogined(c) {
 			logrus.Debug("cookie found but auth not found")
@@ -49,12 +50,12 @@ func BasicAuth(c *gin.Context) {
 		// Skip auth
 		logrus.Debug("skip auth")
 		return
-	case auth.ErrorWrongEncoding, auth.ErrorBadToken:
+	case codes.WrongEncoding, codes.BadToken:
 		FlashMessage(c).Warn("Connot decode auth token")
 		c.HTML(http.StatusBadRequest, "/errors/unauthorized.html", renderer.Data{}.With(c))
 		c.Abort()
 		return
-	case auth.ErrorUnauthorized:
+	case codes.Unauthorized:
 		logrus.Debug("unauthorized")
 		FlashMessage(c).Warn("Error on auth, id password not matched")
 		c.Header("WWW-Authenticate", AuthenicateString)
