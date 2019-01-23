@@ -7,10 +7,6 @@ GIT_COMMIT_ID:=$(shell git rev-parse --short HEAD)
 VERSION:=$(GIT_COMMIT_ID)-$(shell date +"%Y%m%d.%H%M%S")
 
 # if gopath not set, make inside current dir
-ifeq ($(GOPATH),)
-	GOPATH=$(PWD)/.GOPATH
-endif
-
 GO_SOURCES = $(shell find . -name ".GOPATH" -prune -o -type f -name '*.go' -print)
 JS_SOURCES = $(shell find app/js -type f -name '*.js' -print)
 HTML_SOURCES = $(shell find app/html -type f -name '*.html' -print)
@@ -33,9 +29,7 @@ DIRS = $(shell find . -name dist -prune -o -name ".git" -prune -o -type d -print
 		$(CSS_SOURCES) \
 		$(WEB_LIBS)| tr " " "\n"
 run: $(BIN_NAME)
-	#go test -v ./backend/...
 	./$(BIN_NAME) -D serve
-	#./$(BIN_NAME) -D -w ~/src/shipdock/shipdock serve -o front-page=readme.md
 auto-run:
 	while true; do \
 		make .sources | entr -rd make run ;  \
@@ -47,7 +41,7 @@ reset:
 ## Binary build
 $(BIN_NAME).bin: $(GO_SOURCES) $(GOPATH)/src/$(IMPORT_PATH)
 	go get -v -d $(IMPORT_PATH)            # can replace with glide
-	go build -i -v \
+	go build -v \
 		-ldflags "-X main.Version=$(VERSION)" \
 		-o $(BIN_NAME).bin .
 	@echo Build DONE
