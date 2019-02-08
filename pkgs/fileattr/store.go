@@ -65,6 +65,25 @@ func (s *storeClause) Limit(limit int) LimitClause {
 	return s
 }
 func (s *storeClause) Find() ([]FileAttr, error) {
+	if s.limit == 0 {
+		s.limit = -1
+	}
+	order := ""
+	switch s.orderType {
+	case OrderTypeKey:
+		order += "key"
+	case OrderTypeValue:
+		order += "value"
+	}
+	order += " "
+
+	switch s.orderDirection {
+	case OrderDirectionAsc:
+		order += "asc"
+	case OrderDirectionDesc:
+		order += "desc"
+	}
+
 	attrs := []FileAttrEntity{}
 
 	err := s.db.Where(&FileAttrEntity{
@@ -73,7 +92,7 @@ func (s *storeClause) Find() ([]FileAttr, error) {
 			Namespace: s.options.Namespace,
 			Key:       s.options.Key,
 		},
-	}).Find(&attrs).Error
+	}).Limit(s.limit).Order(order).Find(&attrs).Error
 	if err != nil {
 		return nil, err
 	}
@@ -121,16 +140,20 @@ func (s *pathClause) Get(namespaceKey string) (string, error) {
 	return attr.Value, nil
 }
 func (s *pathClause) Set(namespaceKey, value string) error {
-	namespace, k := attrKeySplit(namespaceKey)
+	namespace, key := attrKeySplit(namespaceKey)
 
-	attr := &FileAttrEntity{FileAttr: FileAttr{Namespace: namespace, Key: k, Value: value, Path: s.path}}
 	return s.store.db.Where(&FileAttrEntity{
 		FileAttr: FileAttr{
 			Path:      s.path,
 			Namespace: namespace,
-			Key:       k,
+			Key:       key,
 		},
-	}).Assign(attr).FirstOrCreate(attr).Error
+	}).Assign(FileAttr{
+		Path:      s.path,
+		Namespace: namespace,
+		Key:       key,
+		Value:     value,
+	}).FirstOrCreate(&FileAttrEntity{}).Error
 }
 func (s *pathClause) All(namespace string) (map[string]string, error) {
 	attrs, err := (&storeClause{store: s.store}).Where(&Options{

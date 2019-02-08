@@ -41,7 +41,7 @@ func (rc *RecentChanges) RegisterRouter(r gin.IRouter) {
 		attrs, err := rc.store.Where(&plugins.FindOptions{
 			Namespace: "plugin.wikinote.bluemir.me",
 			Key:       "last-change",
-		}).SortBy(plugins.VALUE, plugins.ASC).Limit(10).Find()
+		}).SortBy(plugins.VALUE, plugins.DESC).Limit(10).Find()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, err.Error())
 		}
