@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/plugins"
@@ -26,10 +25,6 @@ func New(opts map[string]string, store plugins.FileAttrStore) plugins.Plugin {
 
 type RecentChanges struct {
 	store plugins.FileAttrStore
-}
-type LastChange struct {
-	gorm.Model
-	Path string
 }
 
 func (rc *RecentChanges) OnPostSave(path string, data []byte, store plugins.FileAttr) error {
