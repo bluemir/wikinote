@@ -12,6 +12,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/pkgs/config"
+	"github.com/bluemir/wikinote/pkgs/fileattr"
 )
 
 type Backend interface {
@@ -49,7 +50,6 @@ func New(o *Options) (Backend, error) {
 		return nil, err
 	}
 	db, err := gorm.Open("sqlite3", wikipath+"/.app/wikinote.db")
-	//db, err := gorm.Open("sqlite3", ":memory:")
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to connect database")
 	}
@@ -92,17 +92,24 @@ func New(o *Options) (Backend, error) {
 	// QUESTION save file or just print stdout?
 	logrus.Infof("Root Token: %s", token)
 
+	// FileAttrStore
+	fas, err := fileattr.NewStore(db)
+	if err != nil {
+		return nil, err
+	}
+
 	// make backend structor
 	b := &backend{
-		basePath: wikipath,
-		conf:     conf,
-		db:       db,
-		auth:     authMng,
-		plugins:  nil,
+		basePath:      wikipath,
+		conf:          conf,
+		db:            db,
+		auth:          authMng,
+		fileAttrStore: fas,
+		plugins:       nil,
 	}
 
 	// initialize components
-	pl, err := loadPlugins(db, conf)
+	pl, err := loadPlugins(conf, fas)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +126,8 @@ type backend struct {
 	configPath string
 	db         *gorm.DB
 
-	auth auth.Manager
+	auth          auth.Manager
+	fileAttrStore fileattr.Store
 
 	plugins *pluginList
 }

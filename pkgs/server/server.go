@@ -166,6 +166,7 @@ func authCheck(c *gin.Context, actions ...string) int {
 				return http.StatusForbidden
 			}
 		}
+		// contents permission plugin
 		return http.StatusOK
 	} else {
 		for _, action := range actions {
@@ -174,6 +175,7 @@ func authCheck(c *gin.Context, actions ...string) int {
 				return http.StatusUnauthorized
 			}
 		}
+		// contents permission plugin
 		return http.StatusOK
 	}
 }
@@ -185,10 +187,12 @@ func Action(actions ...string) gin.HandlerFunc {
 			// TODO make fordidden page
 			c.HTML(http.StatusForbidden, "/errors/forbidden.html", renderer.Data{}.With(c))
 			c.Abort()
+			return
 		case http.StatusUnauthorized:
 			c.Header("WWW-Authenticate", AuthenicateString)
 			c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
 			c.Abort()
+			return
 		case http.StatusOK:
 			return // pass
 		}
@@ -200,10 +204,12 @@ func Do(c *gin.Context, handler gin.HandlerFunc, actions ...string) {
 		// TODO make fordidden page
 		c.HTML(http.StatusForbidden, "/errors/forbidden.html", renderer.Data{}.With(c))
 		c.Abort()
+		return
 	case http.StatusUnauthorized:
 		c.Header("WWW-Authenticate", AuthenicateString)
 		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
 		c.Abort()
+		return
 	case http.StatusOK:
 		handler(c)
 		return // pass

@@ -5,7 +5,6 @@ import (
 	"html/template"
 	"strings"
 
-	"github.com/jinzhu/gorm"
 	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/plugins"
@@ -15,7 +14,7 @@ func init() {
 	plugins.Register("disqus", New)
 }
 
-func New(db *gorm.DB, opts map[string]string) plugins.Plugin {
+func New(opts map[string]string, store plugins.FileAttrStore) plugins.Plugin {
 	logrus.Debugf("init disqus, %+v", opts)
 	return &Disqus{
 		shortName: opts["short-name"],

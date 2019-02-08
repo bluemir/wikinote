@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 
 	"github.com/sirupsen/logrus"
+
+	"github.com/bluemir/wikinote/pkgs/fileattr"
 )
 
 type FileClause interface {
@@ -13,6 +15,9 @@ type FileClause interface {
 	Write(path string, data []byte) error
 	List(path string) ([]os.FileInfo, error)
 	Search(query string) (interface{}, error)
+
+	Attr(path string) fileattr.PathClause
+	AttrStore() fileattr.Store
 
 	GetFullPath(path string) string
 }
@@ -36,7 +41,7 @@ func (b *fileClause) Write(path string, data []byte) error {
 		return err
 	}
 
-	err = b.Plugin().AfterWikiSave(path, data)
+	err = b.Plugin().PostSave(path, data)
 	if err != nil {
 		return err
 	}
@@ -52,6 +57,12 @@ func (b *fileClause) List(path string) ([]os.FileInfo, error) {
 func (b *fileClause) Search(query string) (interface{}, error) {
 	//TODO query to pattern(regexp)
 	return search(b.basePath, query)
+}
+func (b *fileClause) Attr(path string) fileattr.PathClause {
+	return b.fileAttrStore.Path(path)
+}
+func (b *fileClause) AttrStore() fileattr.Store {
+	return b.fileAttrStore
 }
 func (b *fileClause) GetFullPath(path string) string {
 	return filepath.Join(b.basePath, path)

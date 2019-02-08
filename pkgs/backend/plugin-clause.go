@@ -8,7 +8,7 @@ import (
 
 type PluginClause interface {
 	Footer(path string) []PluginResult
-	AfterWikiSave(path string, data []byte) error
+	PostSave(path string, data []byte) error
 	RegisterRouter(r gin.IRouter)
 }
 
@@ -17,20 +17,22 @@ type pluginClause struct {
 }
 
 func (b *pluginClause) Footer(path string) []PluginResult {
+	attr := b.File().Attr(path)
 	result := []PluginResult{}
 	for _, p := range b.plugins.footer {
-		d, e := p.Footer(path)
+		d, e := p.Footer(path, attr)
 		result = append(result, PluginResult{
 			d, e,
 		})
 	}
 	return result
 }
-func (b *pluginClause) AfterWikiSave(path string, data []byte) error {
-	for _, p := range b.plugins.afterWikiSave {
-		e := p.AfterWikiSave(path, data)
-		if e != nil {
-			return e
+func (b *pluginClause) PostSave(path string, data []byte) error {
+	store := b.File().Attr(path)
+	for _, p := range b.plugins.postSave {
+		err := p.OnPostSave(path, data, store)
+		if err != nil {
+			return err
 		}
 	}
 	return nil

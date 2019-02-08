@@ -16,54 +16,50 @@ func init() {
 	plugins.Register("recent-changes", New)
 }
 
-func New(db *gorm.DB, opts map[string]string) plugins.Plugin {
-	db.AutoMigrate(&LastChange{})
+func New(opts map[string]string, store plugins.FileAttrStore) plugins.Plugin {
 	logrus.Debugf("init recent-changes, %+v", opts)
 	return &RecentChanges{
-		db: db,
+		store: store,
 	}
 }
 
 type RecentChanges struct {
-	db *gorm.DB
+	store plugins.FileAttrStore
 }
 type LastChange struct {
 	gorm.Model
 	Path string
 }
 
-func (rc *RecentChanges) AfterWikiSave(path string, data []byte) error {
-	lc := &LastChange{
-		Path: path,
-	}
-	result := rc.db.Where("path = ?", path).Assign(&LastChange{
-		Model: gorm.Model{
-			UpdatedAt: time.Now(),
-		},
-		Path: path,
-	}).FirstOrCreate(lc)
-	if result.Error != nil {
-		return result.Error
-	}
-	return nil
+func (rc *RecentChanges) OnPostSave(path string, data []byte, store plugins.FileAttr) error {
+	// for last update use utc (sortable)
+	return store.Set("plugin.wikinote.bluemir.me/last-change", time.Now().UTC().Format(time.RFC3339))
 }
 
 func (rc *RecentChanges) RegisterRouter(r gin.IRouter) {
 	r.GET("/", func(c *gin.Context) {
-		lcs := []LastChange{}
-		result := rc.db.Order("updated_at desc").Limit(10).Find(&lcs)
-		if result.Error != nil {
-			c.AbortWithError(http.StatusInternalServerError, result.Error)
-			return
+		attrs, err := rc.store.Where(&plugins.FindOptions{
+			Namespace: "plugin.wikinote.bluemir.me",
+			Key:       "last-change",
+		}).SortBy(plugins.VALUE, plugins.ASC).Limit(10).Find()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, err.Error())
 		}
 
-		c.JSON(http.StatusOK, lcs)
+		c.JSON(http.StatusOK, attrs)
 	})
 }
-func (rc *RecentChanges) Footer(path string) (template.HTML, error) {
-	last := &LastChange{}
-	if err := rc.db.Where("path = ?", path).First(last).Error; err != nil {
+
+func (rc *RecentChanges) Footer(path string, store plugins.FileAttr) (template.HTML, error) {
+	tStr, err := store.Get("plugin.wikinote.bluemir.me/last-change")
+	if err != nil {
 		return template.HTML(""), err
 	}
-	return template.HTML("last update: " + last.UpdatedAt.Format(time.RFC3339)), nil
+
+	t, err := time.Parse(time.RFC3339, tStr)
+	if err != nil {
+		return template.HTML(""), err
+	}
+
+	return template.HTML("last update: " + t.Local().Format(time.RFC3339)), nil
 }
