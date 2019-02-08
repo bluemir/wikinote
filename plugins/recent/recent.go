@@ -1,6 +1,7 @@
 package recent
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
 	"time"
@@ -45,6 +46,20 @@ func (rc *RecentChanges) RegisterRouter(r gin.IRouter) {
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, err.Error())
 		}
+
+		result := ""
+		for _, attr := range attrs {
+
+			t, err := time.Parse(time.RFC3339, attr.Value)
+			if err != nil {
+				t = time.Now()
+			}
+			result += fmt.Sprintf(`<p><a href="%s">%s</a> %s</p>`, attr.Path, attr.Path, t.Local().Format(time.RFC3339))
+		}
+
+		plugins.RenderPage(plugins.Meta{
+			"body": template.HTML(result),
+		}).With(c)
 
 		c.JSON(http.StatusOK, attrs)
 	})

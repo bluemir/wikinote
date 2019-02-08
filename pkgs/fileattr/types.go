@@ -1,10 +1,10 @@
 package fileattr
 
 type FileAttr struct {
-	Path      string
-	Namespace string
-	Key       string
-	Value     string
+	Path      string // 1024
+	Namespace string // 256
+	Key       string // 256
+	Value     string // 2048
 }
 
 type Store interface {
