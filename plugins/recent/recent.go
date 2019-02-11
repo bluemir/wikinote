@@ -16,7 +16,7 @@ func init() {
 	plugins.Register("recent-changes", New)
 }
 
-func New(opts map[string]string, store plugins.FileAttrStore) plugins.Plugin {
+func New(opts map[string]string, store plugins.FileAttrStore, auth plugins.AuthManager) plugins.Plugin {
 	logrus.Debugf("init recent-changes, %+v", opts)
 	return &RecentChanges{
 		store: store,

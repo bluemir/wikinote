@@ -7,7 +7,7 @@ GIT_COMMIT_ID:=$(shell git rev-parse --short HEAD)
 VERSION:=$(GIT_COMMIT_ID)-$(shell date +"%Y%m%d.%H%M%S")
 
 # if gopath not set, make inside current dir
-GO_SOURCES = $(shell find . -name ".GOPATH" -prune -o -type f -name '*.go' -print)
+GO_SOURCES = $(shell find . -type f -name '*.go' -print)
 JS_SOURCES = $(shell find app/js -type f -name '*.js' -print)
 HTML_SOURCES = $(shell find app/html -type f -name '*.html' -print)
 CSS_SOURCES = $(shell find app/less -type f -name "*.less" -print)
@@ -39,8 +39,7 @@ reset:
 	ps -e | grep make | grep -v grep | awk '{print $$1}' | xargs kill
 
 ## Binary build
-$(BIN_NAME).bin: $(GO_SOURCES) $(GOPATH)/src/$(IMPORT_PATH)
-	go get -v -d $(IMPORT_PATH)            # can replace with glide
+$(BIN_NAME).bin: $(GO_SOURCES)
 	go build -v \
 		-ldflags "-X main.Version=$(VERSION)" \
 		-o $(BIN_NAME).bin .
@@ -66,16 +65,11 @@ dist/%: app/%
 	cp $< $@
 
 tools:
-	npm install -g traceur
 	npm install -g less
 	go get github.com/GeertJohan/go.rice/rice
+
 clean:
 	rm -rf dist/ vendor/ $(BIN_NAME) $(BIN_NAME).bin $(BIN_NAME).tmp
 	go clean
-
-$(GOPATH)/src/$(IMPORT_PATH):
-	@echo "make symbolic link on $(GOPATH)/src/$(IMPORT_PATH)..."
-	@mkdir -p $(dir $(GOPATH)/src/$(IMPORT_PATH))
-	ln -s $(PWD) $(GOPATH)/src/$(IMPORT_PATH)
 
 .PHONY: .sources run auto-run reset tools clean

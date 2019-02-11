@@ -3,32 +3,36 @@ package plugins
 import (
 	"html/template"
 
-	"github.com/bluemir/wikinote/pkgs/fileattr"
+	"github.com/bluemir/go-utils/auth"
 	"github.com/gin-gonic/gin"
+
+	"github.com/bluemir/wikinote/pkgs/fileattr"
 )
 
+// Plugins
 type FooterPlugin interface {
 	Footer(path string, attr FileAttr) (template.HTML, error)
+}
+type PreSavePlugin interface {
+	OnPreSave(path string, data []byte, attr FileAttr) ([]byte, error)
 }
 type PostSavePlugin interface {
 	OnPostSave(path string, data []byte, attr FileAttr) error
 }
-type AllHookPlugin interface {
-	PostSavePlugin
-	//PreSavePlugin
+type ReadPlugin interface {
+	OnRead(path string, data []byte, attr FileAttr) ([]byte, error)
+}
+type FilePermissionPlugin interface {
+	TryRead(path string, user interface{}, attr FileAttr) error
+	TryWrite(path string, user interface{}, attr FileAttr) error
 }
 type RegisterRouterPlugin interface {
 	RegisterRouter(r gin.IRouter)
 }
-type ContentsPermissionPlugin interface {
-	CanView(path string, user string) (bool, error)
-	CanEdit(path string, user string) (bool, error)
-}
-type FileAttr interface {
-	Get(key string) (string, error)
-	Set(key, value string) error
-	All(namespace string) (map[string]string, error)
-}
+
+// File Attr
+
+type FileAttr = fileattr.PathClause
 type FileAttrStore = fileattr.Store
 type FindOptions = fileattr.Options
 
@@ -39,3 +43,13 @@ const (
 	ASC  = fileattr.OrderDirectionAsc
 	DESC = fileattr.OrderDirectionDesc
 )
+
+// Auth
+
+type AuthManager auth.Manager
+
+// context
+type Components interface {
+	Auth() AuthManager
+	AttrStore() FileAttrStore
+}

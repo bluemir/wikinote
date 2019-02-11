@@ -109,7 +109,7 @@ func New(o *Options) (Backend, error) {
 	}
 
 	// initialize components
-	pl, err := loadPlugins(conf, fas)
+	pl, err := loadPlugins(conf, fas, authMng)
 	if err != nil {
 		return nil, err
 	}

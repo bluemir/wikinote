@@ -166,18 +166,15 @@ func authCheck(c *gin.Context, actions ...string) int {
 				return http.StatusForbidden
 			}
 		}
-		// contents permission plugin
-		return http.StatusOK
 	} else {
 		for _, action := range actions {
-			if !Backend(c).Auth().Is(auth.Role("guest")).Allow(auth.Action(action)) {
+			if !Backend(c).Auth().Is(backend.RoleGuest).Allow(auth.Action(action)) {
 				logrus.Debugf("guest not allow %s", action)
 				return http.StatusUnauthorized
 			}
 		}
-		// contents permission plugin
-		return http.StatusOK
 	}
+	return http.StatusOK
 }
 
 func Action(actions ...string) gin.HandlerFunc {
@@ -214,4 +211,11 @@ func Do(c *gin.Context, handler gin.HandlerFunc, actions ...string) {
 		handler(c)
 		return // pass
 	}
+}
+func Token(c *gin.Context) *auth.Token {
+	token, ok := c.Get(TOKEN)
+	if ok {
+		return token.(*auth.Token)
+	}
+	return nil
 }

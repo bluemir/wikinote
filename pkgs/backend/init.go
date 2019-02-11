@@ -3,6 +3,7 @@ package backend
 import (
 	"fmt"
 
+	"github.com/bluemir/go-utils/auth"
 	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/pkgs/config"
@@ -10,27 +11,23 @@ import (
 	"github.com/bluemir/wikinote/plugins"
 )
 
-const (
-	defaultRule = `
-rules:
-  admin:  [ "view", "edit", "user", "search" ]
-  editor: [ "view', "edit", "attach", "search" ]
-  viewer: [ "view", "search" ]
-  guest:  [ "view" ]
-`
-)
-
 type pluginList struct {
 	footer         []plugins.FooterPlugin
 	postSave       []plugins.PostSavePlugin
+	preSave        []plugins.PreSavePlugin
+	onRead         []plugins.ReadPlugin
+	permission     []plugins.FilePermissionPlugin
 	registerRouter map[string]plugins.RegisterRouterPlugin
 }
 
-func loadPlugins(conf *config.Config, store fileattr.Store) (*pluginList, error) {
+func loadPlugins(conf *config.Config, store fileattr.Store, authManager auth.Manager) (*pluginList, error) {
 	// TODO can on/off
 	pl := &pluginList{
 		footer:         []plugins.FooterPlugin{},
 		postSave:       []plugins.PostSavePlugin{},
+		preSave:        []plugins.PreSavePlugin{},
+		onRead:         []plugins.ReadPlugin{},
+		permission:     []plugins.FilePermissionPlugin{},
 		registerRouter: map[string]plugins.RegisterRouterPlugin{},
 	}
 
@@ -40,7 +37,7 @@ func loadPlugins(conf *config.Config, store fileattr.Store) (*pluginList, error)
 			pc = map[string]interface{}{}
 		}
 
-		p, err := plugins.New(name, flat(pc), store) // TODO config
+		p, err := plugins.New(name, flat(pc), store, authManager) // TODO config
 		if err != nil {
 			logrus.Error(err)
 			return nil, err
@@ -50,9 +47,21 @@ func loadPlugins(conf *config.Config, store fileattr.Store) (*pluginList, error)
 			logrus.Debugf("footer plugin '%s'", name)
 			pl.footer = append(pl.footer, f)
 		}
+		if plugin, ok := p.(plugins.PreSavePlugin); ok {
+			logrus.Debugf("pre save plugin '%s'", name)
+			pl.preSave = append(pl.preSave, plugin)
+		}
 		if a, ok := p.(plugins.PostSavePlugin); ok {
 			logrus.Debugf("post save plugin '%s'", name)
 			pl.postSave = append(pl.postSave, a)
+		}
+		if plugin, ok := p.(plugins.ReadPlugin); ok {
+			logrus.Debugf("read plugin '%s'", name)
+			pl.onRead = append(pl.onRead, plugin)
+		}
+		if plugin, ok := p.(plugins.FilePermissionPlugin); ok {
+			logrus.Debugf("permission plugin '%s'", name)
+			pl.permission = append(pl.permission, plugin)
 		}
 		if a, ok := p.(plugins.RegisterRouterPlugin); ok {
 			logrus.Debugf("resiger route plugin '%s'", name)

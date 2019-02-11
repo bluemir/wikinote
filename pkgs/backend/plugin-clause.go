@@ -8,7 +8,11 @@ import (
 
 type PluginClause interface {
 	Footer(path string) []PluginResult
+	PreSave(path string, data []byte) ([]byte, error)
 	PostSave(path string, data []byte) error
+	OnRead(path string, data []byte) ([]byte, error)
+	TryRead(path string, user interface{}) error
+	TryWrite(path string, user interface{}) error
 	RegisterRouter(r gin.IRouter)
 }
 
@@ -27,10 +31,55 @@ func (b *pluginClause) Footer(path string) []PluginResult {
 	}
 	return result
 }
+func (b *pluginClause) PreSave(path string, data []byte) ([]byte, error) {
+	attr := b.File().Attr(path)
+	d := data
+	for _, p := range b.plugins.preSave {
+		var err error
+		d, err = p.OnPreSave(path, d, attr)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return d, nil
+}
 func (b *pluginClause) PostSave(path string, data []byte) error {
 	store := b.File().Attr(path)
 	for _, p := range b.plugins.postSave {
 		err := p.OnPostSave(path, data, store)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+func (b *pluginClause) OnRead(path string, data []byte) ([]byte, error) {
+	attr := b.File().Attr(path)
+	d := data
+	for _, p := range b.plugins.onRead {
+		var err error
+		d, err = p.OnRead(path, d, attr)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return d, nil
+}
+
+func (b *pluginClause) TryRead(path string, user interface{}) error {
+	attr := b.File().Attr(path)
+	for _, plugin := range b.plugins.permission {
+		err := plugin.TryRead(path, user, attr)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+func (b *pluginClause) TryWrite(path string, user interface{}) error {
+	attr := b.File().Attr(path)
+	for _, plugin := range b.plugins.permission {
+		err := plugin.TryWrite(path, user, attr)
 		if err != nil {
 			return err
 		}

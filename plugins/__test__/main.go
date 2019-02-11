@@ -10,7 +10,7 @@ func init() {
 	plugins.Register("__test__", New)
 }
 
-func New(opts map[string]string, fileAttrStore plugins.FileAttrStore) plugins.Plugin {
+func New(opts map[string]string, fileAttrStore plugins.FileAttrStore, auth plugins.AuthManager) plugins.Plugin {
 	logrus.Debugf("test config: %v", opts)
 	return &TestPlugin{}
 }

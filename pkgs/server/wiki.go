@@ -16,6 +16,16 @@ import (
 
 func HandleView(c *gin.Context) {
 	//logrus.Debugf("path: %s, accept: %+v", c.Request.URL.Path, c.GetHeader("Accept"))
+	backend := Backend(c)
+	path := c.Request.URL.Path
+	err := backend.Plugin().TryRead(path, Token(c))
+	if err != nil {
+		c.HTML(http.StatusForbidden, "/errors/forbidden.html", renderer.Data{
+			"msg": err.Error(),
+		}.With(c))
+		return
+	}
+
 	switch {
 	// TODO check file type
 	case checkExt(c, ".md"):
@@ -25,6 +35,7 @@ func HandleView(c *gin.Context) {
 			c.HTML(http.StatusNotFound, "/errors/not-found.html", renderer.Data{}.With(c))
 			return
 		}
+
 		renderedData, err := Backend(c).Render(data)
 		if err != nil {
 			c.HTML(http.StatusInternalServerError, "/view/internal-error.html", renderer.Data{}.With(c))
@@ -72,12 +83,23 @@ func HandleRaw(c *gin.Context) {
 }
 func HandleEditForm(c *gin.Context) {
 	backend := Backend(c)
-	data, err := backend.File().Read(c.Request.URL.Path)
+	path := c.Request.URL.Path
+
+	err := backend.Plugin().TryRead(path, Token(c))
+	if err != nil {
+		c.HTML(http.StatusForbidden, "/errors/forbidden.html", renderer.Data{
+			"msg": err.Error(),
+		}.With(c))
+		return
+	}
+
+	data, err := backend.File().Read(path)
 	if err != nil {
 		//c.AbortWithError(http.StatusNotFound, err)
 		renderer.Of(c).Info("Create new note")
 		// TODO add flash message
 	}
+
 	c.HTML(http.StatusOK, "/edit.html", renderer.Data{
 		"data": string(data),
 		"path": c.Param("path"),

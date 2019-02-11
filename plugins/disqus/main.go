@@ -14,7 +14,7 @@ func init() {
 	plugins.Register("disqus", New)
 }
 
-func New(opts map[string]string, store plugins.FileAttrStore) plugins.Plugin {
+func New(opts map[string]string, store plugins.FileAttrStore, auth plugins.AuthManager) plugins.Plugin {
 	logrus.Debugf("init disqus, %+v", opts)
 	return &Disqus{
 		shortName: opts["short-name"],

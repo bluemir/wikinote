@@ -36,7 +36,13 @@ func (b *fileClause) Write(path string, data []byte) error {
 	if err := os.MkdirAll(dirpath, 0755); err != nil {
 		return err
 	}
-	err := ioutil.WriteFile(b.GetFullPath(path), data, 0644)
+
+	d, err := b.Plugin().PreSave(path, data)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(b.GetFullPath(path), d, 0644)
 	if err != nil {
 		return err
 	}
