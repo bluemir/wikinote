@@ -63,12 +63,12 @@ func (rc *RecentChanges) RegisterRouter(r gin.IRouter) {
 func (rc *RecentChanges) Footer(path string, store plugins.FileAttr) (template.HTML, error) {
 	tStr, err := store.Get("plugin.wikinote.bluemir.me/last-change")
 	if err != nil {
-		return template.HTML(""), err
+		return template.HTML(""), nil
 	}
 
 	t, err := time.Parse(time.RFC3339, tStr)
 	if err != nil {
-		return template.HTML(""), err
+		return template.HTML(""), nil
 	}
 
 	return template.HTML("last update: " + t.Local().Format(time.RFC3339)), nil
