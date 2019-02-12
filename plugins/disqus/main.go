@@ -25,7 +25,7 @@ type Disqus struct {
 	shortName string
 }
 
-func (d *Disqus) Footer(path string) (template.HTML, error) {
+func (d *Disqus) Footer(path string, attr plugins.FileAttr) (template.HTML, error) {
 	if d.shortName == "" {
 		return "", fmt.Errorf("shortName is not set")
 	}

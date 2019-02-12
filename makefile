@@ -75,6 +75,7 @@ clean:
 	go clean
 
 docker-build: .docker-image
+docker-push: .docker-image.pushed
 
 .docker-image: Dockerfile makefile $(GO_SOURCES) $(DISTS)
 	docker build -t $(DOCKER_IMAGE_NAME):$(VERSION) .

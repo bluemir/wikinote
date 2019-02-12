@@ -57,6 +57,7 @@ func (publish *Publish) TryWrite(path string, user interface{}, attr plugins.Fil
 	return nil
 }
 func (publish *Publish) OnPreSave(path string, data []byte, attr plugins.FileAttr) ([]byte, error) {
+	// TODO make to api
 	// try to parse first line
 	// if matched, set file attribute
 	if bytes.HasPrefix(data, []byte(".publish")) {
