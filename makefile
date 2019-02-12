@@ -1,6 +1,8 @@
 IMPORT_PATH=github.com/bluemir/wikinote
 BIN_NAME=$(notdir $(IMPORT_PATH))
 
+DOCKER_IMAGE_NAME=bluemir/wikinote
+
 default: $(BIN_NAME)
 
 GIT_COMMIT_ID:=$(shell git rev-parse --short HEAD)
@@ -71,5 +73,14 @@ tools:
 clean:
 	rm -rf dist/ vendor/ $(BIN_NAME) $(BIN_NAME).bin $(BIN_NAME).tmp
 	go clean
+
+docker-build: .docker-image
+
+.docker-image: Dockerfile makefile $(GO_SOURCES) $(DISTS)
+	docker build -t $(DOCKER_IMAGE_NAME):$(VERSION) .
+	echo "$(DOCKER_IMAGE_NAME):$(VERSION)" > .docker-image
+.docker-image.pushed: .docker-image
+	docker push $(shell cat .docker-image)
+	echo $(shell cat .docker-image) > .docker-image.pushed
 
 .PHONY: .sources run auto-run reset tools clean

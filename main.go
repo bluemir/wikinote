@@ -1,9 +1,15 @@
 package main
 
-import "github.com/bluemir/wikinote/cmd"
+import (
+	"github.com/bluemir/wikinote/cmd"
+	"github.com/sirupsen/logrus"
+)
 
 var Version string
 
 func main() {
-	cmd.Execute(Version)
+	err := cmd.Execute(Version)
+	if err != nil {
+		logrus.Error(err)
+	}
 }

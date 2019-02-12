@@ -1,4 +1,4 @@
-FROM fedora as builder
+FROM fedora:29 as builder
 
 RUN dnf -y install \
 	nodejs \
@@ -7,24 +7,21 @@ RUN dnf -y install \
 	findutils \
 	make && dnf clean all
 
-COPY makefile /go/src/github.com/bluemir/wikinote/makefile
+RUN npm install -g less
 
 ENV GOPATH /go
 ENV PATH /go/bin:$PATH
-
-WORKDIR /go/src/github.com/bluemir/wikinote
 RUN go get github.com/GeertJohan/go.rice/rice
-RUN npm install -g traceur less
 
+WORKDIR /src
 COPY . .
 
-RUN rm -rf .GOPATH && make clean wikinote
+RUN make
 
 FROM alpine:latest
 RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
 
-COPY --from=builder /go/src/github.com/bluemir/wikinote/wikinote /wikinote
-RUN ls /wikinote
+COPY --from=builder /src/wikinote /wikinote
 EXPOSE 80
 ENTRYPOINT ["/wikinote"]
 CMD ["serve", "--bind", ":80"]
