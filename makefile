@@ -5,8 +5,7 @@ DOCKER_IMAGE_NAME=bluemir/wikinote
 
 default: $(BIN_NAME)
 
-GIT_COMMIT_ID:=$(shell git rev-parse --short HEAD)
-VERSION:=$(GIT_COMMIT_ID)-$(shell date +"%Y%m%d.%H%M%S")
+VERSION?=$(shell git describe --long --tags --dirty --always)
 
 # if gopath not set, make inside current dir
 GO_SOURCES = $(shell find . -type f -name '*.go' -print)
@@ -72,16 +71,26 @@ tools:
 
 clean:
 	rm -rf dist/ vendor/ $(BIN_NAME) $(BIN_NAME).bin $(BIN_NAME).tmp
+	rm -f .docker-image .docker-image.pushed
 	go clean
 
 docker-build: .docker-image
 docker-push: .docker-image.pushed
+docker-run: .docker-image
+	docker run --rm -it \
+		-p 4000:4000 \
+		-v ~/wiki:/wiki \
+		$(shell cat .docker-image) \
+		serve \
+		--wiki-path /wiki \
+		--config /wiki/.app/config.yaml \
+		--bind :4000
 
 .docker-image: Dockerfile makefile $(GO_SOURCES) $(DISTS)
 	docker build -t $(DOCKER_IMAGE_NAME):$(VERSION) .
-	echo "$(DOCKER_IMAGE_NAME):$(VERSION)" > .docker-image
+	echo "$(DOCKER_IMAGE_NAME):$(VERSION)" > $@
 .docker-image.pushed: .docker-image
 	docker push $(shell cat .docker-image)
-	echo $(shell cat .docker-image) > .docker-image.pushed
+	echo $(shell cat .docker-image) > $@
 
 .PHONY: .sources run auto-run reset tools clean
