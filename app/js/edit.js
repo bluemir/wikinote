@@ -30,22 +30,24 @@ $.get("article form").on("keydown", function(evt) {
 		return
 	}
 });
+
 $.get("body").on("keydown", function(evt) {
-	switch(evt.keyCode ) {
-		case KEYCODE_ALT:
-			previewOn();
-			evt.preventDefault();
-		return
+	var keyCode = String.fromCharCode(evt.keyCode);
+	if (evt.altKey && keyCode == "P") {
+		previewToggle()
+		evt.preventDefault();
 	}
-}, true)
-$.get("body").on("keyup", function(evt) {
-	switch(evt.keyCode ) {
-		case KEYCODE_ALT:
-			previewOff();
-			evt.preventDefault();
-		return
-	}
-}, true)
+})
+
+$.get(".btn.editor").on("click", function(evt) {
+	previewOff();
+	evt.preventDefault();
+})
+$.get(".btn.preview").on("click", function(evt){
+	previewOn();
+	evt.preventDefault();
+})
+
 function updateDocument() {
 	var str = $.get("article form textarea").value;
 	var path = $.get("article form").getAttribute("action");
@@ -74,4 +76,11 @@ function previewOn(){
 function previewOff(){
 	$tabs.classList.remove("preview");
 	$tabs.classList.add("editor");
+}
+function previewToggle() {
+	if ($tabs.classList.contains("preview")) {
+		previewOff()
+	} else {
+		previewOn()
+	}
 }
