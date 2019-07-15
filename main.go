@@ -8,6 +8,7 @@ import (
 var Version string
 
 func main() {
+
 	err := cmd.Execute(Version)
 	if err != nil {
 		logrus.Error(err)

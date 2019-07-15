@@ -3,7 +3,6 @@ package server
 import (
 	"net/http"
 
-	"github.com/GeertJohan/go.rice"
 	"github.com/bluemir/go-utils/auth"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -12,6 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/pkgs/backend"
+	"github.com/bluemir/wikinote/pkgs/dist"
 	"github.com/bluemir/wikinote/pkgs/renderer"
 )
 
@@ -58,7 +58,7 @@ func Run(b backend.Backend, conf *Config) error {
 		special.Use(func(c *gin.Context) {
 			c.Set(SPECAIL, true)
 		})
-		special.StaticFS("/static/", rice.MustFindBox("../../dist").HTTPBox())
+		special.StaticFS("/static/", dist.Apps.HTTPBox())
 
 		// register
 		special.GET("/auth/register", HandleRegisterForm)

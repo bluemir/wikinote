@@ -8,9 +8,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/GeertJohan/go.rice"
 	"github.com/gin-gonic/gin/render"
 	"github.com/sirupsen/logrus"
+
+	"github.com/bluemir/wikinote/pkgs/dist"
 )
 
 type LayoutRenderer struct {
@@ -19,7 +20,7 @@ type LayoutRenderer struct {
 
 func NewRenderer() render.HTMLRender {
 	templates := map[string]*template.Template{}
-	box := rice.MustFindBox("../../dist/html")
+	box := dist.HTMLs
 	layout := template.New("layout")
 	box.Walk("/_layout", func(path string, info os.FileInfo, err error) error {
 		logrus.Debugf("[parse layout] name :%s, path: %s", info.Name(), path)

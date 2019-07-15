@@ -3,34 +3,38 @@ BIN_NAME=$(notdir $(IMPORT_PATH))
 
 DOCKER_IMAGE_NAME=bluemir/wikinote
 
-default: $(BIN_NAME)
+default: build/$(BIN_NAME)
 
 VERSION?=$(shell git describe --long --tags --dirty --always)
 
-# if gopath not set, make inside current dir
-GO_SOURCES = $(shell find . -type f -name '*.go' -print)
-JS_SOURCES = $(shell find app/js -type f -name '*.js' -print)
+GO_SOURCES   = $(shell find .        -type f -name '*.go'   -print)
+JS_SOURCES   = $(shell find app/js   -type f -name '*.js'   -print)
 HTML_SOURCES = $(shell find app/html -type f -name '*.html' -print)
-CSS_SOURCES = $(shell find app/less -type f -name "*.less" -print)
-WEB_LIBS = $(shell find app/lib -type f -type f -print)
+CSS_SOURCES  = $(shell find app/less -type f -name "*.less" -print)
+WEB_LIBS     = $(shell find app/lib  -type f                -print)
 
-DISTS  = $(JS_SOURCES:app/js/%=dist/js/%)
-DISTS += $(HTML_SOURCES:app/html/%=dist/html/%)
-DISTS += dist/css/common.css
-DISTS += $(WEB_LIBS:app/lib/%=dist/lib/%)
+DISTS  = $(JS_SOURCES:app/js/%=build/dist/js/%)
+DISTS += $(HTML_SOURCES:app/html/%=build/dist/html/%)
+DISTS += build/dist/css/common.css
+DISTS += $(WEB_LIBS:app/lib/%=build/dist/lib/%)
 
-# Automatic runner
-DIRS = $(shell find . -name dist -prune -o -name ".git" -prune -o -type d -print)
+DIRS = $(shell find . \
+                    -name build -prune -o \
+                    -name ".git" -prune -o \
+                    -type d \
+                    -print)
 
 .sources:
 	@echo $(DIRS) makefile \
-		$(GO_SOURCES) \
-		$(JS_SOURCES) \
-		$(HTML_SOURCES) \
-		$(CSS_SOURCES) \
-		$(WEB_LIBS)| tr " " "\n"
-run: $(BIN_NAME)
-	./$(BIN_NAME) -D serve
+	      $(GO_SOURCES) \
+	      $(JS_SOURCES) \
+	      $(HTML_SOURCES) \
+	      $(CSS_SOURCES) \
+	      $(WEB_LIBS)| tr " " "\n"
+
+run: export LOG_LEVEL=trace
+run: build/$(BIN_NAME)
+	build/$(BIN_NAME) -D serve
 auto-run:
 	while true; do \
 		make .sources | entr -rd make run ;  \
@@ -40,29 +44,28 @@ reset:
 	ps -e | grep make | grep -v grep | awk '{print $$1}' | xargs kill
 
 ## Binary build
-$(BIN_NAME).bin: $(GO_SOURCES)
+build/$(BIN_NAME).bin: $(GO_SOURCES) makefile
 	go build -v \
 		-ldflags "-X main.Version=$(VERSION)" \
-		-o $(BIN_NAME).bin .
+		-o $@ .
 	@echo Build DONE
 
-$(BIN_NAME): $(BIN_NAME).bin $(DISTS)
-	cp $(BIN_NAME).bin $(BIN_NAME).tmp
-	rice append -v --exec $(BIN_NAME).tmp \
-		-i $(IMPORT_PATH)/pkgs/server  \
-		-i $(IMPORT_PATH)/pkgs/renderer \
-		-i $(IMPORT_PATH)/pkgs/config
-	mv $(BIN_NAME).tmp $(BIN_NAME)
+build/$(BIN_NAME): build/$(BIN_NAME).bin $(DISTS)
+	cp $< $@.tmp
+	rice append -v \
+		-i $(IMPORT_PATH)/pkgs/dist     \
+		--exec $@.tmp
+	mv $@.tmp $@
 	@echo Embed resources DONE
 
 ## Web dist
-dist/html/%.html: app/html/%.html
-	@mkdir -p $(basename $@)
+build/dist/html/%.html: app/html/%.html
+	@mkdir -p $(dir $@)
 	cp $< $@
-dist/css/common.css: $(CSS_SOURCES)
+build/dist/css/common.css: $(CSS_SOURCES)
 	lessc app/less/main.less $@
-dist/%: app/%
-	@mkdir -p $(basename $@)
+build/dist/%: app/%
+	@mkdir -p $(dir $@)
 	cp $< $@
 
 tools:
@@ -70,26 +73,28 @@ tools:
 	go get github.com/GeertJohan/go.rice/rice
 
 clean:
-	rm -rf dist/ vendor/ $(BIN_NAME) $(BIN_NAME).bin $(BIN_NAME).tmp
-	rm -f .docker-image .docker-image.pushed
+	rm -rf bulid/ vendor/
 	go clean
 
-docker-build: .docker-image
-docker-push: .docker-image.pushed
-docker-run: .docker-image
+docker-build: build/.docker-image
+docker-push: build/.docker-image.pushed
+docker-run: build/.docker-image
 	docker run --rm -it \
 		-p 4000:4000 \
 		-v ~/wiki:/wiki \
-		$(shell cat .docker-image) \
+		-e LOG_LEVEL=trace \
+		$(shell cat $<) \
 		serve \
 		--wiki-path /wiki \
 		--config /wiki/.app/config.yaml \
 		--bind :4000
 
-.docker-image: Dockerfile makefile $(GO_SOURCES) $(DISTS)
-	docker build -t $(DOCKER_IMAGE_NAME):$(VERSION) .
+build/.docker-image: Dockerfile makefile $(GO_SOURCES) $(DISTS)
+	docker build \
+		--build-arg VERSION=$(VERSION) \
+		-t $(DOCKER_IMAGE_NAME):$(VERSION) .
 	echo "$(DOCKER_IMAGE_NAME):$(VERSION)" > $@
-.docker-image.pushed: .docker-image
+build/.docker-image.pushed: .docker-image
 	docker push $(shell cat .docker-image)
 	echo $(shell cat .docker-image) > $@
 
