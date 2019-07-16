@@ -16,15 +16,6 @@ import (
 
 func HandleView(c *gin.Context) {
 	//logrus.Debugf("path: %s, accept: %+v", c.Request.URL.Path, c.GetHeader("Accept"))
-	backend := Backend(c)
-	path := c.Request.URL.Path
-	err := backend.Plugin().TryRead(path, Token(c))
-	if err != nil {
-		c.HTML(http.StatusForbidden, "/errors/forbidden.html", renderer.Data{
-			"msg": err.Error(),
-		}.With(c))
-		return
-	}
 
 	switch {
 	// TODO check file type
@@ -84,14 +75,6 @@ func HandleRaw(c *gin.Context) {
 func HandleEditForm(c *gin.Context) {
 	backend := Backend(c)
 	path := c.Request.URL.Path
-
-	err := backend.Plugin().TryRead(path, Token(c))
-	if err != nil {
-		c.HTML(http.StatusForbidden, "/errors/forbidden.html", renderer.Data{
-			"msg": err.Error(),
-		}.With(c))
-		return
-	}
 
 	data, err := backend.File().Read(path)
 	if err != nil {

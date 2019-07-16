@@ -13,8 +13,6 @@ type PluginClause interface {
 	PreSave(path string, data []byte) ([]byte, error)
 	PostSave(path string, data []byte) error
 	OnRead(path string, data []byte) ([]byte, error)
-	TryRead(path string, user interface{}) error
-	TryWrite(path string, user interface{}) error
 	AuthCheck(ctx *auth.Context) (bool, error)
 	RegisterRouter(r gin.IRouter)
 }
@@ -69,26 +67,6 @@ func (b *pluginClause) OnRead(path string, data []byte) ([]byte, error) {
 	return d, nil
 }
 
-func (b *pluginClause) TryRead(path string, user interface{}) error {
-	attr := b.File().Attr(path)
-	for _, plugin := range b.plugins.permission {
-		err := plugin.TryRead(path, user, attr)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-func (b *pluginClause) TryWrite(path string, user interface{}) error {
-	attr := b.File().Attr(path)
-	for _, plugin := range b.plugins.permission {
-		err := plugin.TryWrite(path, user, attr)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
 func (b *pluginClause) AuthCheck(ctx *auth.Context) (bool, error) {
 	for _, plugin := range b.plugins.authz {
 		ok, err := plugin.AuthCheck(ctx)

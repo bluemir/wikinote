@@ -22,10 +22,6 @@ type PostSavePlugin interface {
 type ReadPlugin interface {
 	OnRead(path string, data []byte, attr FileAttr) ([]byte, error)
 }
-type FilePermissionPlugin interface {
-	TryRead(path string, user interface{}, attr FileAttr) error
-	TryWrite(path string, user interface{}, attr FileAttr) error
-}
 type AuthzPlugin interface {
 	AuthCheck(c *auth.Context) (bool, error)
 }

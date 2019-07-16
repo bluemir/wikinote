@@ -16,7 +16,6 @@ type pluginList struct {
 	postSave       []plugins.PostSavePlugin
 	preSave        []plugins.PreSavePlugin
 	onRead         []plugins.ReadPlugin
-	permission     []plugins.FilePermissionPlugin
 	authz          []plugins.AuthzPlugin
 	registerRouter map[string]plugins.RegisterRouterPlugin
 }
@@ -28,7 +27,6 @@ func loadPlugins(conf *config.Config, store fileattr.Store, authManager *auth.Ma
 		postSave:       []plugins.PostSavePlugin{},
 		preSave:        []plugins.PreSavePlugin{},
 		onRead:         []plugins.ReadPlugin{},
-		permission:     []plugins.FilePermissionPlugin{},
 		authz:          []plugins.AuthzPlugin{},
 		registerRouter: map[string]plugins.RegisterRouterPlugin{},
 	}
@@ -61,9 +59,9 @@ func loadPlugins(conf *config.Config, store fileattr.Store, authManager *auth.Ma
 			logrus.Debugf("read plugin '%s'", name)
 			pl.onRead = append(pl.onRead, plugin)
 		}
-		if plugin, ok := p.(plugins.FilePermissionPlugin); ok {
+		if plugin, ok := p.(plugins.AuthzPlugin); ok {
 			logrus.Debugf("permission plugin '%s'", name)
-			pl.permission = append(pl.permission, plugin)
+			pl.authz = append(pl.authz, plugin)
 		}
 		if a, ok := p.(plugins.RegisterRouterPlugin); ok {
 			logrus.Debugf("resiger route plugin '%s'", name)
