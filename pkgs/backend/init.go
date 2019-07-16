@@ -3,9 +3,9 @@ package backend
 import (
 	"fmt"
 
-	"github.com/bluemir/go-utils/auth"
 	"github.com/sirupsen/logrus"
 
+	"github.com/bluemir/wikinote/pkgs/auth"
 	"github.com/bluemir/wikinote/pkgs/config"
 	"github.com/bluemir/wikinote/pkgs/fileattr"
 	"github.com/bluemir/wikinote/plugins"
@@ -17,10 +17,11 @@ type pluginList struct {
 	preSave        []plugins.PreSavePlugin
 	onRead         []plugins.ReadPlugin
 	permission     []plugins.FilePermissionPlugin
+	authz          []plugins.AuthzPlugin
 	registerRouter map[string]plugins.RegisterRouterPlugin
 }
 
-func loadPlugins(conf *config.Config, store fileattr.Store, authManager auth.Manager) (*pluginList, error) {
+func loadPlugins(conf *config.Config, store fileattr.Store, authManager *auth.Manager) (*pluginList, error) {
 	// TODO can on/off
 	pl := &pluginList{
 		footer:         []plugins.FooterPlugin{},
@@ -28,6 +29,7 @@ func loadPlugins(conf *config.Config, store fileattr.Store, authManager auth.Man
 		preSave:        []plugins.PreSavePlugin{},
 		onRead:         []plugins.ReadPlugin{},
 		permission:     []plugins.FilePermissionPlugin{},
+		authz:          []plugins.AuthzPlugin{},
 		registerRouter: map[string]plugins.RegisterRouterPlugin{},
 	}
 

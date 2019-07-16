@@ -1,12 +1,9 @@
 package server
 
 import (
-	"io/ioutil"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-
-	"github.com/bluemir/go-utils/auth"
 
 	"github.com/bluemir/wikinote/pkgs/renderer"
 )
@@ -33,13 +30,15 @@ func HandleAPIUserUpdateRole(c *gin.Context) {
 		return
 	}
 
-	role, err := ioutil.ReadAll(c.Request.Body)
-	u.Role = auth.Role(role)
+	/*
+		role, err := ioutil.ReadAll(c.Request.Body)
+		//u.Role = auth.Role(role)
 
-	if err := Backend(c).Auth().UpdateUser(u); err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"msg": err.Error()})
-		c.Abort()
-		return
-	}
+			if err := Backend(c).Auth().UpdateUser(u); err != nil {
+				c.JSON(http.StatusNotFound, gin.H{"msg": err.Error()})
+				c.Abort()
+				return
+			}
+	*/
 	c.JSON(http.StatusOK, u)
 }

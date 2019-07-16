@@ -3,14 +3,12 @@ package backend
 import (
 	"os"
 
-	"github.com/bluemir/go-utils/auth"
-	_ "github.com/bluemir/go-utils/auth/gorm"
-	"github.com/ghodss/yaml"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
+	"github.com/bluemir/wikinote/pkgs/auth"
 	"github.com/bluemir/wikinote/pkgs/config"
 	"github.com/bluemir/wikinote/pkgs/fileattr"
 )
@@ -20,7 +18,7 @@ type Backend interface {
 	SaveConfig(conf *config.Config) error
 
 	File() FileClause
-	Auth() auth.Manager
+	Auth() *auth.Manager
 	Plugin() PluginClause
 
 	// renderer
@@ -54,34 +52,9 @@ func New(o *Options) (Backend, error) {
 		return nil, errors.Wrap(err, "failed to connect database")
 	}
 
-	authMng, first, err := auth.New(&auth.Options{
-		StoreDriver: "gorm",
-		DefaultRole: conf.User.Default.Role,
-		RootRole:    "root",
-		DriverOpts: map[string]interface{}{
-			"db": db,
-		},
-	})
+	authMng, err := auth.New(db)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to init auth manager")
-	}
-
-	if first {
-		// add default rules...
-		rules := &struct {
-			Rules map[string][]string
-		}{}
-		err := yaml.Unmarshal([]byte(defaultRule), rules)
-		if err != nil {
-			return nil, errors.Wrap(err, "parse default rule failed")
-		}
-
-		for k, v := range rules.Rules {
-			err := authMng.PutRule(k, v...)
-			if err != nil {
-				return nil, errors.Wrap(err, "failed to put default rule")
-			}
-		}
 	}
 
 	token, err := authMng.Root("root")
@@ -126,7 +99,7 @@ type backend struct {
 	configPath string
 	db         *gorm.DB
 
-	auth          auth.Manager
+	auth          *auth.Manager
 	fileAttrStore fileattr.Store
 
 	plugins *pluginList
@@ -143,7 +116,7 @@ func (b *backend) Config() *config.Config {
 func (b *backend) SaveConfig(conf *config.Config) error {
 	return b.conf.Save(b.configPath)
 }
-func (b *backend) Auth() auth.Manager {
+func (b *backend) Auth() *auth.Manager {
 	return b.auth
 }
 func (b *backend) File() FileClause {

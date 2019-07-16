@@ -3,9 +3,9 @@ package plugins
 import (
 	"html/template"
 
-	"github.com/bluemir/go-utils/auth"
 	"github.com/gin-gonic/gin"
 
+	"github.com/bluemir/wikinote/pkgs/auth"
 	"github.com/bluemir/wikinote/pkgs/fileattr"
 )
 
@@ -25,6 +25,9 @@ type ReadPlugin interface {
 type FilePermissionPlugin interface {
 	TryRead(path string, user interface{}, attr FileAttr) error
 	TryWrite(path string, user interface{}, attr FileAttr) error
+}
+type AuthzPlugin interface {
+	AuthCheck(c *auth.Context) (bool, error)
 }
 type RegisterRouterPlugin interface {
 	RegisterRouter(r gin.IRouter)
@@ -46,10 +49,4 @@ const (
 
 // Auth
 
-type AuthManager auth.Manager
-
-// context
-type Components interface {
-	Auth() AuthManager
-	AttrStore() FileAttrStore
-}
+type AuthManager *auth.Manager

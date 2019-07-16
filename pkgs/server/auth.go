@@ -3,11 +3,10 @@ package server
 import (
 	"net/http"
 
-	"github.com/bluemir/go-utils/auth"
-	"github.com/bluemir/go-utils/auth/codes"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 
+	"github.com/bluemir/wikinote/pkgs/auth"
 	"github.com/bluemir/wikinote/pkgs/renderer"
 )
 
@@ -19,16 +18,24 @@ func isLogined(c *gin.Context) bool {
 	return true
 }
 
-func BasicAuth(c *gin.Context) {
+func Token(c *gin.Context) *auth.Token {
+	token, ok := c.Get(TOKEN)
+	if ok {
+		return token.(*auth.Token)
+	}
+	return nil
+}
+
+func BasicAuthn(c *gin.Context) {
 	token, err := Backend(c).Auth().HttpAuth(c.GetHeader("Authorization"))
 
 	switch auth.ErrorCode(err) {
-	case codes.None:
-		logrus.Debug("Login user :", token.Username)
-		c.SetCookie("logined", token.Username, 0, "", "", false, true)
+	case auth.ErrNone:
+		logrus.Debug("Login user :", token.UserName)
+		c.SetCookie("logined", token.UserName, 0, "", "", false, true)
 		c.Set(TOKEN, token)
 		return
-	case codes.EmptyAccount: // it means logout
+	case auth.ErrEmptyAccount: // it means logout
 		logrus.Debug("Empty Account")
 		if isLogined(c) {
 			c.SetCookie("logined", "", -1, "", "", false, true)
@@ -38,7 +45,7 @@ func BasicAuth(c *gin.Context) {
 			c.Abort()
 		}
 		return
-	case codes.EmptyHeader:
+	case auth.ErrEmptyHeader:
 		logrus.Debug("Empty header")
 		if isLogined(c) {
 			logrus.Debug("cookie found but auth not found")
@@ -50,12 +57,12 @@ func BasicAuth(c *gin.Context) {
 		// Skip auth
 		logrus.Debug("skip auth")
 		return
-	case codes.WrongEncoding, codes.BadToken:
+	case auth.ErrWrongEncoding, auth.ErrBadToken:
 		FlashMessage(c).Warn("Connot decode auth token")
 		c.HTML(http.StatusBadRequest, "/errors/unauthorized.html", renderer.Data{}.With(c))
 		c.Abort()
 		return
-	case codes.Unauthorized:
+	case auth.ErrUnauthorized:
 		logrus.Debug("unauthorized")
 		FlashMessage(c).Warn("Error on auth, id password not matched")
 		c.Header("WWW-Authenticate", AuthenicateString)
@@ -67,6 +74,42 @@ func BasicAuth(c *gin.Context) {
 		c.HTML(http.StatusInternalServerError, "/errors/unauthorized.html", renderer.Data{}.With(c))
 		c.Abort()
 		return
+	}
+}
+func Authz(actions ...string) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		token, ok := c.Get(TOKEN)
+		if !ok {
+			c.Header("WWW-Authenticate", AuthenicateString)
+			c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
+			c.Abort()
+			return
+		}
+
+		subject := Backend(c).Auth().Subject(token.(*auth.Token))
+		object := Backend(c).File().AuthzObject(c.Request.URL.Path)
+
+		for _, action := range actions {
+			result, err := Backend(c).Plugin().AuthCheck(&auth.Context{
+				Subject: subject,
+				Object:  object,
+				Action:  action,
+			})
+			if err != nil {
+				c.HTML(http.StatusInternalServerError, "errors/internal.html", renderer.Data{}.With(c))
+				c.Abort()
+				return
+			}
+			const Reject = false
+			const Accept = true
+			switch result {
+			case Reject:
+				c.HTML(http.StatusForbidden, "/errors/forbidden.html", renderer.Data{}.With(c))
+				c.Abort()
+				return
+			case Accept:
+			}
+		}
 	}
 }
 func HandleRegisterForm(c *gin.Context) {
@@ -94,10 +137,8 @@ func HandleRegister(c *gin.Context) {
 
 	err = Backend(c).Auth().CreateUser(&auth.User{
 		Name: registeForm.Id,
-		Labels: map[string]string{
-			"email": registeForm.Email,
-		},
 	})
+	//Backend(c).Auth().SetAttr(username, HandleRegisterForm.Email)
 	if err != nil {
 		FlashMessage(c).Warn("fail to register: %s", err.Error())
 		c.Redirect(http.StatusSeeOther, "/!/auth/register")

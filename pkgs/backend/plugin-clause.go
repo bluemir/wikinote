@@ -4,6 +4,8 @@ import (
 	"html/template"
 
 	"github.com/gin-gonic/gin"
+
+	"github.com/bluemir/wikinote/pkgs/auth"
 )
 
 type PluginClause interface {
@@ -13,6 +15,7 @@ type PluginClause interface {
 	OnRead(path string, data []byte) ([]byte, error)
 	TryRead(path string, user interface{}) error
 	TryWrite(path string, user interface{}) error
+	AuthCheck(ctx *auth.Context) (bool, error)
 	RegisterRouter(r gin.IRouter)
 }
 
@@ -85,6 +88,19 @@ func (b *pluginClause) TryWrite(path string, user interface{}) error {
 		}
 	}
 	return nil
+}
+func (b *pluginClause) AuthCheck(ctx *auth.Context) (bool, error) {
+	for _, plugin := range b.plugins.authz {
+		ok, err := plugin.AuthCheck(ctx)
+		if err != nil {
+			return false, err
+		}
+
+		if !ok {
+			return false, nil
+		}
+	}
+	return true, nil
 }
 func (b *pluginClause) RegisterRouter(r gin.IRouter) {
 	for name, p := range b.plugins.registerRouter {

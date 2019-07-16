@@ -1,10 +1,10 @@
 package plugins
 
 import (
-	"github.com/bluemir/go-utils/auth"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
+	"github.com/bluemir/wikinote/pkgs/auth"
 	"github.com/bluemir/wikinote/pkgs/fileattr"
 )
 
@@ -19,7 +19,7 @@ func Register(name string, initFunc PluginInit) {
 	plugins[name] = initFunc
 }
 
-func New(name string, opts map[string]string, fileAttrStore fileattr.Store, authManager auth.Manager) (Plugin, error) {
+func New(name string, opts map[string]string, fileAttrStore fileattr.Store, authManager *auth.Manager) (Plugin, error) {
 	log := logrus.WithField("method", "plugin.New")
 	log.Tracef("name: %s, opts: %#v", name, opts)
 	if plugin, ok := plugins[name]; ok {

@@ -3,7 +3,6 @@ package server
 import (
 	"net/http"
 
-	"github.com/bluemir/go-utils/auth"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/autotls"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/bluemir/wikinote/pkgs/backend"
 	"github.com/bluemir/wikinote/pkgs/dist"
+	"github.com/bluemir/wikinote/pkgs/query-router"
 	"github.com/bluemir/wikinote/pkgs/renderer"
 )
 
@@ -65,70 +65,49 @@ func Run(b backend.Backend, conf *Config) error {
 		special.POST("/auth/register", HandleRegister)
 
 		//auth
-		special.Use(BasicAuth)
+		special.Use(BasicAuthn)
 		special.GET("/auth/login", HandleLogin)
 		special.GET("/auth/logout", HandleLogout)
 
-		special.POST("/api/preview", Action("edit"), HandlePreview) // render body
-		special.GET("/search", Action("view", "search"), HandleSearch)
+		special.POST("/api/preview", Authz("edit"), HandlePreview) // render body
+		special.GET("/search", Authz("view", "search"), HandleSearch)
 
-		special.GET("/user", Action("user"), HandleUserList)
+		special.GET("/user", Authz("user"), HandleUserList)
 		special.GET("/user/:id")
 		special.PUT("/user")
 
 		//special.GET("/api/users", Action("user"), HandleAPIUesrList)
 		//special.GET("/api/users/:id", Action("user"), HandleAPIUesr)
-		special.PUT("/api/users/:name/role", Action("user"), HandleAPIUserUpdateRole)
+		special.PUT("/api/users/:name/role", Authz("user"), HandleAPIUserUpdateRole)
 		// TODO make Action for API
 	}
 
-	app.Use(BasicAuth)
-	app.NoRoute(func(c *gin.Context) {
-		// GET            render file or render functional page
-		// POST           create or update file with form submit
-		// PUT            create or update file with ajax
-		// DELETE         delete file
+	app.Use(BasicAuthn)
 
-		switch c.Request.Method {
-		case http.MethodGet:
-			// check param
-			// TODO auth
-			if _, ok := c.GetQuery("edit"); ok {
-				Do(c, HandleEditForm, "edit")
-				return
-			}
-			if _, ok := c.GetQuery("attach"); ok {
-				Do(c, HandleAttachForm, "attach")
-				return
-			}
-			if _, ok := c.GetQuery("raw"); ok {
-				Do(c, HandleRaw, "view")
-				return
-			}
-			if _, ok := c.GetQuery("history"); ok {
-				c.String(http.StatusNotImplemented, "text/plain", "not implemeted")
-				return
-			}
-			if _, ok := c.GetQuery("backlinks"); ok {
-				c.String(http.StatusNotImplemented, "text/plain", "not implemeted")
-				return
-			}
-			if _, ok := c.GetQuery("move"); ok {
-				c.String(http.StatusNotImplemented, "text/plain", "not implemeted")
-				return
-			}
-			Do(c, HandleView, "view")
+	// - GET            render file or render functional page
+	//   - edit      : show editor
+	//   - attach    : show attachment and upload form
+	//   - raw       : show raw text(not rendered)
+	//   - history   : show histroy
+	//   - backlinks : show backlinks
+	//   - move      : show move confirm window
+	// - POST           create or update file with form submit
+	// - PUT            create or update file with ajax
+	// - DELETE         delete file
 
-		case http.MethodPost:
-			Do(c, HandleUpdateForm, "edit")
-		case http.MethodPut:
-			Do(c, HandleUpdate, "edit")
-		case http.MethodDelete:
-			//Do(c, HandleDelte, "edit")
-			c.String(http.StatusNotImplemented, "text/plain", "not implemeted")
-			return
-		}
-	})
+	queryRouter := queryrouter.New()
+	queryRouter.Register(http.MethodGet, "edit", Authz("edit"), HandleEditForm)
+	queryRouter.Register(http.MethodGet, "attach", Authz("attach"), HandleAttachForm)
+	queryRouter.Register(http.MethodGet, "raw", Authz("raw"), HandleRaw)
+	queryRouter.Register(http.MethodGet, "history", HandleNotImplemented)
+	queryRouter.Register(http.MethodGet, "backlinks", HandleNotImplemented)
+	queryRouter.Register(http.MethodGet, "move", HandleNotImplemented)
+	queryRouter.Register(http.MethodGet, "*", HandleView)
+	queryRouter.Register(http.MethodPost, "*", Authz("edit"), HandleUpdateForm)
+	queryRouter.Register(http.MethodPut, "*", Authz("edit"), HandleUpdate)
+	queryRouter.Register(http.MethodDelete, "*", HandleNotImplemented)
+
+	app.NoRoute(queryRouter.Handler)
 
 	if len(conf.Domain) > 0 {
 		logrus.Warn("ignore bind or port option")
@@ -155,67 +134,8 @@ func FlashMessage(c *gin.Context) renderer.MessageContext {
 	return renderer.Of(c)
 }
 
-func authCheck(c *gin.Context, actions ...string) int {
-	// check user
-	//      if not logined return 401
-	//      if logined but not have permission return 403
-	token, ok := c.Get(TOKEN)
-	if ok {
-		for _, action := range actions {
-			if !Backend(c).Auth().Is(token).Allow(auth.Action(action)) {
-				return http.StatusForbidden
-			}
-		}
-	} else {
-		for _, action := range actions {
-			if !Backend(c).Auth().Is(backend.RoleGuest).Allow(auth.Action(action)) {
-				logrus.Debugf("guest not allow %s", action)
-				return http.StatusUnauthorized
-			}
-		}
-	}
-	return http.StatusOK
-}
-
-func Action(actions ...string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		switch authCheck(c, actions...) {
-		case http.StatusForbidden:
-			// TODO make fordidden page
-			c.HTML(http.StatusForbidden, "/errors/forbidden.html", renderer.Data{}.With(c))
-			c.Abort()
-			return
-		case http.StatusUnauthorized:
-			c.Header("WWW-Authenticate", AuthenicateString)
-			c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
-			c.Abort()
-			return
-		case http.StatusOK:
-			return // pass
-		}
-	}
-}
-func Do(c *gin.Context, handler gin.HandlerFunc, actions ...string) {
-	switch authCheck(c, actions...) {
-	case http.StatusForbidden:
-		// TODO make fordidden page
-		c.HTML(http.StatusForbidden, "/errors/forbidden.html", renderer.Data{}.With(c))
-		c.Abort()
-		return
-	case http.StatusUnauthorized:
-		c.Header("WWW-Authenticate", AuthenicateString)
-		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
-		c.Abort()
-		return
-	case http.StatusOK:
-		handler(c)
-		return // pass
-	}
-}
-func Token(c *gin.Context) *auth.Token {
-	token, ok := c.Get(TOKEN)
-	if ok {
-		return token.(*auth.Token)
-	}
-	return nil
+func HandleNotImplemented(c *gin.Context) {
+	c.String(http.StatusNotImplemented, "text/plain", "not implemeted")
+	c.Abort()
+	return
 }

@@ -4,9 +4,10 @@ import (
 	"path"
 	"strings"
 
-	"github.com/bluemir/go-utils/auth"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+
+	"github.com/bluemir/wikinote/pkgs/auth"
 )
 
 const (
@@ -98,7 +99,7 @@ func (rd *renderData) Username() string {
 	if rd.Token == nil {
 		return ""
 	}
-	return rd.Token.Username
+	return rd.Token.UserName
 }
 func (rd *renderData) IsLogin() bool {
 	return rd.Token != nil

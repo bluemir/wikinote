@@ -9,8 +9,7 @@ var Version string
 
 func main() {
 
-	err := cmd.Execute(Version)
-	if err != nil {
+	if err := cmd.Execute(Version); err != nil {
 		logrus.Error(err)
 	}
 }
