@@ -13,7 +13,7 @@ type PluginClause interface {
 	PreSave(path string, data []byte) ([]byte, error)
 	PostSave(path string, data []byte) error
 	OnRead(path string, data []byte) ([]byte, error)
-	AuthCheck(ctx *auth.Context) (bool, error)
+	AuthCheck(ctx *auth.Context) (auth.Result, error)
 	RegisterRouter(r gin.IRouter)
 }
 
@@ -67,18 +67,17 @@ func (b *pluginClause) OnRead(path string, data []byte) ([]byte, error) {
 	return d, nil
 }
 
-func (b *pluginClause) AuthCheck(ctx *auth.Context) (bool, error) {
+func (b *pluginClause) AuthCheck(ctx *auth.Context) (auth.Result, error) {
 	for _, plugin := range b.plugins.authz {
-		ok, err := plugin.AuthCheck(ctx)
+		result, err := plugin.AuthCheck(ctx)
 		if err != nil {
-			return false, err
+			return auth.Unknown, err
 		}
-
-		if !ok {
-			return false, nil
+		if result == auth.Reject {
+			return auth.Reject, nil
 		}
 	}
-	return true, nil
+	return auth.Accept, nil
 }
 func (b *pluginClause) RegisterRouter(r gin.IRouter) {
 	for name, p := range b.plugins.registerRouter {

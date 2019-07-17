@@ -7,6 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/pkgs/auth"
+	"github.com/bluemir/wikinote/pkgs/backend"
 	"github.com/bluemir/wikinote/pkgs/renderer"
 )
 
@@ -87,7 +88,7 @@ func Authz(actions ...string) func(c *gin.Context) {
 		}
 
 		subject := Backend(c).Auth().Subject(token.(*auth.Token))
-		object := Backend(c).File().AuthzObject(c.Request.URL.Path)
+		object := &backend.AuthzObject{Backend(c).File().Attr(c.Request.URL.Path)}
 
 		for _, action := range actions {
 			result, err := Backend(c).Plugin().AuthCheck(&auth.Context{
@@ -100,14 +101,18 @@ func Authz(actions ...string) func(c *gin.Context) {
 				c.Abort()
 				return
 			}
-			const Reject = false
-			const Accept = true
 			switch result {
-			case Reject:
+			case auth.Reject:
 				c.HTML(http.StatusForbidden, "/errors/forbidden.html", renderer.Data{}.With(c))
 				c.Abort()
 				return
-			case Accept:
+			case auth.Accept:
+				// check next
+				continue
+			case auth.Unknown:
+				c.HTML(http.StatusInternalServerError, "errors/internal.html", renderer.Data{}.With(c))
+				c.Abort()
+				return
 			}
 		}
 	}

@@ -7,7 +7,6 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/bluemir/wikinote/pkgs/auth"
 	"github.com/bluemir/wikinote/pkgs/fileattr"
 )
 
@@ -19,7 +18,6 @@ type FileClause interface {
 
 	Attr(path string) fileattr.PathClause
 	AttrStore() fileattr.Store
-	AuthzObject(path string) auth.Object
 
 	GetFullPath(path string) string
 }
@@ -72,18 +70,6 @@ func (b *fileClause) Attr(path string) fileattr.PathClause {
 func (b *fileClause) AttrStore() fileattr.Store {
 	return b.fileAttrStore
 }
-func (b *fileClause) AuthzObject(path string) auth.Object {
-	return &authzObject{b.Attr(path)}
-}
 func (b *fileClause) GetFullPath(path string) string {
 	return filepath.Join(b.basePath, path)
-}
-
-type authzObject struct {
-	fileattr.PathClause
-}
-
-func (obj *authzObject) Attr(key string) string {
-	value, _ := obj.Get(key)
-	return value
 }

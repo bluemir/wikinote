@@ -20,6 +20,8 @@ type FileAttrEntity struct {
 	gorm.Model
 	FileAttr
 }
+
+// serach context
 type storeClause struct {
 	*store
 	options        *Options

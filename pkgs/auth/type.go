@@ -11,12 +11,15 @@ type Token struct {
 	RevokeKey string `gorm:"unique"`
 }
 
+// AuthAttr
 type Attr struct {
-	ID    string
-	Key   string
-	Value string
+	ID        string `gorm:"primary_key"`
+	Namespace string `gorm:"primary_key"`
+	Key       string `gorm:"primary_key"`
+	Value     string
 }
 
+// helper
 type Subject interface {
 	Attr(key string) string
 }
@@ -28,3 +31,12 @@ type Context struct {
 	Object  Object
 	Action  string
 }
+type Result int
+
+const (
+	Unknown Result = iota
+	Reject
+	Accept
+)
+
+// ABAC(Context{subject, object, action}) == Reject

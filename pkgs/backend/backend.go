@@ -126,3 +126,12 @@ func (b *backend) File() FileClause {
 func (b *backend) Plugin() PluginClause {
 	return &pluginClause{b}
 }
+
+type AuthzObject struct {
+	fileattr.PathClause
+}
+
+func (obj *AuthzObject) Attr(key string) string {
+	value, _ := obj.Get(key)
+	return value
+}

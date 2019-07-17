@@ -23,7 +23,7 @@ type ReadPlugin interface {
 	OnRead(path string, data []byte, attr FileAttr) ([]byte, error)
 }
 type AuthzPlugin interface {
-	AuthCheck(c *auth.Context) (bool, error)
+	AuthCheck(c *auth.Context) (auth.Result, error)
 }
 type RegisterRouterPlugin interface {
 	RegisterRouter(r gin.IRouter)
