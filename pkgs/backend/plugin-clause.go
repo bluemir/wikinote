@@ -12,7 +12,7 @@ type PluginClause interface {
 	Footer(path string) []PluginResult
 	PreSave(path string, data []byte) ([]byte, error)
 	PostSave(path string, data []byte) error
-	OnRead(path string, data []byte) ([]byte, error)
+	OnReadWiki(ctx *auth.Context, path string, data []byte) ([]byte, error)
 	AuthCheck(ctx *auth.Context) (auth.Result, error)
 	RegisterRouter(r gin.IRouter)
 }
@@ -54,14 +54,14 @@ func (b *pluginClause) PostSave(path string, data []byte) error {
 	}
 	return nil
 }
-func (b *pluginClause) OnRead(path string, data []byte) ([]byte, error) {
-	attr := b.File().Attr(path)
+func (b *pluginClause) OnReadWiki(ctx *auth.Context, path string, data []byte) ([]byte, error) {
+	//attr := b.File().Attr(path)
 	d := data
-	for _, p := range b.plugins.onRead {
+	for _, p := range b.plugins.onReadWiki {
 		var err error
-		d, err = p.OnRead(path, d, attr)
+		d, err = p.OnReadWiki(ctx, path, d)
 		if err != nil {
-			return nil, err
+			return data, err
 		}
 	}
 	return d, nil

@@ -77,7 +77,7 @@ func BasicAuthn(c *gin.Context) {
 		return
 	}
 }
-func Authz(actions ...string) func(c *gin.Context) {
+func Authz(action string) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		token, ok := c.Get(TOKEN)
 		if !ok {
@@ -90,30 +90,28 @@ func Authz(actions ...string) func(c *gin.Context) {
 		subject := Backend(c).Auth().Subject(token.(*auth.Token))
 		object := &backend.AuthzObject{Backend(c).File().Attr(c.Request.URL.Path)}
 
-		for _, action := range actions {
-			result, err := Backend(c).Plugin().AuthCheck(&auth.Context{
-				Subject: subject,
-				Object:  object,
-				Action:  action,
-			})
-			if err != nil {
-				c.HTML(http.StatusInternalServerError, "errors/internal.html", renderer.Data{}.With(c))
-				c.Abort()
-				return
-			}
-			switch result {
-			case auth.Reject:
-				c.HTML(http.StatusForbidden, "/errors/forbidden.html", renderer.Data{}.With(c))
-				c.Abort()
-				return
-			case auth.Accept:
-				// check next
-				continue
-			case auth.Unknown:
-				c.HTML(http.StatusInternalServerError, "errors/internal.html", renderer.Data{}.With(c))
-				c.Abort()
-				return
-			}
+		result, err := Backend(c).Plugin().AuthCheck(&auth.Context{
+			Subject: subject,
+			Object:  object,
+			Action:  action,
+		})
+		if err != nil {
+			c.HTML(http.StatusInternalServerError, "errors/internal.html", renderer.Data{}.With(c))
+			c.Abort()
+			return
+		}
+		switch result {
+		case auth.Reject:
+			c.HTML(http.StatusForbidden, "/errors/forbidden.html", renderer.Data{}.With(c))
+			c.Abort()
+			return
+		case auth.Accept:
+			// check next
+			return
+		case auth.Unknown:
+			c.HTML(http.StatusInternalServerError, "errors/internal.html", renderer.Data{}.With(c))
+			c.Abort()
+			return
 		}
 	}
 }

@@ -70,7 +70,7 @@ func Run(b backend.Backend, conf *Config) error {
 		special.GET("/auth/logout", HandleLogout)
 
 		special.POST("/api/preview", Authz("edit"), HandlePreview) // render body
-		special.GET("/search", Authz("view", "search"), HandleSearch)
+		special.GET("/search", Authz("search"), HandleSearch)
 
 		special.GET("/user", Authz("user"), HandleUserList)
 		special.GET("/user/:id")

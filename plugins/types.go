@@ -19,8 +19,9 @@ type PreSavePlugin interface {
 type PostSavePlugin interface {
 	OnPostSave(path string, data []byte, attr FileAttr) error
 }
-type ReadPlugin interface {
-	OnRead(path string, data []byte, attr FileAttr) ([]byte, error)
+type ReadWikiPlugin interface {
+	//OnRead(path string, data []byte, attr FileAttr) ([]byte, error)
+	OnReadWiki(authCtx *auth.Context, path string, data []byte) ([]byte, error)
 }
 type AuthzPlugin interface {
 	AuthCheck(c *auth.Context) (auth.Result, error)

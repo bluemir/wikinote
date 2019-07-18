@@ -11,6 +11,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 
+	"github.com/bluemir/wikinote/pkgs/auth"
+	"github.com/bluemir/wikinote/pkgs/backend"
 	"github.com/bluemir/wikinote/pkgs/renderer"
 )
 
@@ -27,7 +29,27 @@ func HandleView(c *gin.Context) {
 			return
 		}
 
-		renderedData, err := Backend(c).Render(data)
+		token, ok := c.Get(TOKEN)
+		if !ok {
+			c.Header("WWW-Authenticate", AuthenicateString)
+			c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
+			c.Abort()
+			return
+		}
+		subject := Backend(c).Auth().Subject(token.(*auth.Token))
+		object := &backend.AuthzObject{Backend(c).File().Attr(c.Request.URL.Path)}
+
+		buf, err := Backend(c).Plugin().OnReadWiki(&auth.Context{
+			Subject: subject,
+			Object:  object,
+			Action:  "read",
+		}, c.Request.URL.Path, data)
+		if err != nil {
+			c.HTML(http.StatusInternalServerError, "/view/internal-error.html", renderer.Data{}.With(c))
+			return
+		}
+
+		renderedData, err := Backend(c).Render(buf)
 		if err != nil {
 			c.HTML(http.StatusInternalServerError, "/view/internal-error.html", renderer.Data{}.With(c))
 			return

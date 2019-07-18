@@ -16,7 +16,7 @@ type pluginList struct {
 	footer         []plugins.FooterPlugin
 	postSave       []plugins.PostSavePlugin
 	preSave        []plugins.PreSavePlugin
-	onRead         []plugins.ReadPlugin
+	onReadWiki     []plugins.ReadWikiPlugin
 	authz          []plugins.AuthzPlugin
 	registerRouter map[string]plugins.RegisterRouterPlugin
 }
@@ -27,7 +27,7 @@ func loadPlugins(conf *config.Config, store fileattr.Store, authManager *auth.Ma
 		footer:         []plugins.FooterPlugin{},
 		postSave:       []plugins.PostSavePlugin{},
 		preSave:        []plugins.PreSavePlugin{},
-		onRead:         []plugins.ReadPlugin{},
+		onReadWiki:     []plugins.ReadWikiPlugin{},
 		authz:          []plugins.AuthzPlugin{},
 		registerRouter: map[string]plugins.RegisterRouterPlugin{},
 	}
@@ -56,9 +56,9 @@ func loadPlugins(conf *config.Config, store fileattr.Store, authManager *auth.Ma
 			logrus.Debugf("post save plugin '%s'", name)
 			pl.postSave = append(pl.postSave, a)
 		}
-		if plugin, ok := p.(plugins.ReadPlugin); ok {
+		if plugin, ok := p.(plugins.ReadWikiPlugin); ok {
 			logrus.Debugf("read plugin '%s'", name)
-			pl.onRead = append(pl.onRead, plugin)
+			pl.onReadWiki = append(pl.onReadWiki, plugin)
 		}
 		if plugin, ok := p.(plugins.AuthzPlugin); ok {
 			logrus.Debugf("permission plugin '%s'", name)
@@ -96,9 +96,9 @@ func loadPlugins(conf *config.Config, store fileattr.Store, authManager *auth.Ma
 			logrus.Debugf("post save plugin '%s'", name)
 			pl.postSave = append(pl.postSave, a)
 		}
-		if plugin, ok := p.(plugins.ReadPlugin); ok {
+		if plugin, ok := p.(plugins.ReadWikiPlugin); ok {
 			logrus.Debugf("read plugin '%s'", name)
-			pl.onRead = append(pl.onRead, plugin)
+			pl.onReadWiki = append(pl.onReadWiki, plugin)
 		}
 		if plugin, ok := p.(plugins.AuthzPlugin); ok {
 			logrus.Debugf("permission plugin '%s'", name)

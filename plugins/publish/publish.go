@@ -3,8 +3,10 @@ package publish
 import (
 	"bytes"
 
+	yaml "gopkg.in/yaml.v3"
+
+	"github.com/bluemir/wikinote/pkgs/auth"
 	"github.com/bluemir/wikinote/plugins"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -14,47 +16,39 @@ const (
 	statePublished = "published"
 )
 
+/*
+TODO
+save to draft. And copy to md when publish
+*/
+
 func init() {
-	plugins.Register("publish", New)
+	plugins.RegisterV2("publish", New)
 }
 
-func New(opts map[string]string, store plugins.FileAttrStore, auth plugins.AuthManager) plugins.Plugin {
-	state, ok := opts["default-state"]
-	if ok && state == statePublished {
-		return &Publish{
-			defaultState: statePublished,
-			auth:         auth,
-		}
+func New(core plugins.Core, confBuf []byte) (plugins.Plugin, error) {
+	opts := &Options{
+		defaultState: statePublished,
 	}
-	return &Publish{
-		defaultState: stateDraft,
-		auth:         auth,
+
+	if err := yaml.Unmarshal(confBuf, opts); err != nil {
+		return nil, err
 	}
+	return &Publish{core, opts}, nil
 }
 
 type Publish struct {
+	plugins.Core
+	opts *Options
+}
+type Options struct {
 	defaultState string
-	auth         plugins.AuthManager
 }
 
-func (publish *Publish) TryRead(path string, user interface{}, attr plugins.FileAttr) error {
-	state, err := attr.Get(AttrKey)
-	if err != nil {
-		state = publish.defaultState
+func (publish *Publish) OnReadWiki(ctx *auth.Context, path string, data []byte) ([]byte, error) {
+	if ctx.Object.Attr(AttrKey) == stateDraft && ctx.Subject.Attr("publish.plugins.bluemir.me/auth") == "true" {
+		return data, nil
 	}
-	switch state {
-	case stateDraft:
-		if publish.auth.Is(user).NotAllow("edit") {
-			return errors.Errorf("This is Draft")
-		}
-	case statePublished:
-		return nil
-	default:
-	}
-	return nil
-}
-func (publish *Publish) TryWrite(path string, user interface{}, attr plugins.FileAttr) error {
-	return nil
+	return []byte("it is draft"), nil
 }
 func (publish *Publish) OnPreSave(path string, data []byte, attr plugins.FileAttr) ([]byte, error) {
 	// TODO make to api
