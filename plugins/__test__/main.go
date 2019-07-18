@@ -10,9 +10,9 @@ func init() {
 	plugins.Register("__test__", New)
 }
 
-func New(opts map[string]string, fileAttrStore plugins.FileAttrStore, auth plugins.AuthManager) plugins.Plugin {
+func New(core plugins.Core, opts []byte) (plugins.Plugin, error) {
 	logrus.Debugf("test config: %v", opts)
-	return &TestPlugin{}
+	return &TestPlugin{}, nil
 }
 
 type TestPlugin struct {

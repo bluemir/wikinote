@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/sirupsen/logrus"
+	yaml "gopkg.in/yaml.v3"
 
 	"github.com/bluemir/wikinote/plugins"
 )
@@ -14,15 +15,22 @@ func init() {
 	plugins.Register("disqus", New)
 }
 
-func New(opts map[string]string, store plugins.FileAttrStore, auth plugins.AuthManager) plugins.Plugin {
-	logrus.Debugf("init disqus, %+v", opts)
-	return &Disqus{
-		shortName: opts["short-name"],
+func New(core plugins.Core, opts []byte) (plugins.Plugin, error) {
+	config := &Config{}
+	if err := yaml.Unmarshal(opts, config); err != nil {
+		return nil, err
 	}
+	logrus.Debugf("init disqus, %#v", config)
+	return &Disqus{
+		shortName: config.ShortName,
+	}, nil
 }
 
 type Disqus struct {
 	shortName string
+}
+type Config struct {
+	ShortName string `yaml:"short-name"`
 }
 
 func (d *Disqus) Footer(path string, attr plugins.FileAttr) (template.HTML, error) {

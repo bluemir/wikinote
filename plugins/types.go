@@ -44,5 +44,18 @@ const (
 	DESC = fileattr.OrderDirectionDesc
 )
 
-// Auth
-type AuthManager *auth.Manager
+type Core interface {
+	// File().Attr().Where().SortBy().Limit().Find()
+	// File().Attr().SortBy().Find()
+	File() CoreFile
+	Auth() CoreAuth
+}
+type CoreFile interface {
+	Attr() CoreFileAttr
+}
+type CoreFileAttr = fileattr.Store
+
+type CoreAuth interface {
+}
+
+type AuthContext = auth.Context

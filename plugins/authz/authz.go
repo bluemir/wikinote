@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	plugins.RegisterV2("authz", New)
+	plugins.Register("authz", New)
 }
 
 func New(core plugins.Core, conf []byte) (plugins.Plugin, error) {

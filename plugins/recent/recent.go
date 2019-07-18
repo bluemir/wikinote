@@ -16,11 +16,12 @@ func init() {
 	plugins.Register("recent-changes", New)
 }
 
-func New(opts map[string]string, store plugins.FileAttrStore, auth plugins.AuthManager) plugins.Plugin {
-	logrus.Debugf("init recent-changes, %+v", opts)
+func New(core plugins.Core, opts []byte) (plugins.Plugin, error) {
+
+	logrus.Debugf("init recent-changes")
 	return &RecentChanges{
-		store: store,
-	}
+		store: core.File().Attr(),
+	}, nil
 }
 
 type RecentChanges struct {

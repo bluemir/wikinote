@@ -21,7 +21,7 @@ save to draft. And copy to md when publish
 */
 
 func init() {
-	plugins.RegisterV2("publish", New)
+	plugins.Register("publish", New)
 }
 
 func New(core plugins.Core, confBuf []byte) (plugins.Plugin, error) {

@@ -103,7 +103,7 @@ func Run(b backend.Backend, conf *Config) error {
 	queryRouter.Register(http.MethodGet, "history", HandleNotImplemented)
 	queryRouter.Register(http.MethodGet, "backlinks", HandleNotImplemented)
 	queryRouter.Register(http.MethodGet, "move", HandleNotImplemented)
-	queryRouter.Register(http.MethodGet, "*", HandleView)
+	queryRouter.Register(http.MethodGet, "*", Authz("view"), HandleView)
 	queryRouter.Register(http.MethodPost, "*", Authz("edit"), HandleUpdateForm)
 	queryRouter.Register(http.MethodPut, "*", Authz("edit"), HandleUpdate)
 	queryRouter.Register(http.MethodDelete, "*", HandleNotImplemented)

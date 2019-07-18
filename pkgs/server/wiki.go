@@ -29,19 +29,20 @@ func HandleView(c *gin.Context) {
 		}
 		authCtx, ok := c.Get(AUTH_CONTEXT)
 		if !ok {
-			c.HTML(http.StatusInternalServerError, "/view/internal-error.html", renderer.Data{}.With(c))
+			logrus.Trace("auth get failed")
+			c.HTML(http.StatusInternalServerError, "/errors/internal-error.html", renderer.Data{}.With(c))
 			c.Abort()
 			return
 		}
 		buf, err := Backend(c).Plugin().OnReadWiki(authCtx.(*auth.Context), c.Request.URL.Path, data)
 		if err != nil {
-			c.HTML(http.StatusInternalServerError, "/view/internal-error.html", renderer.Data{}.With(c))
+			c.HTML(http.StatusInternalServerError, "/errors/internal-error.html", renderer.Data{}.With(c))
 			return
 		}
 
 		renderedData, err := Backend(c).Render(buf)
 		if err != nil {
-			c.HTML(http.StatusInternalServerError, "/view/internal-error.html", renderer.Data{}.With(c))
+			c.HTML(http.StatusInternalServerError, "/errors/internal-error.html", renderer.Data{}.With(c))
 			return
 		}
 

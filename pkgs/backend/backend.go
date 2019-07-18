@@ -81,12 +81,10 @@ func New(o *Options) (Backend, error) {
 		plugins:       nil,
 	}
 
-	// initialize components
-	pl, err := loadPlugins(conf, fas, authMng)
-	if err != nil {
+	// initialize plugins
+	if err := b.loadPlugins(conf); err != nil {
 		return nil, err
 	}
-	b.plugins = pl
 
 	logrus.Info("Backend Initialized")
 
