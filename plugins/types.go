@@ -21,10 +21,10 @@ type PostSavePlugin interface {
 }
 type ReadWikiPlugin interface {
 	//OnRead(path string, data []byte, attr FileAttr) ([]byte, error)
-	OnReadWiki(authCtx *auth.Context, path string, data []byte) ([]byte, error)
+	OnReadWiki(authCtx *AuthContext, path string, data []byte) ([]byte, error)
 }
 type AuthzPlugin interface {
-	AuthCheck(c *auth.Context) (auth.Result, error)
+	AuthCheck(c *AuthContext) (auth.Result, error)
 }
 type RegisterRouterPlugin interface {
 	RegisterRouter(r gin.IRouter)
@@ -45,5 +45,4 @@ const (
 )
 
 // Auth
-
 type AuthManager *auth.Manager

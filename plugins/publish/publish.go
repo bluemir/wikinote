@@ -5,7 +5,6 @@ import (
 
 	yaml "gopkg.in/yaml.v3"
 
-	"github.com/bluemir/wikinote/pkgs/auth"
 	"github.com/bluemir/wikinote/plugins"
 )
 
@@ -44,7 +43,7 @@ type Options struct {
 	defaultState string
 }
 
-func (publish *Publish) OnReadWiki(ctx *auth.Context, path string, data []byte) ([]byte, error) {
+func (publish *Publish) OnReadWiki(ctx *plugins.AuthContext, path string, data []byte) ([]byte, error) {
 	if ctx.Object.Attr(AttrKey) == stateDraft && ctx.Subject.Attr("publish.plugins.bluemir.me/auth") == "true" {
 		return data, nil
 	}

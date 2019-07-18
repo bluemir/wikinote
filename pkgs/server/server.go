@@ -17,9 +17,10 @@ import (
 
 // gin context or session keys
 const (
-	BACKEND = "backend"
-	SPECAIL = renderer.KEY_SPECIAL_ROUTE
-	TOKEN   = renderer.KEY_TOKEN
+	BACKEND      = "backend"
+	SPECAIL      = renderer.KEY_SPECIAL_ROUTE
+	TOKEN        = renderer.KEY_TOKEN
+	AUTH_CONTEXT = "auth-context"
 
 	Relam             = "Wikinote"
 	AuthenicateString = `Basic realm="` + Relam + `"`

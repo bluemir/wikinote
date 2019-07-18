@@ -90,11 +90,14 @@ func Authz(action string) func(c *gin.Context) {
 		subject := Backend(c).Auth().Subject(token.(*auth.Token))
 		object := &backend.AuthzObject{Backend(c).File().Attr(c.Request.URL.Path)}
 
-		result, err := Backend(c).Plugin().AuthCheck(&auth.Context{
+		ctx := &auth.Context{
 			Subject: subject,
 			Object:  object,
 			Action:  action,
-		})
+		}
+		c.Set(AUTH_CONTEXT, ctx)
+
+		result, err := Backend(c).Plugin().AuthCheck(ctx)
 		if err != nil {
 			c.HTML(http.StatusInternalServerError, "errors/internal.html", renderer.Data{}.With(c))
 			c.Abort()

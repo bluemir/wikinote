@@ -3,6 +3,8 @@ package plugins
 import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+
+	"github.com/bluemir/wikinote/pkgs/auth"
 )
 
 var pluginsV2 = map[string]PluginInitV2{}
@@ -29,13 +31,19 @@ type Core interface {
 	File() CoreFile
 	Auth() CoreAuth
 }
-type Config interface {
-	//UnmarshalYAML(value *yaml.Node) error
-}
 type CoreFile interface {
+	Attr()
+}
+type CoreFileAttr interface {
+	Where()
+	SortBy()
+	Limit()
+	Find()
 }
 type CoreAuth interface {
 }
+
+type AuthContext = auth.Context
 
 /*
 type Core interface {
