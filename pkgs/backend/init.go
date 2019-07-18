@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/sirupsen/logrus"
+	yaml "gopkg.in/yaml.v2"
 
 	"github.com/bluemir/wikinote/pkgs/auth"
 	"github.com/bluemir/wikinote/pkgs/config"
@@ -42,6 +43,46 @@ func loadPlugins(conf *config.Config, store fileattr.Store, authManager *auth.Ma
 			logrus.Error(err)
 			return nil, err
 		}
+		logrus.Debugf("plugin '%s' is initialize", name)
+		if f, ok := p.(plugins.FooterPlugin); ok {
+			logrus.Debugf("footer plugin '%s'", name)
+			pl.footer = append(pl.footer, f)
+		}
+		if plugin, ok := p.(plugins.PreSavePlugin); ok {
+			logrus.Debugf("pre save plugin '%s'", name)
+			pl.preSave = append(pl.preSave, plugin)
+		}
+		if a, ok := p.(plugins.PostSavePlugin); ok {
+			logrus.Debugf("post save plugin '%s'", name)
+			pl.postSave = append(pl.postSave, a)
+		}
+		if plugin, ok := p.(plugins.ReadPlugin); ok {
+			logrus.Debugf("read plugin '%s'", name)
+			pl.onRead = append(pl.onRead, plugin)
+		}
+		if plugin, ok := p.(plugins.AuthzPlugin); ok {
+			logrus.Debugf("permission plugin '%s'", name)
+			pl.authz = append(pl.authz, plugin)
+		}
+		if a, ok := p.(plugins.RegisterRouterPlugin); ok {
+			logrus.Debugf("resiger route plugin '%s'", name)
+			pl.registerRouter[name] = a
+		}
+	}
+
+	for _, pconf := range conf.PluginsV2 {
+		buf, err := yaml.Marshal(pconf.Options)
+		if err != nil {
+			logrus.Error(err)
+			return nil, err
+		}
+		p, err := plugins.NewV2(pconf.Name, nil, buf)
+		if err != nil {
+			logrus.Error(err)
+			return nil, err
+		}
+
+		name := pconf.Name
 		logrus.Debugf("plugin '%s' is initialize", name)
 		if f, ok := p.(plugins.FooterPlugin); ok {
 			logrus.Debugf("footer plugin '%s'", name)

@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ghodss/yaml"
 	"github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v3"
 )
 
 var defaultConfig = `
@@ -25,14 +25,18 @@ plugins:
 `
 
 type Config struct {
-	FrontPage  string `json:"front-page"`
-	AutoBackup bool   `json:"auto-backup"`
+	FrontPage  string `yaml:"front-page"`
+	AutoBackup bool   `yaml:"auto-backup"`
 	User       struct {
 		Default struct {
 			Role string
 		}
 	}
-	Plugins map[string]interface{} `json:"plugins"`
+	Plugins   map[string]interface{} `yaml:"plugins"`
+	PluginsV2 []struct {
+		Name    string      `yaml:"name"`
+		Options interface{} `yaml:"options"`
+	} `yaml:"pluginsV2"`
 }
 
 func ParseConfig(path string) (*Config, error) {
@@ -40,7 +44,7 @@ func ParseConfig(path string) (*Config, error) {
 	// Default Value
 
 	conf := &Config{}
-	defer logrus.Debugf("%+v", conf)
+	defer logrus.Debugf("%#v", conf)
 	err := yaml.Unmarshal([]byte(defaultConfig), conf)
 	if err != nil {
 		return conf, err

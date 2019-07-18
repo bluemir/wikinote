@@ -4,8 +4,9 @@ import (
 	"encoding/base64"
 	"strings"
 
-	"github.com/bluemir/go-utils/auth/utils"
 	"github.com/jinzhu/gorm"
+
+	"github.com/bluemir/wikinote/pkgs/utils"
 )
 
 func New(store *gorm.DB) (*Manager, error) {

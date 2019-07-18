@@ -122,7 +122,6 @@ func (b *backend) Auth() *auth.Manager {
 func (b *backend) File() FileClause {
 	return &fileClause{b}
 }
-
 func (b *backend) Plugin() PluginClause {
 	return &pluginClause{b}
 }
