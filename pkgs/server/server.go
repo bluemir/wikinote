@@ -70,7 +70,7 @@ func Run(b backend.Backend, conf *Config) error {
 		special.GET("/auth/login", HandleLogin)
 		special.GET("/auth/logout", HandleLogout)
 
-		special.POST("/api/preview", Authz("edit"), HandlePreview) // render body
+		special.POST("/api/preview", Authz("preview"), HandlePreview) // render body
 		special.GET("/search", Authz("search"), HandleSearch)
 
 		special.GET("/user", Authz("user"), HandleUserList)
@@ -104,8 +104,8 @@ func Run(b backend.Backend, conf *Config) error {
 	queryRouter.Register(http.MethodGet, "backlinks", HandleNotImplemented)
 	queryRouter.Register(http.MethodGet, "move", HandleNotImplemented)
 	queryRouter.Register(http.MethodGet, "*", Authz("view"), HandleView)
-	queryRouter.Register(http.MethodPost, "*", Authz("edit"), HandleUpdateForm)
-	queryRouter.Register(http.MethodPut, "*", Authz("edit"), HandleUpdate)
+	queryRouter.Register(http.MethodPost, "*", Authz("update"), HandleUpdateForm)
+	queryRouter.Register(http.MethodPut, "*", Authz("update"), HandleUpdate)
 	queryRouter.Register(http.MethodDelete, "*", HandleNotImplemented)
 
 	app.NoRoute(queryRouter.Handler)
