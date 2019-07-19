@@ -13,7 +13,8 @@ func New(store *gorm.DB) (*Manager, error) {
 	store.AutoMigrate(
 		&User{},
 		&Token{},
-		&Attr{},
+		&UserAttr{},
+		&TokenAttr{},
 	)
 	return &Manager{store}, nil
 }

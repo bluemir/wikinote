@@ -3,11 +3,9 @@ package auth
 import (
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
-	"github.com/rs/xid"
 )
 
 func (m *Manager) CreateUser(u *User) error {
-	u.ID = xid.New().String()
 	if err := m.store.Create(u).Error; err != nil {
 		return errors.Wrapf(err, "User already exist")
 	}

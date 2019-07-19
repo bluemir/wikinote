@@ -14,12 +14,10 @@ func (m *Manager) IssueToken(username, unhashedKey string) (*Token, error) {
 		return nil, errors.Errorf("user not found")
 	}
 
-	id := xid.New().String()
 	token := &Token{
-		ID:        id,
 		UserName:  username,
 		HashedKey: hash(unhashedKey, salt(username)),
-		RevokeKey: hash(username+id+unhashedKey[:4], "__revoke__"),
+		RevokeKey: hash(username+xid.New().String(), "__revoke__"),
 	}
 	if err := m.store.Create(token).Error; err != nil {
 		return nil, err

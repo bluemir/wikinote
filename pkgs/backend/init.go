@@ -49,7 +49,7 @@ func (b *backend) loadPlugins(conf *config.Config) error {
 		}
 		p, err := plugins.New(pconf.Name, core, buf)
 		if err != nil {
-			logrus.Error(err)
+			logrus.WithField("plugin", pconf.Name).Error(err)
 			return err
 		}
 

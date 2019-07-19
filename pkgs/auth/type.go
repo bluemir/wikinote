@@ -1,11 +1,11 @@
 package auth
 
 type User struct {
-	ID   string `gorm:"primary_key"`
+	ID   uint   `gorm:"primary_key"`
 	Name string `gorm:"unique"`
 }
 type Token struct {
-	ID        string `gorm:"primary_key"`
+	ID        uint `gorm:"primary_key"`
 	UserName  string
 	HashedKey string `json:"-"`
 	RevokeKey string `gorm:"unique"`
@@ -13,10 +13,18 @@ type Token struct {
 
 // AuthAttr
 type Attr struct {
-	ID        string `gorm:"primary_key"`
-	Namespace string `gorm:"primary_key"`
-	Key       string `gorm:"primary_key"`
-	Value     string
+	Key   string
+	Value string
+}
+type UserAttr struct {
+	UserId uint   `gorm:"primary_key"`
+	Key    string `gorm:"primary_key"`
+	Value  string
+}
+type TokenAttr struct {
+	TokenId uint   `gorm:"primary_key"`
+	Key     string `gorm:"primary_key"`
+	Value   string
 }
 
 // helper
@@ -38,5 +46,3 @@ const (
 	Reject
 	Accept
 )
-
-// ABAC(Context{subject, object, action}) == Reject

@@ -10,14 +10,20 @@ type subject struct {
 }
 
 func (m *Manager) Subject(token *Token) Subject {
+	// token may be nil for guest
 	return &subject{m, token}
 }
 
 func (subj *subject) Attr(key string) string {
 	attr := &Attr{}
-	if err := subj.store.Where(&Attr{
-		ID:  subj.token.ID,
-		Key: key,
+
+	if subj.token == nil {
+		return "" // just return nil value
+	}
+
+	if err := subj.store.Where(&TokenAttr{
+		TokenId: subj.token.ID,
+		Key:     key,
 	}).Take(attr).Error; err != nil && !gorm.IsRecordNotFoundError(err) {
 		// TODO log Error
 		return ""
@@ -30,9 +36,9 @@ func (subj *subject) Attr(key string) string {
 		// TODO log Error
 		return ""
 	}
-	if err := subj.store.Where(&Attr{
-		ID:  user.ID,
-		Key: key,
+	if err := subj.store.Where(&UserAttr{
+		UserId: user.ID,
+		Key:    key,
 	}).Take(attr).Error; err != nil {
 		// TODO log Error
 		return ""

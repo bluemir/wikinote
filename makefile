@@ -54,7 +54,7 @@ build/dist/%: app/%
 build/$(BIN_NAME): build/$(BIN_NAME).bin $(DISTS)
 	cp $< $@.tmp
 	rice append -v \
-		-i $(IMPORT_PATH)/pkgs/dist     \
+		-i $(IMPORT_PATH)/pkgs/dist \
 		--exec $@.tmp
 	mv $@.tmp $@
 	@echo Embed resources DONE
@@ -71,7 +71,7 @@ auto-run:
 		echo "hit ^C again to quit" && sleep 1  \
 	; done
 reset:
-	ps -f -C make | grep auto-run | awk '{print $$2}' | xargs kill
+	ps -f -C make | grep "test run" | awk '{print $$2}' | xargs kill
 
 docker-build: build/.docker-image
 build/.docker-image: Dockerfile makefile $(GO_SOURCES) $(DISTS)

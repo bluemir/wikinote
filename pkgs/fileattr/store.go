@@ -126,7 +126,6 @@ type pathClause struct {
 }
 
 func (s *pathClause) Get(key string) (string, error) {
-
 	attr, err := (&storeClause{store: s.store}).Where(&Options{
 		Path: s.path,
 		Key:  key,

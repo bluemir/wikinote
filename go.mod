@@ -18,6 +18,7 @@ require (
 	github.com/jinzhu/now v1.0.1 // indirect
 	github.com/lib/pq v1.1.1 // indirect
 	github.com/mattn/go-sqlite3 v1.10.0 // indirect
+	github.com/mgutz/str v1.2.0
 	github.com/pkg/errors v0.8.1
 	github.com/rs/xid v1.2.1
 	github.com/russross/blackfriday/v2 v2.0.1

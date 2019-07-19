@@ -28,16 +28,17 @@ func Token(c *gin.Context) *auth.Token {
 }
 
 func BasicAuthn(c *gin.Context) {
+	log := logrus.WithField("method", "BaiscAuthn")
 	token, err := Backend(c).Auth().HttpAuth(c.GetHeader("Authorization"))
 
 	switch auth.ErrorCode(err) {
 	case auth.ErrNone:
-		logrus.Debug("Login user :", token.UserName)
+		log.Debug("Login user :", token.UserName)
 		c.SetCookie("logined", token.UserName, 0, "", "", false, true)
 		c.Set(TOKEN, token)
 		return
 	case auth.ErrEmptyAccount: // it means logout
-		logrus.Debug("Empty Account")
+		log.Debug("Empty Account")
 		if isLogined(c) {
 			c.SetCookie("logined", "", -1, "", "", false, true)
 		} else {
@@ -47,7 +48,7 @@ func BasicAuthn(c *gin.Context) {
 		}
 		return
 	case auth.ErrEmptyHeader:
-		logrus.Debug("Empty header")
+		log.Debug("Empty header")
 		if isLogined(c) {
 			logrus.Debug("cookie found but auth not found")
 			c.Header("WWW-Authenticate", AuthenicateString)
@@ -56,7 +57,8 @@ func BasicAuthn(c *gin.Context) {
 			return
 		}
 		// Skip auth
-		logrus.Debug("skip auth")
+		log.Debug("skip auth")
+		// maybe use guest token
 		return
 	case auth.ErrWrongEncoding, auth.ErrBadToken:
 		FlashMessage(c).Warn("Connot decode auth token")
@@ -64,7 +66,7 @@ func BasicAuthn(c *gin.Context) {
 		c.Abort()
 		return
 	case auth.ErrUnauthorized:
-		logrus.Debug("unauthorized")
+		log.Debug("unauthorized")
 		FlashMessage(c).Warn("Error on auth, id password not matched")
 		c.Header("WWW-Authenticate", AuthenicateString)
 		c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
@@ -78,16 +80,9 @@ func BasicAuthn(c *gin.Context) {
 	}
 }
 func Authz(action string) func(c *gin.Context) {
+	log := logrus.WithField("method", "Authz")
 	return func(c *gin.Context) {
-		token, ok := c.Get(TOKEN)
-		if !ok {
-			c.Header("WWW-Authenticate", AuthenicateString)
-			c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", renderer.Data{}.With(c))
-			c.Abort()
-			return
-		}
-
-		subject := Backend(c).Auth().Subject(token.(*auth.Token))
+		subject := Backend(c).Auth().Subject(Token(c))
 		object := &backend.AuthzObject{Backend(c).File().Attr(c.Request.URL.Path)}
 
 		ctx := &auth.Context{
@@ -105,10 +100,12 @@ func Authz(action string) func(c *gin.Context) {
 		}
 		switch result {
 		case auth.Reject:
+			log.Trace("rejected")
 			c.HTML(http.StatusForbidden, "/errors/forbidden.html", renderer.Data{}.With(c))
 			c.Abort()
 			return
 		case auth.Accept:
+			log.Trace("accepted")
 			// check next
 			return
 		case auth.Unknown:
@@ -144,8 +141,13 @@ func HandleRegister(c *gin.Context) {
 	err = Backend(c).Auth().CreateUser(&auth.User{
 		Name: registeForm.Id,
 	})
-	//Backend(c).Auth().SetAttr(username, HandleRegisterForm.Email)
 	if err != nil {
+		FlashMessage(c).Warn("fail to register: %s", err.Error())
+		c.Redirect(http.StatusSeeOther, "/!/auth/register")
+		return
+	}
+
+	if err := Backend(c).Auth().SetUserAttr(registeForm.Id, "wikinote.io/email", registeForm.Email); err != nil {
 		FlashMessage(c).Warn("fail to register: %s", err.Error())
 		c.Redirect(http.StatusSeeOther, "/!/auth/register")
 		return

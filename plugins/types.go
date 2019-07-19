@@ -59,3 +59,10 @@ type CoreAuth interface {
 }
 
 type AuthContext = auth.Context
+type AuthResult = auth.Result
+
+const (
+	Accept  = auth.Accept
+	Reject  = auth.Reject
+	Unknown = auth.Unknown
+)
