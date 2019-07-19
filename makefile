@@ -23,7 +23,6 @@ DIRS = $(shell find . \
                     -name ".git" -prune -o \
                     -type d \
                     -print)
-
 .sources:
 	@echo $(DIRS) makefile \
 	      $(GO_SOURCES) \
@@ -32,16 +31,7 @@ DIRS = $(shell find . \
 	      $(CSS_SOURCES) \
 	      $(WEB_LIBS)| tr " " "\n"
 
-run: export LOG_LEVEL=trace
-run: build/$(BIN_NAME)
-	build/$(BIN_NAME) -D serve
-auto-run:
-	while true; do \
-		make .sources | entr -rd make run ;  \
-		echo "hit ^C again to quit" && sleep 1  \
-	; done
-reset:
-	ps -e | grep make | grep -v grep | awk '{print $$1}' | xargs kill
+# BUILD
 
 ## Binary build
 build/$(BIN_NAME).bin: $(GO_SOURCES) makefile
@@ -49,14 +39,6 @@ build/$(BIN_NAME).bin: $(GO_SOURCES) makefile
 		-ldflags "-X main.Version=$(VERSION)" \
 		-o $@ .
 	@echo Build DONE
-
-build/$(BIN_NAME): build/$(BIN_NAME).bin $(DISTS)
-	cp $< $@.tmp
-	rice append -v \
-		-i $(IMPORT_PATH)/pkgs/dist     \
-		--exec $@.tmp
-	mv $@.tmp $@
-	@echo Embed resources DONE
 
 ## Web dist
 build/dist/html/%.html: app/html/%.html
@@ -68,16 +50,42 @@ build/dist/%: app/%
 	@mkdir -p $(dir $@)
 	cp $< $@
 
-tools:
-	npm install -g less
-	go get github.com/GeertJohan/go.rice/rice
+## resource embed
+build/$(BIN_NAME): build/$(BIN_NAME).bin $(DISTS)
+	cp $< $@.tmp
+	rice append -v \
+		-i $(IMPORT_PATH)/pkgs/dist     \
+		--exec $@.tmp
+	mv $@.tmp $@
+	@echo Embed resources DONE
 
-clean:
-	rm -rf bulid/ vendor/
-	go clean
+test:
+	go test -v ./...
+
+run: export LOG_LEVEL=trace
+run: build/$(BIN_NAME)
+	build/$(BIN_NAME) -D serve
+auto-run:
+	while true; do \
+		make .sources | entr -rd make test run ;  \
+		echo "hit ^C again to quit" && sleep 1  \
+	; done
+reset:
+	ps -f -C make | grep auto-run | awk '{print $$2}' | xargs kill
 
 docker-build: build/.docker-image
+build/.docker-image: Dockerfile makefile $(GO_SOURCES) $(DISTS)
+	docker build \
+		--build-arg VERSION=$(VERSION) \
+		-t $(DOCKER_IMAGE_NAME):$(VERSION) .
+	echo "$(DOCKER_IMAGE_NAME):$(VERSION)" > $@
+
+
 docker-push: build/.docker-image.pushed
+build/.docker-image.pushed: .docker-image
+	docker push $(shell cat .docker-image)
+	echo $(shell cat .docker-image) > $@
+
 docker-run: build/.docker-image
 	docker run --rm -it \
 		-p 4000:4000 \
@@ -89,13 +97,12 @@ docker-run: build/.docker-image
 		--config /wiki/.app/config.yaml \
 		--bind :4000
 
-build/.docker-image: Dockerfile makefile $(GO_SOURCES) $(DISTS)
-	docker build \
-		--build-arg VERSION=$(VERSION) \
-		-t $(DOCKER_IMAGE_NAME):$(VERSION) .
-	echo "$(DOCKER_IMAGE_NAME):$(VERSION)" > $@
-build/.docker-image.pushed: .docker-image
-	docker push $(shell cat .docker-image)
-	echo $(shell cat .docker-image) > $@
+tools:
+	npm install -g less
+	go get github.com/GeertJohan/go.rice/rice
 
-.PHONY: .sources run auto-run reset tools clean
+clean:
+	rm -rf bulid/ vendor/
+	go clean
+
+.PHONY: .sources run auto-run reset docker-build docker-push docker-run tools clean

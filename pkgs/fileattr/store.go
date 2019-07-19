@@ -6,15 +6,14 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// store.Where(fileAttr.Options{NameSpace: "plugin.bluemir.me"}).SortBy(VALUE, DESC).Find()
+// store.Where(fileAttr.Options{Key: "plugin.bluemir.me/recents"}).SortBy(VALUE, DESC).Find()
 // store.Where(fileAttr.Options{Path:"front-page.md"}).SortBy(KEY, DESC).Find()
 type store struct {
 	db *gorm.DB
 }
 type Options struct {
-	Path      string
-	Namespace string
-	Key       string
+	Path string
+	Key  string
 }
 type FileAttrEntity struct {
 	gorm.Model
@@ -90,9 +89,8 @@ func (s *storeClause) Find() ([]FileAttr, error) {
 
 	err := s.db.Where(&FileAttrEntity{
 		FileAttr: FileAttr{
-			Path:      s.options.Path,
-			Namespace: s.options.Namespace,
-			Key:       s.options.Key,
+			Path: s.options.Path,
+			Key:  s.options.Key,
 		},
 	}).Limit(s.limit).Order(order).Find(&attrs).Error
 	if err != nil {
@@ -111,9 +109,8 @@ func (s *storeClause) Get() (*FileAttr, error) {
 
 	err := s.db.Where(&FileAttrEntity{
 		FileAttr: FileAttr{
-			Path:      s.options.Path,
-			Namespace: s.options.Namespace,
-			Key:       s.options.Key,
+			Path: s.options.Path,
+			Key:  s.options.Key,
 		},
 	}).First(attr).Error
 	if err != nil {
@@ -128,39 +125,32 @@ type pathClause struct {
 	path  string
 }
 
-func (s *pathClause) Get(namespaceKey string) (string, error) {
-	namespace, k := attrKeySplit(namespaceKey)
+func (s *pathClause) Get(key string) (string, error) {
 
 	attr, err := (&storeClause{store: s.store}).Where(&Options{
-		Path:      s.path,
-		Namespace: namespace,
-		Key:       k,
+		Path: s.path,
+		Key:  key,
 	}).Get()
 	if err != nil {
 		return "", err
 	}
 	return attr.Value, nil
 }
-func (s *pathClause) Set(namespaceKey, value string) error {
-	namespace, key := attrKeySplit(namespaceKey)
-
+func (s *pathClause) Set(key, value string) error {
 	return s.store.db.Where(&FileAttrEntity{
 		FileAttr: FileAttr{
-			Path:      s.path,
-			Namespace: namespace,
-			Key:       key,
+			Path: s.path,
+			Key:  key,
 		},
 	}).Assign(FileAttr{
-		Path:      s.path,
-		Namespace: namespace,
-		Key:       key,
-		Value:     value,
+		Path:  s.path,
+		Key:   key,
+		Value: value,
 	}).FirstOrCreate(&FileAttrEntity{}).Error
 }
-func (s *pathClause) All(namespace string) (map[string]string, error) {
+func (s *pathClause) All() (map[string]string, error) {
 	attrs, err := (&storeClause{store: s.store}).Where(&Options{
-		Path:      s.path,
-		Namespace: namespace,
+		Path: s.path,
 	}).Find()
 	if err != nil {
 		return nil, err
@@ -168,7 +158,7 @@ func (s *pathClause) All(namespace string) (map[string]string, error) {
 
 	kv := map[string]string{}
 	for _, attr := range attrs {
-		kv[attr.Namespace+"/"+attr.Key] = attr.Value
+		kv[attr.Key] = attr.Value
 	}
 	return kv, nil
 }

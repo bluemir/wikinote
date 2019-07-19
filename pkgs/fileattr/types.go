@@ -1,10 +1,9 @@
 package fileattr
 
 type FileAttr struct {
-	Path      string // 1024
-	Namespace string // 256
-	Key       string // 256
-	Value     string // 2048
+	Path  string // 1024
+	Key   string // 256
+	Value string // 2048
 }
 
 type Store interface {
@@ -43,7 +42,7 @@ const (
 
 // using by plugins
 type PathClause interface {
-	Get(namespaceKey string) (string, error)
-	Set(namespaceKey, value string) error
-	All(namespace string) (map[string]string, error)
+	Get(key string) (string, error)
+	Set(key, value string) error
+	All() (map[string]string, error)
 }
