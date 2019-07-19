@@ -10,12 +10,15 @@ import (
 )
 
 func New(store *gorm.DB) (*Manager, error) {
-	store.AutoMigrate(
+	err := store.AutoMigrate(
 		&User{},
 		&Token{},
 		&UserAttr{},
 		&TokenAttr{},
-	)
+	).Error
+	if err != nil {
+		return nil, err
+	}
 	return &Manager{store}, nil
 }
 
@@ -92,6 +95,10 @@ func (m *Manager) Root(username string) (string, error) {
 	}
 
 	if err := m.SetUserAttr(username, "rbac/role-root", "true"); err != nil {
+		return "", err
+	}
+
+	if err := m.SetUserAttr(username, "user.wikinote.io/email", "root@wikinote.io"); err != nil {
 		return "", err
 	}
 

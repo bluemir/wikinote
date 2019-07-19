@@ -17,13 +17,13 @@ type Attr struct {
 	Value string
 }
 type UserAttr struct {
-	UserId uint   `gorm:"primary_key"`
-	Key    string `gorm:"primary_key"`
+	UserId uint   `gorm:"primary_key;auto_increment:false"`
+	Key    string `gorm:"primary_key;auto_increment:false"`
 	Value  string
 }
 type TokenAttr struct {
-	TokenId uint   `gorm:"primary_key"`
-	Key     string `gorm:"primary_key"`
+	TokenId uint   `gorm:"primary_key;auto_increment:false"`
+	Key     string `gorm:"primary_key;auto_increment:false"`
 	Value   string
 }
 

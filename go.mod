@@ -7,17 +7,11 @@ require (
 	github.com/daaku/go.zipexe v0.0.0-20150329023125-a5fe2436ffcb // indirect
 	github.com/denisenkom/go-mssqldb v0.0.0-20190715232110-2b613d287457 // indirect
 	github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815
-	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
 	github.com/gin-contrib/sessions v0.0.0-20190101140330-dc5246754963
 	github.com/gin-gonic/autotls v0.0.0-20190119125636-0b5f4fc15768
 	github.com/gin-gonic/gin v1.3.0
-	github.com/go-sql-driver/mysql v1.4.1 // indirect
 	github.com/gofrs/uuid v3.2.0+incompatible // indirect
-	github.com/jinzhu/gorm v1.9.2
-	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a // indirect
-	github.com/jinzhu/now v1.0.1 // indirect
-	github.com/lib/pq v1.1.1 // indirect
-	github.com/mattn/go-sqlite3 v1.10.0 // indirect
+	github.com/jinzhu/gorm v1.9.10
 	github.com/mgutz/str v1.2.0
 	github.com/pkg/errors v0.8.1
 	github.com/rs/xid v1.2.1
