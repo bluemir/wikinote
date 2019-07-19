@@ -1,7 +1,6 @@
 package authz
 
 import (
-	"github.com/sirupsen/logrus"
 	yaml "gopkg.in/yaml.v3"
 
 	"github.com/bluemir/wikinote/plugins"
@@ -12,7 +11,6 @@ func init() {
 }
 
 func New(core plugins.Core, conf []byte) (plugins.Plugin, error) {
-	logrus.Debugf("#############################\n%s", conf)
 	opt := &Option{}
 	err := yaml.Unmarshal(conf, opt)
 	if err != nil {

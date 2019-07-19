@@ -76,7 +76,7 @@ func (b *backend) loadPlugins(conf *config.Config) error {
 			pl.authz = append(pl.authz, plugin)
 		}
 		if a, ok := p.(plugins.RegisterRouterPlugin); ok {
-			logrus.Debugf("resiger route plugin '%s'", name)
+			logrus.Debugf("register route plugin '%s'", name)
 			pl.registerRouter[name] = a
 		}
 	}

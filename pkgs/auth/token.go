@@ -1,6 +1,9 @@
 package auth
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
 )
@@ -17,7 +20,7 @@ func (m *Manager) IssueToken(username, unhashedKey string) (*Token, error) {
 	token := &Token{
 		UserName:  username,
 		HashedKey: hash(unhashedKey, salt(username)),
-		RevokeKey: hash(username+xid.New().String(), "__revoke__"),
+		RevokeKey: fmt.Sprintf("%s-%s", xid.New(), hash(username+time.Now().String(), "__revoke__")),
 	}
 	if err := m.store.Create(token).Error; err != nil {
 		return nil, err
@@ -26,14 +29,14 @@ func (m *Manager) IssueToken(username, unhashedKey string) (*Token, error) {
 }
 func (m *Manager) ListToken(username string) ([]Token, error) {
 	result := []Token{}
-	err := m.store.Where("username = ?", username).Find(&result).Error
+	err := m.store.Where(&Token{UserName: username}).Find(&result).Error
 	if err != nil {
 		return nil, err
 	}
 	return result, err
 }
 func (m *Manager) RevokeToken(revokeKey string) error {
-	err := m.store.Where("revoke_key = ?", revokeKey).Delete(&Token{}).Error
+	err := m.store.Where(&Token{RevokeKey: revokeKey}).Delete(&Token{}).Error
 	if err != nil {
 		return err
 	}

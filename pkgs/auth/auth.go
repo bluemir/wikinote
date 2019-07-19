@@ -64,15 +64,36 @@ func (m *Manager) Default(username, unhashedKey string) (*Token, error) {
 	return token, nil
 }
 func (m *Manager) Root(username string) (string, error) {
-	user := &User{
-		Name: username,
+	_, exist, err := m.GetUser(username)
+	if err != nil {
+		return "", err
 	}
-	if err := m.CreateUser(user); err != nil {
-		//return "", err
+	if !exist {
+		if err := m.CreateUser(&User{
+			Name: username,
+		}); err != nil {
+			return "", err
+		}
 	}
+
+	tokens, err := m.ListToken(username)
+	if err != nil {
+		return "", err
+	}
+	for _, token := range tokens {
+		if err := m.RevokeToken(token.RevokeKey); err != nil {
+			return "", err
+		}
+	}
+
 	key := utils.RandomString(16)
 	if _, err := m.IssueToken(username, key); err != nil {
 		return "", err
 	}
+
+	if err := m.SetUserAttr(username, "rbac/role-root", "true"); err != nil {
+		return "", err
+	}
+
 	return key, nil
 }
