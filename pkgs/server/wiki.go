@@ -88,6 +88,13 @@ func (server *Server) HandleRaw(c *gin.Context) {
 func (server *Server) HandleEditForm(c *gin.Context) {
 	path := c.Request.URL.Path
 
+	authCtx, ok := c.Get(AUTH_CONTEXT)
+	if !ok {
+		logrus.Trace("auth get failed")
+		c.HTML(http.StatusInternalServerError, "/errors/internal-error.html", renderer.Data{}.With(c))
+		c.Abort()
+		return
+	}
 	data, err := server.File().Read(path)
 	if err != nil {
 		//c.AbortWithError(http.StatusNotFound, err)
@@ -95,8 +102,14 @@ func (server *Server) HandleEditForm(c *gin.Context) {
 		// TODO add flash message
 	}
 
+	buf, err := server.Plugin().OnReadWiki(authCtx.(*auth.Context), c.Request.URL.Path, data)
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "/errors/internal-error.html", renderer.Data{}.With(c))
+		return
+	}
+
 	c.HTML(http.StatusOK, "/edit.html", renderer.Data{
-		"data": string(data),
+		"data": string(buf),
 		"path": c.Param("path"),
 	}.With(c))
 }
@@ -105,12 +118,28 @@ func (server *Server) HandleUpdateForm(c *gin.Context) {
 	data, ok := c.GetPostForm("data")
 	if !ok {
 		c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("error on form"))
+		return
 	}
-	err := server.File().Write(p, []byte(data))
-	if err != nil {
 
+	authCtx, ok := c.Get(AUTH_CONTEXT)
+	if !ok {
+		logrus.Trace("auth get failed")
+		c.HTML(http.StatusInternalServerError, "/errors/internal-error.html", renderer.Data{}.With(c))
+		c.Abort()
+		return
+	}
+
+	buf, err := server.Plugin().PreSave(authCtx.(*auth.Context), p, []byte(data))
+	if err != nil {
 		c.HTML(http.StatusInternalServerError, "/errors/not-found.html", gin.H{})
 		c.Abort()
+		return
+	}
+
+	if err := server.File().Write(p, buf); err != nil {
+		c.HTML(http.StatusInternalServerError, "/errors/not-found.html", gin.H{})
+		c.Abort()
+		return
 	}
 	c.Redirect(http.StatusSeeOther, p)
 }
@@ -119,8 +148,29 @@ func (server *Server) HandleUpdate(c *gin.Context) {
 	data, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
+		return
 	}
-	server.File().Write(p, data)
+
+	authCtx, ok := c.Get(AUTH_CONTEXT)
+	if !ok {
+		logrus.Trace("auth get failed")
+		c.HTML(http.StatusInternalServerError, "/errors/internal-error.html", renderer.Data{}.With(c))
+		c.Abort()
+		return
+	}
+
+	buf, err := server.Plugin().PreSave(authCtx.(*auth.Context), p, data)
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "/errors/not-found.html", gin.H{})
+		c.Abort()
+		return
+	}
+
+	if err := server.File().Write(p, buf); err != nil {
+		c.HTML(http.StatusInternalServerError, "/errors/not-found.html", gin.H{})
+		c.Abort()
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{})
 }
 func (server *Server) HandleAttachForm(c *gin.Context) {

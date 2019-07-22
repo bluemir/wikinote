@@ -7,6 +7,7 @@ import (
 
 	"github.com/bluemir/wikinote/pkgs/auth"
 	"github.com/bluemir/wikinote/pkgs/fileattr"
+	"github.com/bluemir/wikinote/pkgs/query-router"
 )
 
 // Plugins
@@ -14,7 +15,7 @@ type FooterPlugin interface {
 	Footer(path string, attr FileAttr) (template.HTML, error)
 }
 type PreSavePlugin interface {
-	OnPreSave(path string, data []byte, attr FileAttr) ([]byte, error)
+	OnPreSave(authCtx *AuthContext, path string, data []byte) ([]byte, error)
 }
 type PostSavePlugin interface {
 	OnPostSave(path string, data []byte, attr FileAttr) error
@@ -28,6 +29,9 @@ type AuthzPlugin interface {
 }
 type RegisterRouterPlugin interface {
 	RegisterRouter(r gin.IRouter)
+}
+type RegisterActionPlugin interface {
+	RegisterAction(qr QueryRouter, authzFunc AuthzFunc)
 }
 
 // File Attr
@@ -52,6 +56,8 @@ type Core interface {
 }
 type CoreFile interface {
 	Attr() CoreFileAttr
+	Read(path string) ([]byte, error)
+	Write(path string, buf []byte) error
 }
 type CoreFileAttr = fileattr.Store
 
@@ -66,3 +72,6 @@ const (
 	Reject  = auth.Reject
 	Unknown = auth.Unknown
 )
+
+type QueryRouter = queryrouter.QueryRouter
+type AuthzFunc = func(action string) func(c *gin.Context)

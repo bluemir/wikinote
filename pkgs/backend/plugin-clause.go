@@ -6,15 +6,17 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/bluemir/wikinote/pkgs/auth"
+	"github.com/bluemir/wikinote/pkgs/query-router"
 )
 
 type PluginClause interface {
 	Footer(path string) []PluginResult
-	PreSave(path string, data []byte) ([]byte, error)
+	PreSave(ctx *auth.Context, path string, data []byte) ([]byte, error)
 	PostSave(path string, data []byte) error
 	OnReadWiki(ctx *auth.Context, path string, data []byte) ([]byte, error)
 	AuthCheck(ctx *auth.Context) (auth.Result, error)
 	RegisterRouter(r gin.IRouter)
+	RegisterAction(qr queryrouter.QueryRouter, authzFunc func(string) func(c *gin.Context))
 }
 
 type pluginClause struct {
@@ -32,12 +34,11 @@ func (b *pluginClause) Footer(path string) []PluginResult {
 	}
 	return result
 }
-func (b *pluginClause) PreSave(path string, data []byte) ([]byte, error) {
-	attr := b.File().Attr(path)
+func (b *pluginClause) PreSave(ctx *auth.Context, path string, data []byte) ([]byte, error) {
 	d := data
 	for _, p := range b.plugins.preSave {
 		var err error
-		d, err = p.OnPreSave(path, d, attr)
+		d, err = p.OnPreSave(ctx, path, d)
 		if err != nil {
 			return nil, err
 		}
@@ -82,6 +83,11 @@ func (b *pluginClause) AuthCheck(ctx *auth.Context) (auth.Result, error) {
 func (b *pluginClause) RegisterRouter(r gin.IRouter) {
 	for name, p := range b.plugins.registerRouter {
 		p.RegisterRouter(r.Group(name))
+	}
+}
+func (b *pluginClause) RegisterAction(qr queryrouter.QueryRouter, authzFunc func(string) func(c *gin.Context)) {
+	for _, plugin := range b.plugins.registerAction {
+		plugin.RegisterAction(qr, authzFunc)
 	}
 }
 

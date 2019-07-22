@@ -15,6 +15,7 @@ type pluginList struct {
 	onReadWiki     []plugins.ReadWikiPlugin
 	authz          []plugins.AuthzPlugin
 	registerRouter map[string]plugins.RegisterRouterPlugin
+	registerAction []plugins.RegisterActionPlugin
 }
 type pluginsCore struct {
 	*backend
@@ -28,6 +29,12 @@ func (core *pluginsCore) File() plugins.CoreFile {
 }
 func (core *pluginsCore) Attr() plugins.CoreFileAttr {
 	return core.backend.File().AttrStore()
+}
+func (core *pluginsCore) Read(path string) ([]byte, error) {
+	return core.backend.File().Read(path)
+}
+func (core *pluginsCore) Write(path string, buf []byte) error {
+	return core.backend.File().Write(path, buf)
 }
 
 func (b *backend) loadPlugins(conf *config.Config) error {
@@ -78,6 +85,11 @@ func (b *backend) loadPlugins(conf *config.Config) error {
 		if a, ok := p.(plugins.RegisterRouterPlugin); ok {
 			logrus.Debugf("register route plugin '%s'", name)
 			pl.registerRouter[name] = a
+		}
+
+		if plugin, ok := p.(plugins.RegisterActionPlugin); ok {
+			logrus.Debugf("register action plugin '%s'", name)
+			pl.registerAction = append(pl.registerAction, plugin)
 		}
 	}
 	b.plugins = pl

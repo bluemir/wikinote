@@ -37,18 +37,11 @@ func (b *fileClause) Write(path string, data []byte) error {
 		return err
 	}
 
-	d, err := b.Plugin().PreSave(path, data)
-	if err != nil {
+	if err := ioutil.WriteFile(b.GetFullPath(path), data, 0644); err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(b.GetFullPath(path), d, 0644)
-	if err != nil {
-		return err
-	}
-
-	err = b.Plugin().PostSave(path, data)
-	if err != nil {
+	if err := b.Plugin().PostSave(path, data); err != nil {
 		return err
 	}
 	return nil

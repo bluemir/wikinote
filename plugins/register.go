@@ -17,7 +17,7 @@ func Register(name string, initFunc PluginInit) {
 }
 func New(name string, core Core, config []byte) (Plugin, error) {
 	log := logrus.WithField("method", "plugin.New")
-	log.Tracef("initialize plugin, name: %s, opts: %s", name, config)
+	log.Tracef("initialize plugin, name: %s, opts: \n%s", name, config)
 	if init, ok := plugins[name]; ok {
 		return init(core, config)
 	}

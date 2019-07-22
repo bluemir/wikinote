@@ -82,6 +82,8 @@ func Run(b backend.Backend, conf *Config) error {
 		//special.GET("/api/users", Action("user"), HandleAPIUesrList)
 		//special.GET("/api/users/:id", Action("user"), HandleAPIUesr)
 		special.PUT("/api/users/:name/role", server.Authz("user"), server.HandleAPIUserUpdateRole)
+		special.PUT("/api/users/:name/attr/*key", server.Authz("user"), server.HandleAPIPutUserAttr)
+		// curl -XPUT 'http://localhost:4000/!/api/users/{{user}}/role' -u "root:{{rootKey}}" --data "{{role}}"
 		// TODO make Action for API
 	}
 
@@ -109,6 +111,8 @@ func Run(b backend.Backend, conf *Config) error {
 	queryRouter.Register(http.MethodPost, "*", server.Authz("update"), server.HandleUpdateForm)
 	queryRouter.Register(http.MethodPut, "*", server.Authz("update"), server.HandleUpdate)
 	queryRouter.Register(http.MethodDelete, "*", server.HandleNotImplemented)
+
+	server.Plugin().RegisterAction(queryRouter, server.Authz)
 
 	app.NoRoute(queryRouter.Handler)
 
