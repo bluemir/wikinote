@@ -30,11 +30,17 @@ type Config struct {
 	Address string
 	Domain  []string
 }
+type Server struct {
+	backend.Backend
+}
 
 func Run(b backend.Backend, conf *Config) error {
+	server := &Server{b}
+
 	app := gin.New()
 	writer := logrus.New().Writer()
 	defer writer.Close()
+
 	app.Use(gin.LoggerWithWriter(writer))
 	app.Use(gin.Recovery())
 
@@ -43,10 +49,6 @@ func Run(b backend.Backend, conf *Config) error {
 	// TODO rendom string or config
 	store := cookie.NewStore([]byte("__wikinote__"))
 	app.Use(sessions.Sessions("session", store))
-
-	app.Use(func(c *gin.Context) {
-		c.Set(BACKEND, b)
-	})
 
 	b.Plugin().RegisterRouter(app.Group("/!/plugins"))
 
@@ -62,28 +64,28 @@ func Run(b backend.Backend, conf *Config) error {
 		special.StaticFS("/static/", dist.Apps.HTTPBox())
 
 		// register
-		special.GET("/auth/register", HandleRegisterForm)
-		special.POST("/auth/register", HandleRegister)
+		special.GET("/auth/register", server.HandleRegisterForm)
+		special.POST("/auth/register", server.HandleRegister)
 
 		//auth
-		special.Use(BasicAuthn)
-		special.GET("/auth/login", HandleLogin)
-		special.GET("/auth/logout", HandleLogout)
+		special.Use(server.BasicAuthn)
+		special.GET("/auth/login", server.HandleLogin)
+		special.GET("/auth/logout", server.HandleLogout)
 
-		special.POST("/api/preview", Authz("preview"), HandlePreview) // render body
-		special.GET("/search", Authz("search"), HandleSearch)
+		special.POST("/api/preview", server.Authz("preview"), server.HandlePreview) // render body
+		special.GET("/search", server.Authz("search"), server.HandleSearch)
 
-		special.GET("/user", Authz("user"), HandleUserList)
+		special.GET("/user", server.Authz("user"), server.HandleUserList)
 		special.GET("/user/:id")
 		special.PUT("/user")
 
 		//special.GET("/api/users", Action("user"), HandleAPIUesrList)
 		//special.GET("/api/users/:id", Action("user"), HandleAPIUesr)
-		special.PUT("/api/users/:name/role", Authz("user"), HandleAPIUserUpdateRole)
+		special.PUT("/api/users/:name/role", server.Authz("user"), server.HandleAPIUserUpdateRole)
 		// TODO make Action for API
 	}
 
-	app.Use(BasicAuthn)
+	app.Use(server.BasicAuthn)
 
 	// - GET            render file or render functional page
 	//   - edit      : show editor
@@ -97,16 +99,16 @@ func Run(b backend.Backend, conf *Config) error {
 	// - DELETE         delete file
 
 	queryRouter := queryrouter.New()
-	queryRouter.Register(http.MethodGet, "edit", Authz("edit"), HandleEditForm)
-	queryRouter.Register(http.MethodGet, "attach", Authz("attach"), HandleAttachForm)
-	queryRouter.Register(http.MethodGet, "raw", Authz("raw"), HandleRaw)
-	queryRouter.Register(http.MethodGet, "history", HandleNotImplemented)
-	queryRouter.Register(http.MethodGet, "backlinks", HandleNotImplemented)
-	queryRouter.Register(http.MethodGet, "move", HandleNotImplemented)
-	queryRouter.Register(http.MethodGet, "*", Authz("view"), HandleView)
-	queryRouter.Register(http.MethodPost, "*", Authz("update"), HandleUpdateForm)
-	queryRouter.Register(http.MethodPut, "*", Authz("update"), HandleUpdate)
-	queryRouter.Register(http.MethodDelete, "*", HandleNotImplemented)
+	queryRouter.Register(http.MethodGet, "edit", server.Authz("edit"), server.HandleEditForm)
+	queryRouter.Register(http.MethodGet, "attach", server.Authz("attach"), server.HandleAttachForm)
+	queryRouter.Register(http.MethodGet, "raw", server.Authz("raw"), server.HandleRaw)
+	queryRouter.Register(http.MethodGet, "history", server.HandleNotImplemented)
+	queryRouter.Register(http.MethodGet, "backlinks", server.HandleNotImplemented)
+	queryRouter.Register(http.MethodGet, "move", server.HandleNotImplemented)
+	queryRouter.Register(http.MethodGet, "*", server.Authz("view"), server.HandleView)
+	queryRouter.Register(http.MethodPost, "*", server.Authz("update"), server.HandleUpdateForm)
+	queryRouter.Register(http.MethodPut, "*", server.Authz("update"), server.HandleUpdate)
+	queryRouter.Register(http.MethodDelete, "*", server.HandleNotImplemented)
 
 	app.NoRoute(queryRouter.Handler)
 
@@ -127,15 +129,11 @@ func Run(b backend.Backend, conf *Config) error {
 	}
 }
 
-func Backend(c *gin.Context) backend.Backend {
-	return c.MustGet(BACKEND).(backend.Backend)
-}
-
 func FlashMessage(c *gin.Context) renderer.MessageContext {
 	return renderer.Of(c)
 }
 
-func HandleNotImplemented(c *gin.Context) {
+func (server *Server) HandleNotImplemented(c *gin.Context) {
 	c.String(http.StatusNotImplemented, "text/plain", "not implemeted")
 	c.Abort()
 	return

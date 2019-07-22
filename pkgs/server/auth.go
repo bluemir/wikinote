@@ -27,9 +27,9 @@ func Token(c *gin.Context) *auth.Token {
 	return nil
 }
 
-func BasicAuthn(c *gin.Context) {
+func (server *Server) BasicAuthn(c *gin.Context) {
 	log := logrus.WithField("method", "BaiscAuthn")
-	token, err := Backend(c).Auth().HttpAuth(c.GetHeader("Authorization"))
+	token, err := server.Auth().HttpAuth(c.GetHeader("Authorization"))
 
 	switch auth.ErrorCode(err) {
 	case auth.ErrNone:
@@ -79,11 +79,11 @@ func BasicAuthn(c *gin.Context) {
 		return
 	}
 }
-func Authz(action string) func(c *gin.Context) {
+func (server *Server) Authz(action string) func(c *gin.Context) {
 	log := logrus.WithField("method", "Authz")
 	return func(c *gin.Context) {
-		subject := Backend(c).Auth().Subject(Token(c))
-		object := &backend.AuthzObject{Backend(c).File().Attr(c.Request.URL.Path)}
+		subject := server.Auth().Subject(Token(c))
+		object := &backend.AuthzObject{server.File().Attr(c.Request.URL.Path)}
 
 		ctx := &auth.Context{
 			Subject: subject,
@@ -92,7 +92,7 @@ func Authz(action string) func(c *gin.Context) {
 		}
 		c.Set(AUTH_CONTEXT, ctx)
 
-		result, err := Backend(c).Plugin().AuthCheck(ctx)
+		result, err := server.Plugin().AuthCheck(ctx)
 		if err != nil {
 			c.HTML(http.StatusInternalServerError, "errors/internal.html", renderer.Data{}.With(c))
 			c.Abort()
@@ -115,10 +115,10 @@ func Authz(action string) func(c *gin.Context) {
 		}
 	}
 }
-func HandleRegisterForm(c *gin.Context) {
+func (server *Server) HandleRegisterForm(c *gin.Context) {
 	c.HTML(http.StatusOK, "/register.html", renderer.Data{}.With(c))
 }
-func HandleRegister(c *gin.Context) {
+func (server *Server) HandleRegister(c *gin.Context) {
 	registeForm := &struct {
 		Id       string `form:"id"`
 		Password string `form:"password"`
@@ -138,7 +138,7 @@ func HandleRegister(c *gin.Context) {
 		return
 	}
 
-	err = Backend(c).Auth().CreateUser(&auth.User{
+	err = server.Auth().CreateUser(&auth.User{
 		Name: registeForm.Id,
 	})
 	if err != nil {
@@ -147,12 +147,12 @@ func HandleRegister(c *gin.Context) {
 		return
 	}
 
-	if err := Backend(c).Auth().SetUserAttr(registeForm.Id, "wikinote.io/email", registeForm.Email); err != nil {
+	if err := server.Auth().SetUserAttr(registeForm.Id, "wikinote.io/email", registeForm.Email); err != nil {
 		FlashMessage(c).Warn("fail to register: %s", err.Error())
 		c.Redirect(http.StatusSeeOther, "/!/auth/register")
 		return
 	}
-	_, err = Backend(c).Auth().IssueToken(registeForm.Id, registeForm.Password)
+	_, err = server.Auth().IssueToken(registeForm.Id, registeForm.Password)
 	if err != nil {
 		FlashMessage(c).Warn("fail to register: %s", err.Error())
 		c.Redirect(http.StatusSeeOther, "/!/auth/register")
@@ -162,7 +162,7 @@ func HandleRegister(c *gin.Context) {
 	c.Redirect(http.StatusSeeOther, "/")
 }
 
-func HandleLogin(c *gin.Context) {
+func (server *Server) HandleLogin(c *gin.Context) {
 	//Backend(c).Auth().HttpAuth(c.GetHeader("Authorization"))
 	str := c.GetHeader("Authorization")
 	if str == "" {
@@ -173,7 +173,7 @@ func HandleLogin(c *gin.Context) {
 	}
 	c.Redirect(http.StatusTemporaryRedirect, "/")
 }
-func HandleLogout(c *gin.Context) {
+func (server *Server) HandleLogout(c *gin.Context) {
 	str := c.GetHeader("Authorization")
 	if str != "Basic Og==" { // empty id pass word
 		c.Header("WWW-Authenticate", AuthenicateString)

@@ -29,7 +29,7 @@ func (m *Manager) ListUser(filter ...string) ([]User, error) {
 	return users, nil
 }
 func (m *Manager) DeleteUser(username string) error {
-	if err := m.store.Where("name = ?", username).Delete(&User{}).Error; err != nil {
+	if err := m.store.Where(&User{Name: username}).Delete(&User{}).Error; err != nil {
 		return err
 	}
 	return nil

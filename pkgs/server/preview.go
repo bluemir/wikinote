@@ -7,12 +7,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func HandlePreview(c *gin.Context) {
+func (server *Server) HandlePreview(c *gin.Context) {
 	data, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
-	renderedData, err := Backend(c).Render(data)
+	renderedData, err := server.Render(data)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}

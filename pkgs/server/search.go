@@ -8,11 +8,11 @@ import (
 	"github.com/bluemir/wikinote/pkgs/renderer"
 )
 
-func HandleSearch(c *gin.Context) {
+func (server *Server) HandleSearch(c *gin.Context) {
 	query := c.Query("q")
 
 	// TODO html
-	result, err := Backend(c).File().Search(query)
+	result, err := server.File().Search(query)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err)
 		return

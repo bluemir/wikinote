@@ -15,13 +15,13 @@ import (
 	"github.com/bluemir/wikinote/pkgs/renderer"
 )
 
-func HandleView(c *gin.Context) {
+func (server *Server) HandleView(c *gin.Context) {
 	//logrus.Debugf("path: %s, accept: %+v", c.Request.URL.Path, c.GetHeader("Accept"))
 
 	switch {
 	// TODO check file type
 	case checkExt(c, ".md"):
-		data, err := Backend(c).File().Read(c.Request.URL.Path)
+		data, err := server.File().Read(c.Request.URL.Path)
 		if err != nil {
 			logrus.Warnf("md file not found, %s", err)
 			c.HTML(http.StatusNotFound, "/errors/not-found.html", renderer.Data{}.With(c))
@@ -34,13 +34,13 @@ func HandleView(c *gin.Context) {
 			c.Abort()
 			return
 		}
-		buf, err := Backend(c).Plugin().OnReadWiki(authCtx.(*auth.Context), c.Request.URL.Path, data)
+		buf, err := server.Plugin().OnReadWiki(authCtx.(*auth.Context), c.Request.URL.Path, data)
 		if err != nil {
 			c.HTML(http.StatusInternalServerError, "/errors/internal-error.html", renderer.Data{}.With(c))
 			return
 		}
 
-		renderedData, err := Backend(c).Render(buf)
+		renderedData, err := server.Render(buf)
 		if err != nil {
 			c.HTML(http.StatusInternalServerError, "/errors/internal-error.html", renderer.Data{}.With(c))
 			return
@@ -53,7 +53,7 @@ func HandleView(c *gin.Context) {
 		}.With(c))*/
 		c.HTML(http.StatusOK, "/view/markdown.html", renderer.Data{
 			"data":   template.HTML(renderedData),
-			"footer": Backend(c).Plugin().Footer(c.Request.URL.Path),
+			"footer": server.Plugin().Footer(c.Request.URL.Path),
 		}.With(c))
 		// markdown
 	case checkExt(c, ".jpg", ".png", ".bmp", ".gif"):
@@ -80,16 +80,15 @@ func checkExt(c *gin.Context, ext ...string) bool {
 	}
 	return false
 }
-func HandleRaw(c *gin.Context) {
-	logrus.Infof("[View] serve raw file: '%s'", Backend(c).File().GetFullPath(c.Request.URL.Path))
-	c.File(Backend(c).File().GetFullPath(c.Request.URL.Path))
+func (server *Server) HandleRaw(c *gin.Context) {
+	logrus.Infof("[View] serve raw file: '%s'", server.File().GetFullPath(c.Request.URL.Path))
+	c.File(server.File().GetFullPath(c.Request.URL.Path))
 	return
 }
-func HandleEditForm(c *gin.Context) {
-	backend := Backend(c)
+func (server *Server) HandleEditForm(c *gin.Context) {
 	path := c.Request.URL.Path
 
-	data, err := backend.File().Read(path)
+	data, err := server.File().Read(path)
 	if err != nil {
 		//c.AbortWithError(http.StatusNotFound, err)
 		renderer.Of(c).Info("Create new note")
@@ -101,13 +100,13 @@ func HandleEditForm(c *gin.Context) {
 		"path": c.Param("path"),
 	}.With(c))
 }
-func HandleUpdateForm(c *gin.Context) {
+func (server *Server) HandleUpdateForm(c *gin.Context) {
 	p := c.Request.URL.Path
 	data, ok := c.GetPostForm("data")
 	if !ok {
 		c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("error on form"))
 	}
-	err := Backend(c).File().Write(p, []byte(data))
+	err := server.File().Write(p, []byte(data))
 	if err != nil {
 
 		c.HTML(http.StatusInternalServerError, "/errors/not-found.html", gin.H{})
@@ -115,18 +114,18 @@ func HandleUpdateForm(c *gin.Context) {
 	}
 	c.Redirect(http.StatusSeeOther, p)
 }
-func HandleUpdate(c *gin.Context) {
+func (server *Server) HandleUpdate(c *gin.Context) {
 	p := c.Request.URL.Path
 	data, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
-	Backend(c).File().Write(p, data)
+	server.File().Write(p, data)
 	c.JSON(http.StatusOK, gin.H{})
 }
-func HandleAttachForm(c *gin.Context) {
+func (server *Server) HandleAttachForm(c *gin.Context) {
 	p := c.Param("path")
-	list, err := Backend(c).File().List(p)
+	list, err := server.File().List(p)
 	if err != nil {
 		logrus.Warn(err)
 		c.AbortWithError(http.StatusInternalServerError, err)

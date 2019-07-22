@@ -57,6 +57,7 @@ func (m *Manager) Default(username, unhashedKey string) (*Token, error) {
 	}
 	token := &Token{}
 	if err := m.store.Where(&Token{
+		UserName:  username,
 		HashedKey: hash(unhashedKey, salt(username)),
 	}).Take(token).Error; err != nil {
 		if gorm.IsRecordNotFoundError(err) {
