@@ -1,7 +1,9 @@
-IMPORT_PATH=github.com/bluemir/wikinote
+IMPORT_PATH=$(shell cat go.mod | head -n 1 | awk '{print $$2}')
 BIN_NAME=$(notdir $(IMPORT_PATH))
 
 DOCKER_IMAGE_NAME=bluemir/wikinote
+
+export GO111MODULE=on
 
 default: build/$(BIN_NAME)
 
@@ -10,12 +12,12 @@ VERSION?=$(shell git describe --long --tags --dirty --always)
 GO_SOURCES   = $(shell find .        -type f -name '*.go'   -print)
 JS_SOURCES   = $(shell find app/js   -type f -name '*.js'   -print)
 HTML_SOURCES = $(shell find app/html -type f -name '*.html' -print)
-CSS_SOURCES  = $(shell find app/less -type f -name "*.less" -print)
+CSS_SOURCES  = $(shell find app/less -type f -name '*.css'  -print)
 WEB_LIBS     = $(shell find app/lib  -type f                -print)
 
 DISTS  = $(JS_SOURCES:app/js/%=build/dist/js/%)
 DISTS += $(HTML_SOURCES:app/html/%=build/dist/html/%)
-DISTS += build/dist/css/common.css
+DISTS += $(HTML_SOURCES:app/css/%=build/dist/css/%)
 DISTS += $(WEB_LIBS:app/lib/%=build/dist/lib/%)
 
 DIRS = $(shell find . \
@@ -23,6 +25,7 @@ DIRS = $(shell find . \
                     -name ".git" -prune -o \
                     -type d \
                     -print)
+
 .sources:
 	@echo $(DIRS) makefile \
 	      $(GO_SOURCES) \
