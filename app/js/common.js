@@ -1,36 +1,9 @@
-import $ from "./minilib.js";
+import $ from "../lib/minilib.module.js";
+import {Shortcut} from "./shortcut.js";
 
-window.addEventListener("load", function(){
-	var keymap = {
-		ctrl : {
-			"E" : goEditPage,
-			//"M" : goMovePage,
-			//"L" : goViewPage
-		},
-		alt : {
-			//"P" : goPresentation
-		}
-	}
+var sc = new Shortcut($.get("body"));
+sc.add("ctrl + e", goToEdit)
 
-	document.body.on("keydown", function(e) {
-		var keyCode = String.fromCharCode(e.keyCode);
-		if(navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey){
-			if(keymap.ctrl[keyCode]) {
-				keymap.ctrl[keyCode]();
-				e.preventDefault();
-			}
-		} else if(e.altKey) {
-			if(keymap.alt[keyCode]){
-				keymap.alt[keyCode]();
-				e.preventDefault();
-			}
-		}
-	}, false)
-
-	function goEditPage() {
-		if (location.pathname.substr(0, 3) == "/!/") {
-			return // skip special page
-		}
-		location.href = location.pathname+"?edit";
-	}
-})
+function goToEdit(){
+	location.href = location.pathname+"?edit";
+}

@@ -1,0 +1,39 @@
+:root {
+/*
+	color : #04D3F5;
+	color : #3404F5;
+	color : #0853E8;
+	color : #049AFF;
+	color : #0416FF;
+*/
+
+/* --blue: #428bca; */
+
+	--blue       : #0416ff;
+	--light-blue : #049aff;
+	--skyblue    : #bfe4ff;
+	--black      : #101010;
+	--white      : #ffffff;
+	--gray       : #919191;
+	--light-gray : #d1d1d1;
+	--dark-gray  : #333333;
+
+	--header-background-color: var(--black);
+	--header-font-color: var(--white);
+
+	--menu-font-color: var(--skyblue);
+	--menu-hover-background-color: var(--dark-gray);
+
+	--sub-menu-background-color: var(--dark-gray);
+	--sub-menu-hover-background-color: var(--gray);
+
+	--body-padding-background-color: var(--light-gray);
+	--article-background-color: var(--white);
+
+	--button-background-color: var(--skyblue);
+	--button-font-color: var(--gray);
+	--button-hover-font-color: var(--black);
+	--button-selected-font-color: var(--black);
+
+	--link-font-color: var(--light-blue);
+}

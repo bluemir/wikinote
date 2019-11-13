@@ -1,17 +1,6 @@
-{{define "contents"}}
-<article class="row view">
+{{ define "contents" }}
+<section class="wiki-contents marginer">
 	{{ .data }}
-</article>
-<!-- plugins -->
-<aside class="row">
-	{{ range .footer}}
-	<div>
-		{{ if .Err }}
-			<p> Sorry! error on plugin: {{.Err}}</p>
-		{{ else }}
-			{{ .Data }}
-		{{ end }}
-	</div>
-	{{ end }}
-</aside>
-{{end}}
+</section>
+<script type="module" src="/!/static/js/common.js"></script>
+{{ end }}

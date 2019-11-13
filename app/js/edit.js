@@ -1,23 +1,50 @@
-import $ from "./minilib.js";
+import $ from "../lib/minilib.module.js";
+import {Shortcut} from "./shortcut.js";
 
-const KEYCODE_ALT = 18;
-const KEYCODE_TAB = 8;
+class EditorController {
+	constructor() {
+		var sc = new Shortcut($.get("body"))
+		sc.add("ctrl +space", e => this.previewToggle());
+		sc.add("alt + space", e => this.previewToggle());
+		sc.add("alt + .", e => this.previewToggle());
 
-$.get("article form").on("submit", function(evt) {
-	//console.log("hey!", this)
-	//evt.preventDefault();
-});
+		var editorShotcut = new Shortcut($.get(".editor form"));
+		editorShotcut.add("tab", e => this.addTab());
+		editorShotcut.add("ctrl + s", e => this.save());
+	}
+	async previewOn() {
+		var str = $.get("form textarea").value;
+		var res = await $.request("POST", "/!/api/preview", {
+			body: str
+		})
 
-$.get("article form").on("keydown", function(evt) {
-	var keyCode = String.fromCharCode(evt.keyCode);
-	if(navigator.platform.match("Mac") ? evt.metaKey : evt.ctrlKey){
-		if (keyCode == "S") {
-			updateDocument();
-			evt.preventDefault();
-			return
+		var $preview = $.get(".panel.preview");
+
+		if ( res.statusCode>=200 && res.statusCode< 300) {
+			$preview.innerHTML = res.text;
+		} else {
+			$preview.innerHTML = "Oops! error on get preview";
+		}
+		this.state = "preview";
+	}
+	previewOff() {
+		this.state = "editor";
+		$.get(".editor textarea").focus();
+	}
+	previewToggle() {
+		if (this.state == "preview") {
+			this.previewOff();
+		} else {
+			this.previewOn();
 		}
 	}
-	if (keyCode == "\t") {
+	get state() {
+		return $.get(".tabs").attr("state")
+	}
+	set state(v) {
+		$.get(".tabs").attr("state", v)
+	}
+	addTab() {
 		var $textarea = $.get("textarea[name=data]");
 		var start = $textarea.selectionStart;
 		var end = $textarea.selectionEnd;
@@ -25,62 +52,14 @@ $.get("article form").on("keydown", function(evt) {
 
 		$textarea.value = data.substring(0, start) + "\t" + data.substring(end);
 		$textarea.selectionStart = $textarea.selectionEnd = start + 1;
-
-		evt.preventDefault();
-		return
 	}
-});
-
-$.get("body").on("keydown", function(evt) {
-	var keyCode = String.fromCharCode(evt.keyCode);
-	if (evt.altKey && keyCode == "P") {
-		previewToggle()
-		evt.preventDefault();
-	}
-})
-
-$.get(".btn.editor").on("click", function(evt) {
-	previewOff();
-	evt.preventDefault();
-})
-$.get(".btn.preview").on("click", function(evt){
-	previewOn();
-	evt.preventDefault();
-})
-
-function updateDocument() {
-	var str = $.get("article form textarea").value;
-	var path = $.get("article form").getAttribute("action");
-	$.request("PUT", path, {
-		body: str
-	});
-}
-
-var $preview = $.get(".panel.preview");
-var $tabs  = $.get(".tab-control");
-function previewOn(){
-	var str = $.get("article form textarea").value;
-	$.request("POST", "/!/api/preview", {
-		body: str
-	}).then(function (res) {
-		if ( res.statusCode>=200 && res.statusCode< 300) {
-			$preview.innerHTML = res.text;
-		} else {
-			$preview.innerHTML = "Oops! error on get preview";
-		}
-		// TOOD only class can handle
-		$tabs.classList.add("preview");
-		$tabs.classList.remove("editor");
-	})
-}
-function previewOff(){
-	$tabs.classList.remove("preview");
-	$tabs.classList.add("editor");
-}
-function previewToggle() {
-	if ($tabs.classList.contains("preview")) {
-		previewOff()
-	} else {
-		previewOn()
+	async save() {
+		var str = $.get(".tabs form textarea").value;
+		var path = $.get(".tabs form").attr("action");
+		$.request("PUT", path, {
+			body: str
+		});
 	}
 }
+
+new EditorController();

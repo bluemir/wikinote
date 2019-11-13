@@ -11,12 +11,13 @@
 			<li><a href="/!/move{{ .Path }}">Move</a></li>
 			<li><a href="/!/history{{ .Path }}">History</a></li>
 			<li><a href="/!/backlink{{ .Path }}">Back Links</a></li>
+			<li><a href="{{ .Path }}?publish">Publish</a></li>
 			<hr>
 			<!-- TODO make split -->
 			{{ if .IsLogin }}
 			<li><a href="/!/auth/logout">Logout</a></li>
 			{{ else }}
-			<li><a href="/!/auth/login">Login</a></li>
+			<li><a href="/?login">Login</a></li>
 			{{ end }}
 			<li><a href="/!/auth/register">Sign Up</a></li>
 			<li><a href="/!/user">Users</a></li>
@@ -24,3 +25,4 @@
 	</li>
 </ul>
 {{end}}
+

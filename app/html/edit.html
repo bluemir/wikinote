@@ -1,22 +1,17 @@
-{{define "contents"}}
-<article class="row edit">
-	<section class="tab-control editor">
-		<menu class="tab-header">
-			<a class="btn editor" href="#">Edit</a> <a class="btn preview" href="#">Preview</a>
-		</menu>
-		<section class="panel editor">
-			<form method="POST" action="{{.path}}">
-				<textarea name="data">{{.data}}</textarea>
-				<input type="submit" value="Save"/>
-			</form>
-		</section>
-		<section class="panel preview">
-
-		</section>
+{{ define "contents" }}
+<section class="tabs marginer" state="editor">
+	<menu class="tabs-header">
+		<a class="btn" href="#" tab="editor" >Edit</a>
+		<a class="btn" href="#" tab="preview">Preview</a>
+	</menu>
+	<section class="panel editor">
+		<form method="POST" action="{{.path}}">
+			<textarea name="data">{{.data}}</textarea>
+			<input type="submit" value="Save"/>
+		</form>
 	</section>
-</article>
-{{end}}
-
-{{define "scripts"}}
+	<section class="panel preview wiki-contents">
+	</section>
+</section>
 <script type="module" src="/!/static/js/edit.js"></script>
-{{end}}
+{{ end }}

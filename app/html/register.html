@@ -1,12 +1,10 @@
 {{ define "contents" }}
-<article class="row edit">
-	<form action="/!/auth/register" method="POST">
-		<input name="id"       placeholder="id"               type="text" />
-		<input name="email"    placeholder="email"            type="email" />
-		<input name="password" placeholder="password"         type="password" />
-		<input name="confirm"  placeholder="password confirm" type="password" />
+<form action="/!/auth/register" method="POST">
+	<input name="name"     placeholder="name"             type="text" />
+	<input name="email"    placeholder="email"            type="email" />
+	<input name="password" placeholder="password"         type="password" />
+	<input name="confirm"  placeholder="password confirm" type="password" />
 
-		<button type="submit">Sign Up</button>
-	</form>
-</article>
+	<button type="submit">Sign Up</button>
+</form>
 {{ end }}

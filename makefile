@@ -1,111 +1,101 @@
+VERSION?=$(shell git describe --long --tags --dirty --always)
+export VERSION
+
 IMPORT_PATH=$(shell cat go.mod | head -n 1 | awk '{print $$2}')
 BIN_NAME=$(notdir $(IMPORT_PATH))
 
-DOCKER_IMAGE_NAME=bluemir/wikinote
-
 export GO111MODULE=on
+export GIT_TERMINAL_PROMPT=1
 
-default: build/$(BIN_NAME)
+DOCKER_IMAGE_NAME=bluemir/$(BIN_NAME)
 
-VERSION?=$(shell git describe --long --tags --dirty --always)
+## Go Sources
+GO_SOURCES = $(shell find . -name "vendor"  -prune -o \
+                            -type f -name "*.go" -print)
 
-GO_SOURCES   = $(shell find .        -type f -name '*.go'   -print)
-JS_SOURCES   = $(shell find app/js   -type f -name '*.js'   -print)
-HTML_SOURCES = $(shell find app/html -type f -name '*.html' -print)
-CSS_SOURCES  = $(shell find app/less -type f -name '*.css'  -print)
-WEB_LIBS     = $(shell find app/lib  -type f                -print)
+## FE sources
+JS_SOURCES    = $(shell find app/js       -type f -name '*.js'   -print)
+HTML_SOURCES  = $(shell find app/html     -type f -name '*.html' -print)
+CSS_SOURCES   = $(shell find app/css      -type f -name '*.css'  -print)
+WEB_LIBS      = $(shell find app/lib      -type f                -print)
 
-DISTS  = $(JS_SOURCES:app/js/%=build/dist/js/%)
-DISTS += $(HTML_SOURCES:app/html/%=build/dist/html/%)
-DISTS += $(HTML_SOURCES:app/css/%=build/dist/css/%)
+DISTS =
+DISTS += $(JS_SOURCES:app/js/%=build/dist/js/%)
+DISTS += $(CSS_SOURCES:app/css/%=build/dist/css/%)
 DISTS += $(WEB_LIBS:app/lib/%=build/dist/lib/%)
 
-DIRS = $(shell find . \
-                    -name build -prune -o \
-                    -name ".git" -prune -o \
-                    -type d \
-                    -print)
-
-.sources:
-	@echo $(DIRS) makefile \
-	      $(GO_SOURCES) \
-	      $(JS_SOURCES) \
-	      $(HTML_SOURCES) \
-	      $(CSS_SOURCES) \
-	      $(WEB_LIBS)| tr " " "\n"
-
-# BUILD
-
-## Binary build
-build/$(BIN_NAME).bin: $(GO_SOURCES) makefile
-	go build -v \
-		-ldflags "-X main.Version=$(VERSION)" \
-		-o $@ .
-	@echo Build DONE
+default: build
 
 ## Web dist
-build/dist/html/%.html: app/html/%.html
-	@mkdir -p $(dir $@)
-	cp $< $@
-build/dist/css/common.css: $(CSS_SOURCES)
-	lessc app/less/main.less $@
+#dist/css/%.css: $(CSS_SOURCES)
+#	lessc app/less/entry/$*.less $@
 build/dist/%: app/%
 	@mkdir -p $(dir $@)
 	cp $< $@
 
-## resource embed
-build/$(BIN_NAME): build/$(BIN_NAME).bin $(DISTS)
+build: build/$(BIN_NAME)
+
+build/$(BIN_NAME).unpacked: $(GO_SOURCES) makefile
+	@mkdir -p build
+	go build -v \
+		-ldflags "-X main.VERSION=$(VERSION)" \
+		$(OPTIONAL_BUILD_ARGS) \
+		-o $@ main.go
+build/$(BIN_NAME): build/$(BIN_NAME).unpacked $(HTML_SOURCES) $(DISTS)
+	@mkdir -p build
 	cp $< $@.tmp
 	rice append -v \
-		-i $(IMPORT_PATH)/pkgs/dist \
+		-i $(IMPORT_PATH)/pkg/dist \
 		--exec $@.tmp
-	mv $@.tmp $@
-	@echo Embed resources DONE
+	mv build/$(BIN_NAME).tmp $@
 
-test:
-	go test -v ./...
+docker: build/.docker-image
 
-run: export LOG_LEVEL=trace
-run: build/$(BIN_NAME)
-	build/$(BIN_NAME) -D serve
-auto-run:
-	while true; do \
-		make .sources | entr -rd make test run ;  \
-		echo "hit ^C again to quit" && sleep 1  \
-	; done
-reset:
-	ps -f -C make | grep "test run" | awk '{print $$2}' | xargs kill
-
-docker-build: build/.docker-image
-build/.docker-image: Dockerfile makefile $(GO_SOURCES) $(DISTS)
+build/.docker-image: $(GO_SOURCES) $(HTML_SOURCES) $(DISTS) build/Dockerfile
 	docker build \
 		--build-arg VERSION=$(VERSION) \
-		-t $(DOCKER_IMAGE_NAME):$(VERSION) .
-	echo "$(DOCKER_IMAGE_NAME):$(VERSION)" > $@
+		-t $(DOCKER_IMAGE_NAME):$(VERSION) \
+		-f $< .
+	echo $(DOCKER_IMAGE_NAME):$(VERSION) > $@
+
+build/Dockerfile: export BIN_NAME:=$(BIN_NAME)
+build/Dockerfile: Dockerfile.template
+	@mkdir -p build
+	cat $< | envsubst '$$BIN_NAME' > $@
 
 
-docker-push: build/.docker-image.pushed
-build/.docker-image.pushed: .docker-image
-	docker push $(shell cat .docker-image)
-	echo $(shell cat .docker-image) > $@
+push: build/.docker-image.pushed
 
-docker-run: build/.docker-image
-	docker run --rm -it \
-		-p 4000:4000 \
-		-v ~/wiki:/wiki \
-		-e LOG_LEVEL=trace \
-		$(shell cat $<) \
-		serve \
-		--wiki-path /wiki \
-		--config /wiki/.app/config.yaml \
-		--bind :4000
-
-tools:
-	npm install -g less
-	go get github.com/GeertJohan/go.rice/rice
+build/.docker-image.pushed: build/.docker-image
+	docker push $(shell cat build/.docker-image)
+	echo $(shell cat build/.docker-image) > $@
 
 clean:
-	rm -rf bulid/ vendor/
-	go clean
+	rm -rf build/
 
-.PHONY: .sources run auto-run reset docker-build docker-push docker-run tools clean
+run: export LOG_LEVEL=TRACE
+run: build/$(BIN_NAME)
+	$< serve
+
+auto-run:
+	while true; do \
+		$(MAKE) .sources | \
+		entr -rd $(MAKE) run ;  \
+		echo "hit ^C again to quit" && sleep 1  \
+	; done
+
+.sources:
+	@echo \
+	makefile \
+	$(GO_SOURCES) \
+	$(JS_SOURCES) \
+	$(HTML_SOURCES) \
+	$(CSS_SOURCES) \
+	$(WEB_LIBS) \
+	$(HTML_TEMPLATE) \
+	| tr " " "\n"
+
+test:
+	go test -v ./pkg/...
+
+.PHONY: build docker push clean run auto-run .sources test default
