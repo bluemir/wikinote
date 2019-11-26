@@ -99,6 +99,7 @@ func Run(b *backend.Backend, conf *Config) error {
 
 		logrus.Infof("Enable Auto TLS @ %s", conf.TLSDomains)
 		logrus.Infof("Run Server")
+
 		return autotls.Run(app, conf.TLSDomains...)
 	} else {
 		logrus.Infof("Run Server on %s", conf.Bind)

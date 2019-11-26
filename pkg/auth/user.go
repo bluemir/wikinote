@@ -30,3 +30,12 @@ func (m *Manager) UpdateUser(user *User) error {
 	}
 	return m.db.Save(user).Error
 }
+func (m *Manager) EnsureUser(username string, Labels map[string]string) error {
+	if err := m.db.FirstOrCreate(&User{
+		Name:   username,
+		Labels: Labels,
+	}).Error; err != nil {
+		return errors.Wrapf(err, "User already exist")
+	}
+	return nil
+}

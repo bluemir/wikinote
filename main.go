@@ -46,6 +46,8 @@ func main() {
 		Default(os.ExpandEnv("$HOME/wiki/.app/roles.yaml")).
 		PlaceHolder("$HOME/wiki/.app/roles.yaml").
 		StringVar(&conf.Backend.RoleFile)
+	cli.Flag("root-user", "root user").
+		StringVar(&conf.Backend.RootUser)
 
 	cli.Version(VERSION)
 

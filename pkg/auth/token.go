@@ -9,7 +9,6 @@ import (
 )
 
 func (m *Manager) IssueToken(username, unhashedKey string) (*Token, error) {
-
 	_, ok, err := m.GetUser(username)
 	if err != nil {
 		return nil, err
@@ -27,4 +26,10 @@ func (m *Manager) IssueToken(username, unhashedKey string) (*Token, error) {
 		return nil, err
 	}
 	return token, nil
+}
+func (m *Manager) RevokeToken(revokeKey string) error {
+	return m.db.Where(&Token{RevokeKey: revokeKey}).Delete(&Token{RevokeKey: revokeKey}).Error
+}
+func (m *Manager) RevokeTokenAll(username string) error {
+	return m.db.Where(&Token{UserName: username}).Delete(&Token{UserName: username}).Error
 }

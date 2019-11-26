@@ -51,7 +51,7 @@ build/$(BIN_NAME): build/$(BIN_NAME).unpacked $(HTML_SOURCES) $(DISTS)
 
 docker: build/.docker-image
 
-build/.docker-image: build/Dockerfile $(GO_SOURCES) $(HTML_SOURCES) $(DISTS) 
+build/.docker-image: build/Dockerfile $(GO_SOURCES) $(HTML_SOURCES) $(DISTS)
 	docker build \
 		--build-arg VERSION=$(VERSION) \
 		-t $(DOCKER_IMAGE_NAME):$(VERSION) \
@@ -75,7 +75,7 @@ clean:
 
 run: export LOG_LEVEL=TRACE
 run: build/$(BIN_NAME)
-	$< serve
+	$< --root-user root serve
 
 auto-run:
 	while true; do \

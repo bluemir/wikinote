@@ -7,6 +7,7 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/pkg/errors"
+	"github.com/rs/xid"
 	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/pkg/auth"
@@ -16,6 +17,7 @@ type Config struct {
 	Wikipath   string
 	ConfigFile string
 	RoleFile   string
+	RootUser   string
 
 	File struct {
 		FrontPage string `yaml:"front-page"`
@@ -60,6 +62,22 @@ func New(conf *Config) (*Backend, error) {
 	authManager, err := auth.New(db, conf.RoleFile)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to init auth module")
+	}
+
+	if conf.RootUser != "" {
+		key := xid.New().String()
+		if err := authManager.EnsureUser(conf.RootUser, map[string]string{
+			"role/root": "true",
+		}); err != nil {
+			return nil, err
+		}
+		if err := authManager.RevokeTokenAll(conf.RootUser); err != nil {
+			return nil, err
+		}
+		if _, err := authManager.IssueToken(conf.RootUser, key); err != nil {
+			return nil, err
+		}
+		log.Warnf("root key: '%s'", key)
 	}
 
 	log.Trace("backend initailized")

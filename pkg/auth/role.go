@@ -10,6 +10,9 @@ import (
 )
 
 const defaultRoles = `
+- name: root
+  rules:
+  - actions:
 - name: default
   rules:
   - actions:
@@ -86,13 +89,19 @@ func must(buf []byte, err error) string {
 	return string(buf)
 }
 
-func (rule *Rule) IsNotMatchedAction(action string) bool {
+func (rule *Rule) IsMatchedAction(action string) bool {
+	if len(rule.Actions) == 0 {
+		return true // match all
+	}
 	for _, a := range rule.Actions {
 		if a == action {
-			return false
+			return true
 		}
 	}
-	return true
+	return false
+}
+func (rule *Rule) IsNotMatchedAction(action string) bool {
+	return !rule.IsNotMatchedAction(action)
 }
 func (rule *Rule) IsMatchedObject(obj map[string]string) bool {
 	if len(rule.Objects) == 0 {
