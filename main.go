@@ -52,7 +52,7 @@ func main() {
 	serve := cli.Command("serve", "run server")
 	{
 		serve.Flag("bind", "bind address").Default(":4000").StringVar(&conf.Server.Bind)
-		serve.Flag("--tls-domain", "tls domain").StringsVar(&conf.Server.TLSDomains)
+		serve.Flag("tls-domain", "tls domain").StringsVar(&conf.Server.TLSDomains)
 	}
 
 	switch kingpin.MustParse(cli.Parse(os.Args[1:])) {
