@@ -30,9 +30,12 @@ func (backend *Backend) Object(path string) (map[string]string, error) {
 }
 
 func (backend *Backend) FileRead(path string) ([]byte, error) {
+	// data, err := backend.plugins.triggerFileReadHook(path, data)
 	return ioutil.ReadFile(backend.GetFullPath(path))
 }
 func (backend *Backend) FileWrite(path string, data []byte) error {
+	// data, err := backend.plugins.triggerFileWriteHook(path, data)
+	// if err != nil { }
 	fullpath := backend.GetFullPath(path)
 	dirpath := filepath.Dir(fullpath)
 	if err := os.MkdirAll(dirpath, 0755); err != nil {

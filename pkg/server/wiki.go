@@ -32,6 +32,8 @@ func (server *Server) HandleView(c *gin.Context) {
 			return
 		}
 
+		// data , err:= server.backend.plugins.viewFooter(path)
+
 		c.HTML(http.StatusOK, "/view/markdown.html", gin.H{
 			"data":       template.HTML(renderedData),
 			"breadcrumb": makeBreadcurmb(c.Request.URL.Path),
