@@ -101,7 +101,7 @@ func (rule *Rule) IsMatchedAction(action string) bool {
 	return false
 }
 func (rule *Rule) IsNotMatchedAction(action string) bool {
-	return !rule.IsNotMatchedAction(action)
+	return !rule.IsMatchedAction(action)
 }
 func (rule *Rule) IsMatchedObject(obj map[string]string) bool {
 	if len(rule.Objects) == 0 {

@@ -8,6 +8,9 @@ import (
 
 	"github.com/bluemir/wikinote/pkg/backend"
 	"github.com/bluemir/wikinote/pkg/server"
+
+	// plugins
+	_ "github.com/bluemir/wikinote/pkg/plugins/recently-changes"
 )
 
 var VERSION string

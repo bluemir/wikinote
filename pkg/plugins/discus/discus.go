@@ -1,0 +1,4 @@
+package discus
+
+func init() {
+}

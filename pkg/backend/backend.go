@@ -11,6 +11,8 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/pkg/auth"
+	"github.com/bluemir/wikinote/pkg/fileattr"
+	"github.com/bluemir/wikinote/pkg/plugins"
 )
 
 type Config struct {
@@ -20,17 +22,16 @@ type Config struct {
 	RootUser   string
 
 	File struct {
-		FrontPage string `yaml:"front-page"`
-		Plugins   []struct {
-			Name    string      `yaml:"name"`
-			Options interface{} `yaml:"options"`
-		} `yaml:"plugins"`
+		FrontPage string                 `yaml:"front-page"`
+		Plugins   []plugins.PluginConfig `yaml:"plugins"`
 	}
 }
 type Backend struct {
-	Config *Config
-	Auth   *auth.Manager
-	db     *gorm.DB
+	Config   *Config
+	Auth     *auth.Manager
+	Plugin   *plugins.Manager
+	FileAttr *fileattr.Store
+	db       *gorm.DB
 }
 
 func New(conf *Config) (*Backend, error) {
@@ -52,10 +53,11 @@ func New(conf *Config) (*Backend, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to connect database")
 	}
-	if err := db.AutoMigrate(
-		&FileAttr{},
-	).Error; err != nil {
-		return nil, errors.Wrap(err, "auto migrate is failed")
+	db.DB().SetMaxOpenConns(1)
+
+	fa, err := fileattr.New(db)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to init file attribute module")
 	}
 
 	// Init Auth Module
@@ -80,7 +82,19 @@ func New(conf *Config) (*Backend, error) {
 		log.Warnf("root key: '%s'", key)
 	}
 
+	// Init Plugins
+	pluginManager, err := plugins.New(conf.File.Plugins)
+	if err != nil {
+		return nil, err
+	}
+
 	log.Trace("backend initailized")
 
-	return &Backend{conf, authManager, db}, nil
+	return &Backend{
+		Config:   conf,
+		Auth:     authManager,
+		Plugin:   pluginManager,
+		FileAttr: fa,
+		db:       db,
+	}, nil
 }

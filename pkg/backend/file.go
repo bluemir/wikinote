@@ -4,20 +4,16 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/bluemir/wikinote/pkg/fileattr"
 )
 
-type FileAttr struct {
-	Path  string
-	Key   string
-	Value string
-}
-
 func (backend *Backend) Object(path string) (map[string]string, error) {
-	attrs := []FileAttr{}
-
-	if err := backend.db.Where(&FileAttr{
+	attrs, err := backend.FileAttr.Find(&fileattr.FileAttr{
 		Path: path,
-	}).Find(&attrs).Error; err != nil {
+	})
+
+	if err != nil {
 		return map[string]string{}, err
 	}
 
@@ -34,8 +30,11 @@ func (backend *Backend) FileRead(path string) ([]byte, error) {
 	return ioutil.ReadFile(backend.GetFullPath(path))
 }
 func (backend *Backend) FileWrite(path string, data []byte) error {
-	// data, err := backend.plugins.triggerFileWriteHook(path, data)
-	// if err != nil { }
+	data, err := backend.Plugin.TriggerFileWriteHook(path, data)
+	if err != nil {
+		return err
+	}
+
 	fullpath := backend.GetFullPath(path)
 	dirpath := filepath.Dir(fullpath)
 	if err := os.MkdirAll(dirpath, 0755); err != nil {
