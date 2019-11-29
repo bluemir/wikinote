@@ -49,6 +49,9 @@ func (r *Recents) Footer(path string) ([]byte, error) {
 		Key:  KeyLastModified,
 	})
 	if err != nil {
+		if plugins.IsNotFound(err) {
+			return []byte(""), nil
+		}
 		return []byte{}, err
 	}
 	t, err := time.Parse(time.RFC3339, attr.Value)

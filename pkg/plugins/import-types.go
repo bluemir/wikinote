@@ -6,3 +6,5 @@ import (
 
 type Store = fileattr.Store
 type FileAttr = fileattr.FileAttr
+
+var IsNotFound = fileattr.IsNotFound

@@ -28,13 +28,14 @@ func (server *Server) HandleView(c *gin.Context) {
 
 		renderedData, err := server.Render(data)
 		if err != nil {
-			c.HTML(http.StatusInternalServerError, "/errors/internal-error.html", gin.H{})
+			c.HTML(http.StatusInternalServerError, "/errors/internal-server-error.html", gin.H{})
 			return
 		}
 
 		footerData, err := server.Backend.Plugin.WikiFooter(c.Request.URL.Path)
 		if err != nil {
-			c.HTML(http.StatusInternalServerError, "/errors/internal-error.html", gin.H{})
+			log.Warn(err)
+			c.HTML(http.StatusInternalServerError, "/errors/internal-server-error.html", gin.H{})
 			return
 		}
 

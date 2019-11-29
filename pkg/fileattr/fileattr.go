@@ -44,4 +44,8 @@ func (store *Store) Save(attr *FileAttr) error {
 	return store.db.Save(attr).Error
 }
 
+var (
+	IsNotFound = gorm.IsRecordNotFoundError
+)
+
 // need Raw method ?
