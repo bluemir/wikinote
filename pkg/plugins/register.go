@@ -1,6 +1,6 @@
 package plugins
 
-type PluginInit func(opt interface{}) (Plugin, error)
+type PluginInit func(opt interface{}, store *Store) (Plugin, error)
 
 type PluginInitDriver struct {
 	Init    PluginInit

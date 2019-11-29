@@ -83,7 +83,7 @@ func New(conf *Config) (*Backend, error) {
 	}
 
 	// Init Plugins
-	pluginManager, err := plugins.New(conf.File.Plugins)
+	pluginManager, err := plugins.New(conf.File.Plugins, fa)
 	if err != nil {
 		return nil, err
 	}

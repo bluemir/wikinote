@@ -40,6 +40,7 @@ func (store *Store) Take(attr *FileAttr) (*FileAttr, error) {
 	return result, nil
 }
 func (store *Store) Save(attr *FileAttr) error {
+	//TODO check empty value
 	return store.db.Save(attr).Error
 }
 

@@ -32,11 +32,16 @@ func (server *Server) HandleView(c *gin.Context) {
 			return
 		}
 
-		// data , err:= server.backend.plugins.viewFooter(path)
+		footerData, err := server.Backend.Plugin.WikiFooter(c.Request.URL.Path)
+		if err != nil {
+			c.HTML(http.StatusInternalServerError, "/errors/internal-error.html", gin.H{})
+			return
+		}
 
 		c.HTML(http.StatusOK, "/view/markdown.html", gin.H{
 			"data":       template.HTML(renderedData),
 			"breadcrumb": makeBreadcurmb(c.Request.URL.Path),
+			"footerData": footerData,
 		})
 		// markdown
 	case checkExt(c, ".jpg", ".png", ".bmp", ".gif"):

@@ -1,6 +1,8 @@
 package plugins
 
 import (
+	"html/template"
+
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	yaml "gopkg.in/yaml.v3"
@@ -11,7 +13,7 @@ type PluginConfig struct {
 	Options interface{}
 }
 
-func New(configs []PluginConfig) (*Manager, error) {
+func New(configs []PluginConfig, fileAttrStore *Store) (*Manager, error) {
 	manager := &Manager{}
 	for _, conf := range configs {
 		logrus.Infof("%s %#v", conf.Name, conf.Options)
@@ -32,7 +34,7 @@ func New(configs []PluginConfig) (*Manager, error) {
 			}
 		}
 
-		plugin, err := p.Init(p.Options)
+		plugin, err := p.Init(p.Options, fileAttrStore)
 		if err != nil {
 			return nil, err
 		}
@@ -64,4 +66,15 @@ func (m *Manager) TriggerFileWriteHook(path string, data []byte) ([]byte, error)
 		}
 	}
 	return data, nil
+}
+func (m *Manager) WikiFooter(path string) ([]template.HTML, error) {
+	result := []template.HTML{}
+	for _, hook := range m.Footer {
+		data, err := hook.Footer(path)
+		if err != nil {
+			return result, err
+		}
+		result = append(result, template.HTML(data))
+	}
+	return result, nil
 }
