@@ -65,6 +65,9 @@ func Run(b *backend.Backend, conf *Config) error {
 		// auth
 		special.Use(server.Authn)
 		special.POST("/api/preview", server.HandlePreview) // render body
+
+		// plugins
+		server.Backend.Plugin.RouteHook(special.Group("/plugins"))
 	}
 
 	app.Use(server.Authn)

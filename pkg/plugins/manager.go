@@ -3,6 +3,7 @@ package plugins
 import (
 	"html/template"
 
+	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	yaml "gopkg.in/yaml.v3"
@@ -14,9 +15,9 @@ type PluginConfig struct {
 }
 
 func New(configs []PluginConfig, fileAttrStore *Store) (*Manager, error) {
-	manager := &Manager{}
+	manager := &Manager{Route: map[string]PluginRoute{}}
 	for _, conf := range configs {
-		logrus.Infof("%s %#v", conf.Name, conf.Options)
+		logrus.Infof("Initialize plugin: %s", conf.Name)
 		p, ok := inits[conf.Name]
 		if !ok {
 			return nil, errors.Errorf("plugin not found")
@@ -34,6 +35,7 @@ func New(configs []PluginConfig, fileAttrStore *Store) (*Manager, error) {
 			}
 		}
 
+		logrus.Infof("%#v", p.Options)
 		plugin, err := p.Init(p.Options, fileAttrStore)
 		if err != nil {
 			return nil, err
@@ -41,9 +43,15 @@ func New(configs []PluginConfig, fileAttrStore *Store) (*Manager, error) {
 
 		if v, ok := plugin.(PluginFooter); ok {
 			manager.Footer = append(manager.Footer, v)
+			logrus.Tracef("footer detected")
 		}
 		if v, ok := plugin.(PluginWriteHook); ok {
 			manager.WriteHook = append(manager.WriteHook, v)
+			logrus.Tracef("writeHook detected")
+		}
+		if v, ok := plugin.(PluginRoute); ok {
+			manager.Route[conf.Name] = v
+			logrus.Tracef("route detected")
 		}
 	}
 	return manager, nil
@@ -52,6 +60,7 @@ func New(configs []PluginConfig, fileAttrStore *Store) (*Manager, error) {
 type Manager struct {
 	Footer    []PluginFooter
 	WriteHook []PluginWriteHook
+	Route     map[string]PluginRoute
 }
 
 func (m *Manager) TriggerFileReadHook(path string, data []byte) ([]byte, error) {
@@ -77,4 +86,12 @@ func (m *Manager) WikiFooter(path string) ([]template.HTML, error) {
 		result = append(result, template.HTML(data))
 	}
 	return result, nil
+}
+func (m *Manager) RouteHook(app gin.IRouter) error {
+	for name, route := range m.Route {
+		if err := route.Route(app.Group(name)); err != nil {
+			return err
+		}
+	}
+	return nil
 }

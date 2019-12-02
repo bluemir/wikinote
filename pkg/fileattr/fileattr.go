@@ -10,6 +10,10 @@ type FileAttr struct {
 	Key   string `gorm:"primary_key"`
 	Value string
 }
+type ListOption struct {
+	Order string
+	Limit int
+}
 
 type Store struct {
 	db *gorm.DB
@@ -31,6 +35,11 @@ func (store *Store) Find(attr *FileAttr) ([]FileAttr, error) {
 		return nil, err
 	}
 	return attrs, nil
+}
+func (store *Store) Search(attr *FileAttr, opt *ListOption) ([]FileAttr, error) {
+	attrs := []FileAttr{}
+	err := store.db.Where(attr).Order(opt.Order).Limit(opt.Limit).Find(&attrs).Error
+	return attrs, err
 }
 func (store *Store) Take(attr *FileAttr) (*FileAttr, error) {
 	result := &FileAttr{}

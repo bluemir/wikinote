@@ -1,8 +1,12 @@
 package recent
 
 import (
+	"fmt"
+	"html/template"
+	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 
 	"github.com/bluemir/wikinote/pkg/plugins"
@@ -13,6 +17,7 @@ const (
 )
 
 type Options struct {
+	Limit int
 }
 type Recents struct {
 	opt   *Options
@@ -20,7 +25,7 @@ type Recents struct {
 }
 
 func init() {
-	plugins.Register("recent-changes", New, &Options{})
+	plugins.Register("recent-changes", New, &Options{Limit: 10})
 }
 func New(o interface{}, store *plugins.Store) (plugins.Plugin, error) {
 	opt, ok := o.(*Options)
@@ -60,4 +65,34 @@ func (r *Recents) Footer(path string) ([]byte, error) {
 	}
 
 	return []byte("last update: " + t.Local().Format(time.RFC3339)), nil
+}
+func (r *Recents) Route(app gin.IRouter) error {
+	app.GET("/", func(c *gin.Context) {
+		attrs, err := r.store.Search(&plugins.FileAttr{
+			Key: KeyLastModified,
+		}, &plugins.ListOption{
+			Order: "value desc",
+			Limit: 10,
+		})
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, err.Error())
+		}
+
+		result := ""
+		for _, attr := range attrs {
+
+			t, err := time.Parse(time.RFC3339, attr.Value)
+			if err != nil {
+				t = time.Now()
+			}
+			result += fmt.Sprintf(`<p><a href="%s">%s</a> %s</p>`, attr.Path, attr.Path, t.Local().Format(time.RFC3339))
+		}
+
+		c.HTML(http.StatusOK, "/view/markdown.html", gin.H{
+			"data": template.HTML(result),
+		})
+	})
+
+	return nil
 }

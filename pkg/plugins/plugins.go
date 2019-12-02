@@ -1,5 +1,7 @@
 package plugins
 
+import "github.com/gin-gonic/gin"
+
 type Plugin interface {
 }
 
@@ -11,4 +13,7 @@ type PluginReadHook interface {
 }
 type PluginWriteHook interface {
 	FileWriteHook(path string, data []byte) ([]byte, error)
+}
+type PluginRoute interface {
+	Route(r gin.IRouter) error
 }
