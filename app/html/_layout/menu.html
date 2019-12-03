@@ -1,17 +1,12 @@
 {{define "menu"}}
 <ul>
 	{{ if not .IsSpecial }}
-	<li><a href="{{ .Path }}?edit">Edit</a></li>
+	<li><a href="?edit">Edit</a></li>
 	{{ end }}
 	<li>
 		<a href="">More</a>
 		<ul class="sub">
-			<li><a href="/!/delete{{ .Path }}">Delete</a></li>
-			<li><a href="{{ .Path }}?attach">Attach</a></li>
-			<li><a href="/!/move{{ .Path }}">Move</a></li>
-			<li><a href="/!/history{{ .Path }}">History</a></li>
-			<li><a href="/!/backlink{{ .Path }}">Back Links</a></li>
-			<li><a href="{{ .Path }}?publish">Publish</a></li>
+			<li><a href="?delete">Delete</a></li>
 			<hr>
 			<!-- TODO make split -->
 			{{ if .IsLogin }}

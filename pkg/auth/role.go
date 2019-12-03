@@ -17,6 +17,7 @@ const defaultRoles = `
   rules:
   - actions:
     - wiki:read
+    - wiki/raw:read
 `
 
 type Role struct {

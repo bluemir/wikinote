@@ -125,6 +125,24 @@ func (server *Server) HandleUpdate(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{})
 }
+func (server *Server) HandleDeleteForm(c *gin.Context) {
+	c.HTML(http.StatusOK, "/delete.html", gin.H{
+		"name": path.Base(c.Request.URL.Path),
+	})
+}
+func (server *Server) HandleDelete(c *gin.Context) {
+	if c.GetHeader("X-Confirm") != path.Base(c.Request.URL.Path) {
+		c.HTML(http.StatusBadRequest, "/errors/bad-request.html", gin.H{})
+		return
+	}
+
+	err := server.Backend.FileDelete(c.Request.URL.Path)
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "/errors/internal-sever-error.html", gin.H{})
+		return
+	}
+	c.Status(http.StatusNoContent)
+}
 func (server *Server) HandlePreview(c *gin.Context) {
 	data, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {

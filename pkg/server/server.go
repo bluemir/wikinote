@@ -73,11 +73,8 @@ func Run(b *backend.Backend, conf *Config) error {
 	app.Use(server.Authn)
 	// - GET            render file or render functional page
 	//   - edit      : show editor
-	//   - attach    : show attachment and upload form
+	//   - delete    : show delete check page
 	//   - raw       : show raw text(not rendered)
-	//   - history   : show histroy
-	//   - backlinks : show backlinks
-	//   - move      : show move confirm window
 	// - POST           create or update file with form submit
 	// - PUT            create or update file with ajax
 	// - DELETE         delete file
@@ -85,10 +82,11 @@ func Run(b *backend.Backend, conf *Config) error {
 	queryRouter := queryrouter.New()
 	queryRouter.Register(http.MethodGet, "edit", server.Authz("wiki:update"), server.HandleEditForm)
 	queryRouter.Register(http.MethodGet, "raw", server.Authz("wiki/raw:read"), server.HandleRaw)
+	queryRouter.Register(http.MethodGet, "delete", server.Authz("wiki:delete"), server.HandleDeleteForm)
 	queryRouter.Register(http.MethodGet, "*", server.Authz("wiki:read"), server.HandleView)
 	queryRouter.Register(http.MethodPost, "*", server.Authz("wiki:update"), server.HandleUpdateWithForm)
 	queryRouter.Register(http.MethodPut, "*", server.Authz("wiki:update"), server.HandleUpdate)
-	queryRouter.Register(http.MethodDelete, "*", server.Authz("wiki:delete"), server.HandleNotImplemented)
+	queryRouter.Register(http.MethodDelete, "*", server.Authz("wiki:delete"), server.HandleDelete)
 
 	app.NoRoute(queryRouter.Handler)
 

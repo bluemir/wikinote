@@ -47,6 +47,9 @@ func (backend *Backend) FileWrite(path string, data []byte) error {
 
 	return nil
 }
+func (backend *Backend) FileDelete(path string) error {
+	return os.Remove(backend.GetFullPath(path))
+}
 
 func (backend *Backend) GetFullPath(path string) string {
 	return filepath.Join(backend.Config.Wikipath, path)
