@@ -80,13 +80,13 @@ func Run(b *backend.Backend, conf *Config) error {
 	// - DELETE         delete file
 
 	queryRouter := queryrouter.New()
-	queryRouter.Register(http.MethodGet, "edit", server.Authz("wiki:update"), server.HandleEditForm)
-	queryRouter.Register(http.MethodGet, "raw", server.Authz("wiki/raw:read"), server.HandleRaw)
-	queryRouter.Register(http.MethodGet, "delete", server.Authz("wiki:delete"), server.HandleDeleteForm)
-	queryRouter.Register(http.MethodGet, "*", server.Authz("wiki:read"), server.HandleView)
-	queryRouter.Register(http.MethodPost, "*", server.Authz("wiki:update"), server.HandleUpdateWithForm)
-	queryRouter.Register(http.MethodPut, "*", server.Authz("wiki:update"), server.HandleUpdate)
-	queryRouter.Register(http.MethodDelete, "*", server.Authz("wiki:delete"), server.HandleDelete)
+	queryRouter.Register(http.MethodGet, "edit", server.Authz("update"), server.HandleEditForm)
+	queryRouter.Register(http.MethodGet, "raw", server.Authz("read"), server.HandleRaw)
+	queryRouter.Register(http.MethodGet, "delete", server.Authz("delete"), server.HandleDeleteForm)
+	queryRouter.Register(http.MethodGet, "*", server.Authz("read"), server.HandleView)
+	queryRouter.Register(http.MethodPost, "*", server.Authz("update"), server.HandleUpdateWithForm)
+	queryRouter.Register(http.MethodPut, "*", server.Authz("update"), server.HandleUpdate)
+	queryRouter.Register(http.MethodDelete, "*", server.Authz("delete"), server.HandleDelete)
 
 	app.NoRoute(queryRouter.Handler)
 

@@ -9,6 +9,7 @@ import (
 )
 
 func (backend *Backend) Object(path string) (map[string]string, error) {
+	// TODO make kind from ext
 	attrs, err := backend.FileAttr.Find(&fileattr.FileAttr{
 		Path: path,
 	})
@@ -20,6 +21,11 @@ func (backend *Backend) Object(path string) (map[string]string, error) {
 	result := map[string]string{}
 	for _, attr := range attrs {
 		result[attr.Key] = attr.Value
+	}
+	ext := filepath.Ext(path)
+	switch ext {
+	case ".md":
+		result["kind"] = "wiki"
 	}
 
 	return result, nil

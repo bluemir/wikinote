@@ -16,9 +16,8 @@ func (server *Server) HandleView(c *gin.Context) {
 	log := logrus.WithField("method", "server.HandleView")
 	//logrus.Debugf("path: %s, accept: %+v", c.Request.URL.Path, c.GetHeader("Accept"))
 
-	switch {
-	// TODO check file type
-	case checkExt(c, ".md"):
+	switch strings.ToLower(filepath.Ext(c.Request.URL.Path)) {
+	case ".md":
 		data, err := server.FileRead(c.Request.URL.Path)
 		if err != nil {
 			log.Warnf("md file not found, %s", err)
@@ -45,13 +44,13 @@ func (server *Server) HandleView(c *gin.Context) {
 			"footerData": footerData,
 		})
 		// markdown
-	case checkExt(c, ".jpg", ".png", ".bmp", ".gif"):
+	case ".jpg", ".png", ".bmp", ".gif":
 		// image
 		// check exist?
 		c.HTML(http.StatusOK, "/view/image.html", gin.H{})
-	case checkExt(c, ".mp4"):
+	case ".mp4":
 		// video
-	case checkExt(c, ".mp3"):
+	case ".mp3":
 		// music
 	default:
 		// check ext and
@@ -60,14 +59,6 @@ func (server *Server) HandleView(c *gin.Context) {
 		// TODO CONFIG
 		c.Redirect(http.StatusTemporaryRedirect, c.Request.URL.Path+".md")
 	}
-}
-func checkExt(c *gin.Context, ext ...string) bool {
-	for _, e := range ext {
-		if ori := strings.ToLower(filepath.Ext(c.Request.URL.Path)); ori == e {
-			return true
-		}
-	}
-	return false
 }
 
 func (server *Server) HandleRaw(c *gin.Context) {
