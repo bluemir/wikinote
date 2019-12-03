@@ -10,6 +10,7 @@ import (
 	"github.com/bluemir/wikinote/pkg/server"
 
 	// plugins
+	_ "github.com/bluemir/wikinote/pkg/plugins/discus"
 	_ "github.com/bluemir/wikinote/pkg/plugins/recently-changes"
 )
 
