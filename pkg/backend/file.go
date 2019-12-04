@@ -4,11 +4,15 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/bluemir/wikinote/pkg/fileattr"
 )
 
 func (backend *Backend) Object(path string) (map[string]string, error) {
+	if strings.HasPrefix(path, "/!/") {
+		return map[string]string{"kind": "special"}, nil
+	}
 	// TODO make kind from ext
 	attrs, err := backend.FileAttr.Find(&fileattr.FileAttr{
 		Path: path,
@@ -22,6 +26,7 @@ func (backend *Backend) Object(path string) (map[string]string, error) {
 	for _, attr := range attrs {
 		result[attr.Key] = attr.Value
 	}
+
 	ext := filepath.Ext(path)
 	switch ext {
 	case ".md":
