@@ -152,10 +152,10 @@ header menu ul.sub li:hover {
 .wiki-contents h5 {
 	font-size: 1.2rem;
 }
-.wiki-contents table {
+table {
 	border-collapse: collapse;
 }
-.wiki-contents table th, .wiki-contents table td {
+table th, table td {
 	border: 1px solid var(--gray);
 }
 .wiki-contents a {
@@ -240,3 +240,5 @@ footer {
 footer a {
 	color: var(--link-font-color);
 }
+/* search */
+

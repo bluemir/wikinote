@@ -1,0 +1,19 @@
+{{define "contents"}}
+
+<section class="search-view marginer">
+	<h1>Search result</h1>
+	<table>
+		{{range $key, $elem := .result }}
+		<tr>
+			<th colspan="2"><a href="{{$key}}">{{ $key }}</a></th>
+		</tr>
+		{{range $elem}}
+		<tr>
+			<th>{{.Line}}</th>
+			<td>{{.Text}}</td>
+		</tr>
+		{{end}}
+		{{end}}
+	</table>
+</section>
+{{end}}
