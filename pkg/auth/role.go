@@ -1,39 +1,25 @@
 package auth
 
 import (
-	"io/ioutil"
-
 	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/vm"
-	"github.com/sirupsen/logrus"
 	yaml "gopkg.in/yaml.v3"
 )
-
-const defaultRoles = `
-- name: root
-  rules:
-  - actions:
-- name: default
-  rules:
-  - actions:
-    - wiki:read
-    - wiki/raw:read
-`
 
 type Role struct {
 	Name  string `yaml:"name"`
 	Rules []Rule `yaml:"rules"`
 }
 type Rule struct {
-	Objects []ObjectRule `yaml:"objects"`
-	Actions []string     `yaml:"actions"`
+	Objects []*ObjectRule `yaml:"objects"`
+	Actions []string      `yaml:"actions"`
 }
 type ObjectRule struct {
 	*vm.Program
 }
 
 func (rule *ObjectRule) MarshalYAML() (interface{}, error) {
-	return yaml.Marshal(rule.Source.Content())
+	return map[string]string{"source": string(rule.Source.Content())}, nil
 }
 func (rule *ObjectRule) UnmarshalYAML(value *yaml.Node) error {
 	source := value.Value
@@ -47,42 +33,6 @@ func (rule *ObjectRule) UnmarshalYAML(value *yaml.Node) error {
 	return nil
 }
 
-func loadRole(roleFile string) (map[string]Role, error) {
-	log := logrus.WithField("method", "auth.loadRole")
-
-	result := map[string]Role{}
-
-	roles := []Role{}
-
-	if err := yaml.Unmarshal([]byte(defaultRoles), &roles); err != nil {
-		log.Warnf("'%s' not parsed. %s", roleFile, err)
-		return nil, err
-	}
-
-	for _, role := range roles {
-		result[role.Name] = role
-	}
-
-	log.Tracef("default: \n%s\n", must(yaml.Marshal(result)))
-
-	buf, err := ioutil.ReadFile(roleFile)
-	if err != nil {
-		log.Warnf("'%s' not exist. %s", roleFile, err)
-		buf = []byte(``)
-	}
-	if err = yaml.Unmarshal(buf, &roles); err != nil {
-		log.Warnf("'%s' not parsed. %s", roleFile, err)
-		return nil, err
-	}
-
-	for _, role := range roles {
-		result[role.Name] = role
-	}
-
-	log.Tracef("all: \n%s\n", must(yaml.Marshal(result)))
-
-	return result, nil
-}
 func must(buf []byte, err error) string {
 	if err != nil {
 		panic(buf)

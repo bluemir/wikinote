@@ -18,12 +18,12 @@ import (
 type Config struct {
 	Wikipath   string
 	ConfigFile string
-	RoleFile   string
 	RootUser   string
 
 	File struct {
 		FrontPage string                 `yaml:"front-page"`
 		Plugins   []plugins.PluginConfig `yaml:"plugins"`
+		Roles     []auth.Role            `yaml:"roles"`
 	}
 }
 type Backend struct {
@@ -61,7 +61,7 @@ func New(conf *Config) (*Backend, error) {
 	}
 
 	// Init Auth Module
-	authManager, err := auth.New(db, conf.RoleFile)
+	authManager, err := auth.New(db, conf.File.Roles)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to init auth module")
 	}

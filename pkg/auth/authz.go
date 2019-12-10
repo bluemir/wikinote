@@ -9,6 +9,10 @@ import (
 func (manager *Manager) Authz(ctx *Context) Result {
 	log := logrus.WithField("method", "auth.manager:authz")
 
+	log.Tracef("user: %#v", ctx.Subject.User)
+	log.Tracef("object: %#v", ctx.Object)
+	log.Tracef("action: %s", ctx.Action)
+
 	labels := map[string]string{"role/default": "true"}
 	if ctx.Subject.User != nil {
 		labels = ctx.Subject.User.Labels

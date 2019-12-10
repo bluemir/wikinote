@@ -3,6 +3,8 @@ package auth
 import (
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+	yaml "gopkg.in/yaml.v3"
 )
 
 type Manager struct {
@@ -10,8 +12,7 @@ type Manager struct {
 	roles map[string]Role
 }
 
-func New(db *gorm.DB, roleFile string) (*Manager, error) {
-	// Init db
+func New(db *gorm.DB, roles []Role) (*Manager, error) {
 	if err := db.AutoMigrate(
 		&User{},
 		&Token{},
@@ -19,13 +20,18 @@ func New(db *gorm.DB, roleFile string) (*Manager, error) {
 		return nil, err
 	}
 
-	// Load role
-	roles, err := loadRole(roleFile)
+	result := map[string]Role{}
+	for _, role := range roles {
+		result[role.Name] = role
+	}
+
+	buf, err := yaml.Marshal(result)
 	if err != nil {
 		return nil, err
 	}
+	logrus.Tracef("%s", string(buf))
 
-	return &Manager{db, roles}, nil
+	return &Manager{db, result}, nil
 }
 
 func (m *Manager) Subject(token *Token) (Subject, error) {
