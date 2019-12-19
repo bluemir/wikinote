@@ -3,6 +3,7 @@
 	<menu class="tabs-header">
 		<a class="btn" href="#" tab="editor" >Edit</a>
 		<a class="btn" href="#" tab="preview">Preview</a>
+		<a class="btn" href="#" tab="attribute">Attribute</a>
 	</menu>
 	<section class="panel editor">
 		<form method="POST" action="{{.path}}">
@@ -11,6 +12,12 @@
 		</form>
 	</section>
 	<section class="panel preview wiki-contents">
+	</section>
+
+	<section class="panel attribute">
+		<script type="module" src="/!/static/js/kv-editor.js"></script>
+		<kv-editor></kv-editor>
+		<button x-func="attr-save">Save Attribute</button>
 	</section>
 </section>
 <script type="module" src="/!/static/js/edit.js"></script>

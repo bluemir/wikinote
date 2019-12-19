@@ -84,6 +84,8 @@ func Run(b *backend.Backend, conf *Config) error {
 	queryRouter.Register(http.MethodGet, "edit", server.Authz("update"), server.HandleEditForm)
 	queryRouter.Register(http.MethodGet, "raw", server.Authz("read"), server.HandleRaw)
 	queryRouter.Register(http.MethodGet, "delete", server.Authz("delete"), server.HandleDeleteForm)
+	queryRouter.Register(http.MethodGet, "attribute", server.Authz("read"), server.HandleAttributeGet)
+	queryRouter.Register(http.MethodPut, "attribute", server.Authz("update"), server.HandleAttributeUpdate)
 	queryRouter.Register(http.MethodGet, "*", server.Authz("read"), server.HandleView)
 	queryRouter.Register(http.MethodPost, "*", server.Authz("update"), server.HandleUpdateWithForm)
 	queryRouter.Register(http.MethodPut, "*", server.Authz("update"), server.HandleUpdate)

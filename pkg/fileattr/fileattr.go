@@ -52,6 +52,9 @@ func (store *Store) Save(attr *FileAttr) error {
 	//TODO check empty value
 	return store.db.Save(attr).Error
 }
+func (store *Store) Delete(attr *FileAttr) error {
+	return store.db.Where(attr).Delete(attr).Error
+}
 
 var (
 	IsNotFound = gorm.IsRecordNotFoundError

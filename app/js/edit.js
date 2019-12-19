@@ -6,11 +6,18 @@ class EditorController {
 		var sc = new Shortcut($.get("body"))
 		sc.add("ctrl +space", e => this.previewToggle());
 		sc.add("alt + space", e => this.previewToggle());
-		sc.add("alt + .", e => this.previewToggle());
+		sc.add("alt + .",     e => this.previewToggle());
+		sc.add("alt + a",     e => this.attribute());
 
 		var editorShotcut = new Shortcut($.get(".editor form"));
 		editorShotcut.add("tab", e => this.addTab());
 		editorShotcut.add("ctrl + s", e => this.save());
+
+		$.get(".btn[tab=editor]"   ).on("click", e => this.previewOff(e))
+		$.get(".btn[tab=preview]"  ).on("click", e => this.previewOn(e))
+		$.get(".btn[tab=attribute]").on("click", e => this.attribute(e))
+
+		$.get("button[x-func=attr-save]").on("click", e => this.saveAttribute(e))
 	}
 	async previewOn() {
 		var str = $.get("form textarea").value;
@@ -38,6 +45,15 @@ class EditorController {
 			this.previewOn();
 		}
 	}
+	async attribute() {
+		var res = await $.request("GET", location.pathname, {
+			query: { attribute: ""},
+		});
+
+		$.get("kv-editor").data = res.json;
+
+		this.state = "attribute";
+	}
 	get state() {
 		return $.get(".tabs").attr("state")
 	}
@@ -59,6 +75,13 @@ class EditorController {
 		$.request("PUT", path, {
 			body: str
 		});
+	}
+	async saveAttribute() {
+		var d = $.get("kv-editor").data;
+		var res = $.request("PUT", location.pathname, {
+			query: { attribute: "" },
+			body: d,
+		})
 	}
 }
 

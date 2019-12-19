@@ -166,13 +166,17 @@ table th, table td {
 	text-decoration: underline;
 }
 /* preview */
-.tabs .preview {
+.tabs .editor, .tabs .preview, .tabs .attribute {
 	display: none;
 }
-.tabs[state=preview] .editor {
-	display: none;
+.tabs[state=editor] .editor {
+	display: block;
 }
 .tabs[state=preview] .preview {
+	display: block;
+}
+
+.tabs[state=attribute] .attribute {
 	display: block;
 }
 .tabs menu {
@@ -183,22 +187,21 @@ table th, table td {
 	border-bottom: 1px solid var(--button-background-color);
 }
 
-.tabs[state=editor]  .btn[tab=editor] {
-	color: var(--button-selected-font-color);
-}
-.tabs[state=editor]  .btn[tab=preview] {
+.tabs .btn[tab] {
 	color: var(--button-font-color);
 }
 
-.tabs[state=preview] .btn[tab=editor] {
-	color: var(--button-font-color);
+.tabs[state=editor]  .btn[tab=editor] {
+	color: var(--button-selected-font-color);
 }
 .tabs[state=preview] .btn[tab=preview] {
 	color: var(--button-selected-font-color);
 }
-
-.tabs .btn[tab=preview] {
+.tabs[state=attribute] .btn[tab=attribute] {
+	color: var(--button-selected-font-color);
 }
+
+
 /* btn */
 .btn {
 	background: var(--button-background-color);
