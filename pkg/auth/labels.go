@@ -3,20 +3,28 @@ package auth
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"errors"
+
+	"github.com/pkg/errors"
+	//"github.com/sirupsen/logrus"
 )
 
 type Labels map[string]string
 
 func (labels *Labels) Scan(src interface{}) error {
-	str, ok := src.([]byte)
-	if !ok {
-		return errors.New("must []byte")
+	//logrus.Tracef("src type: %T", src)
+	switch str := src.(type) {
+	case []byte:
+		if err := json.Unmarshal(str, labels); err != nil {
+			return err
+		}
+	case string:
+		if err := json.Unmarshal([]byte(str), labels); err != nil {
+			return err
+		}
+	default:
+		return errors.Errorf("must []byte was '%T'", src)
 	}
-	err := json.Unmarshal(str, labels)
-	if err != nil {
-		return err
-	}
+
 	return nil
 }
 func (labels Labels) Value() (driver.Value, error) {

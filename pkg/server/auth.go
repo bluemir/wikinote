@@ -40,13 +40,13 @@ func (server *Server) Authz(action string) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		subject, err := server.Auth.Subject(Token(c))
 		if err != nil {
-			c.HTML(http.StatusInternalServerError, "/errors/internal.html", gin.H{})
+			c.HTML(http.StatusInternalServerError, "/errors/internal-server-error.html", gin.H{})
 			c.Abort()
 			return
 		}
 		object, err := server.Backend.Object(c.Request.RequestURI)
 		if err != nil {
-			c.HTML(http.StatusInternalServerError, "/errors/internal.html", gin.H{})
+			c.HTML(http.StatusInternalServerError, "/errors/internal-server-error.html", gin.H{})
 			c.Abort()
 			return
 		}
@@ -69,7 +69,7 @@ func (server *Server) Authz(action string) func(c *gin.Context) {
 			c.Abort()
 			return
 		case auth.Error:
-			c.HTML(http.StatusInternalServerError, "/errors/internal.html", gin.H{"err": err.Error()})
+			c.HTML(http.StatusInternalServerError, "/errors/internal-server-error.html", gin.H{"err": err.Error()})
 			c.Abort()
 			return
 		case auth.NeedAuthn:
@@ -78,7 +78,7 @@ func (server *Server) Authz(action string) func(c *gin.Context) {
 			c.Abort()
 			return
 		default:
-			c.HTML(http.StatusInternalServerError, "/errors/internal-servic-error.html", gin.H{})
+			c.HTML(http.StatusInternalServerError, "/errors/internal-server-error.html", gin.H{})
 			c.Abort()
 			return
 		}

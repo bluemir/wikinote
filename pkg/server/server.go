@@ -56,7 +56,7 @@ func Run(b *backend.Backend, conf *Config) error {
 		special.StaticFS("/static/", dist.Files.HTTPBox())
 
 		// XXX for dev. must disable after dev
-		//special.PUT("/api/users/:name/role", server.HandleAPIUserUpdateRole)
+		// special.PUT("/api/users/:name/role", server.HandleAPIUserUpdateRole)
 
 		// Register
 		special.GET("/auth/register", server.HandleRegisterForm)

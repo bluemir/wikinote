@@ -10,7 +10,7 @@ require (
 	github.com/gin-contrib/multitemplate v0.0.0-20190914010127-bba2ccfe37ec
 	github.com/gin-contrib/sessions v0.0.1
 	github.com/gin-gonic/autotls v0.0.0-20190904071645-689297a2fe35
-	github.com/gin-gonic/gin v1.4.0
+	github.com/gin-gonic/gin v1.5.0
 	github.com/jinzhu/gorm v1.9.11
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/pkg/errors v0.8.1
