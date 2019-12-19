@@ -15,6 +15,7 @@ import (
 )
 
 var VERSION string
+var GitCommitId string
 
 type Config struct {
 	Backend backend.Config
@@ -31,6 +32,7 @@ func main() {
 	}
 
 	conf := &Config{}
+	conf.Server.GitCommitId = GitCommitId
 
 	cli := kingpin.New("wikinote", "main code")
 

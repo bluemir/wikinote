@@ -6,5 +6,5 @@ import (
 
 var (
 	Files     = rice.MustFindBox("../../build/dist")
-	Templates = rice.MustFindBox("../../app/html")
+	Templates = rice.MustFindBox("../../build/template")
 )

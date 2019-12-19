@@ -21,7 +21,9 @@ func (server *Server) HandleView(c *gin.Context) {
 		data, err := server.FileRead(c.Request.URL.Path)
 		if err != nil {
 			log.Warnf("md file not found, %s", err)
-			c.HTML(http.StatusNotFound, "/errors/not-found.html", gin.H{})
+			c.HTML(http.StatusNotFound, "/errors/not-found.html", gin.H{
+				"breadcrumb": makeBreadcurmb(c.Request.URL.Path),
+			})
 			return
 		}
 

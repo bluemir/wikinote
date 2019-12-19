@@ -15,8 +15,9 @@ import (
 )
 
 type Config struct {
-	Bind       string
-	TLSDomains []string
+	Bind        string
+	TLSDomains  []string
+	GitCommitId string
 }
 
 func Run(b *backend.Backend, conf *Config) error {
@@ -53,10 +54,13 @@ func Run(b *backend.Backend, conf *Config) error {
 
 	special := app.Group("/!")
 	{
-		special.StaticFS("/static/", dist.Files.HTTPBox())
+		//special.StaticFS("/static/", dist.Files.HTTPBox())
+		special.Group("/static").StaticFS(conf.GitCommitId, dist.Files.HTTPBox()) // ...
 
 		// XXX for dev. must disable after dev
 		// special.PUT("/api/users/:name/role", server.HandleAPIUserUpdateRole)
+
+		// TODO user manager
 
 		// Register
 		special.GET("/auth/register", server.HandleRegisterForm)
