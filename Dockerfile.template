@@ -1,8 +1,8 @@
 ARG VERSION=dev
-FROM fedora:30 as build-env
+FROM fedora:31 as build-env
 
 RUN  yum install -y \
-    golang make findutils \
+    golang make findutils gettext \
     && yum clean all
 
 ENV GOPATH=/root/go
@@ -32,7 +32,7 @@ RUN make build/${BIN_NAME}
 
 ################################################################################
 # running image
-FROM fedora:30
+FROM fedora:31
 
 WORKDIR /
 COPY --from=build-env /src/build/${BIN_NAME} /bin/${BIN_NAME}
