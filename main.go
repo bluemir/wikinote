@@ -10,12 +10,15 @@ import (
 	"github.com/bluemir/wikinote/pkg/server"
 
 	// plugins
+	_ "github.com/bluemir/wikinote/pkg/plugins/__test__"
 	_ "github.com/bluemir/wikinote/pkg/plugins/discus"
 	_ "github.com/bluemir/wikinote/pkg/plugins/recently-changes"
 )
 
-var VERSION string
-var GitCommitId string
+var (
+	VERSION     string
+	GitCommitId string
+)
 
 type Config struct {
 	Backend backend.Config
@@ -24,6 +27,7 @@ type Config struct {
 }
 
 func main() {
+
 	// log
 	if level, err := logrus.ParseLevel(os.Getenv("LOG_LEVEL")); err != nil {
 		logrus.Warn("unknown log level. using default level(info)")
@@ -31,7 +35,12 @@ func main() {
 		logrus.SetLevel(level)
 	}
 
-	conf := &Config{}
+	logrus.SetOutput(os.Stderr)
+	logrus.SetReportCaller(true)
+
+	conf := &Config{
+		Backend: backend.InitConfig(),
+	}
 	conf.Server.GitCommitId = GitCommitId
 
 	cli := kingpin.New("wikinote", "main code")
@@ -47,8 +56,8 @@ func main() {
 		Default(os.ExpandEnv("$HOME/wiki/.app/config.yaml")).
 		PlaceHolder("$HOME/wiki/.app/config.yaml").
 		StringVar(&conf.Backend.ConfigFile)
-	cli.Flag("root-user", "root user").
-		StringVar(&conf.Backend.RootUser)
+	cli.Flag("admin-user", "admin user").
+		StringMapVar(&conf.Backend.AdminUsers)
 
 	cli.Version(VERSION)
 
@@ -69,5 +78,4 @@ func main() {
 			logrus.Fatal(err)
 		}
 	}
-
 }

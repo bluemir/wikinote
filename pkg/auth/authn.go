@@ -31,9 +31,8 @@ func (m *Manager) HTTP(header http.Header) (*Token, error) {
 	return m.HTTPHeaderString(header.Get(HeaderAuthorization))
 }
 func (m *Manager) HTTPHeaderString(header string) (*Token, error) {
-	log := logrus.WithField("method", "auth.Manager:HTTPHeaderString")
 	if header == "" {
-		log.Trace("EmptyHeader")
+		logrus.Trace("EmptyHeader")
 		return nil, ErrEmptyHeader
 	}
 	arr := strings.SplitN(header, " ", 2)
@@ -41,7 +40,7 @@ func (m *Manager) HTTPHeaderString(header string) (*Token, error) {
 	case "Basic", "basic", "Token", "token":
 		str, err := base64.StdEncoding.DecodeString(arr[1])
 		if err != nil {
-			log.Error(err)
+			logrus.Error(err)
 			return nil, ErrWrongEncoding
 		}
 

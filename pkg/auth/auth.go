@@ -52,5 +52,4 @@ func (m *Manager) Subject(token *Token) (Subject, error) {
 	subject.User = user
 
 	return subject, nil
-
 }

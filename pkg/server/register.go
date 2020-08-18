@@ -38,6 +38,7 @@ func (server *Server) HandleRegister(c *gin.Context) {
 
 	err := server.Auth.CreateUser(req.Name, auth.Labels{
 		"wikinote.io/email": req.Email,
+		//"role/default":      "true",
 	})
 	if err != nil {
 		c.HTML(http.StatusInternalServerError, "/errors/internal-server-error.html", gin.H{

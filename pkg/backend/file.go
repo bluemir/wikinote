@@ -40,6 +40,7 @@ func (backend *Backend) FileRead(path string) ([]byte, error) {
 	// data, err := backend.plugins.triggerFileReadHook(path, data)
 	return ioutil.ReadFile(backend.GetFullPath(path))
 }
+
 func (backend *Backend) FileWrite(path string, data []byte) error {
 	data, err := backend.Plugin.TriggerFileWriteHook(path, data)
 	if err != nil {
@@ -58,6 +59,7 @@ func (backend *Backend) FileWrite(path string, data []byte) error {
 
 	return nil
 }
+
 func (backend *Backend) FileDelete(path string) error {
 	return os.Remove(backend.GetFullPath(path))
 }

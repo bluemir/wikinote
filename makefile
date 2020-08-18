@@ -1,4 +1,4 @@
-VERSION?=$(shell git describe --long --tags --dirty --always)
+VERSION?=$(shell git describe --tags --dirty --always)
 GIT_COMMIT_ID?=$(shell git rev-parse --short HEAD)
 export VERSION
 export GIT_COMMIT_ID
@@ -84,7 +84,7 @@ clean:
 
 run: export LOG_LEVEL=TRACE
 run: build/$(BIN_NAME)
-	$< --root-user root serve
+	$< --admin-user root=1234 -w ./build/test-data -c ./build/test-data/.app/config.yaml serve
 
 auto-run:
 	while true; do \

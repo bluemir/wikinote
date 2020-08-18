@@ -15,10 +15,17 @@ import (
 	"github.com/bluemir/wikinote/pkg/plugins"
 )
 
+func InitConfig() Config {
+	return Config{
+		AdminUsers: map[string]string{},
+	}
+}
+
 type Config struct {
 	Wikipath   string
 	ConfigFile string
-	RootUser   string
+
+	AdminUsers map[string]string
 
 	File struct {
 		FrontPage string                 `yaml:"front-page"`
@@ -35,14 +42,13 @@ type Backend struct {
 }
 
 func New(conf *Config) (*Backend, error) {
-	log := logrus.WithField("method", "backend.New")
 
 	// Load config file
 	if err := loadConfigFile(conf); err != nil {
 		return nil, err
 	}
 
-	log.Debug(conf)
+	logrus.Debug(conf)
 
 	// Init DB
 	dbPath := filepath.Join(conf.Wikipath, ".app/wikinote.db")
@@ -66,20 +72,22 @@ func New(conf *Config) (*Backend, error) {
 		return nil, errors.Wrap(err, "failed to init auth module")
 	}
 
-	if conf.RootUser != "" {
-		key := xid.New().String()
-		if err := authManager.EnsureUser(conf.RootUser, map[string]string{
+	for name, key := range conf.AdminUsers {
+		if key == "" {
+			key = xid.New().String()
+			logrus.Warnf("generate key: '%s' '%s'", name, key)
+		}
+		if err := authManager.EnsureUser(name, map[string]string{
 			"role/root": "true",
 		}); err != nil {
 			return nil, err
 		}
-		if err := authManager.RevokeTokenAll(conf.RootUser); err != nil {
+		if err := authManager.RevokeTokenAll(name); err != nil {
 			return nil, err
 		}
-		if _, err := authManager.IssueToken(conf.RootUser, key); err != nil {
+		if _, err := authManager.IssueToken(name, key); err != nil {
 			return nil, err
 		}
-		log.Warnf("root key: '%s'", key)
 	}
 
 	// Init Plugins
@@ -88,7 +96,7 @@ func New(conf *Config) (*Backend, error) {
 		return nil, err
 	}
 
-	log.Trace("backend initailized")
+	logrus.Trace("backend initailized")
 
 	return &Backend{
 		Config:   conf,
