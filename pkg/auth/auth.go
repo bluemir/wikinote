@@ -29,11 +29,12 @@ func New(db *gorm.DB, roles []Role) (*Manager, error) {
 		result[role.Name] = role
 	}
 
+	// dump
 	buf, err := yaml.Marshal(result)
 	if err != nil {
 		return nil, err
 	}
-	logrus.Tracef("roles: %s", string(buf))
+	logrus.Tracef("roles: \n%s", string(buf))
 
 	return &Manager{db, result}, nil
 }

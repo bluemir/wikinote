@@ -61,7 +61,7 @@ clean:
 	rm -rf build/ $(OPTIONAL_CLEAN_DIR)
 
 run: build/$(APP_NAME)
-	$< -vvvv server
+	$< -vvv server --admin-user root=1234 --wiki-path=runtime --config=runtime/.app/config.yaml
 
 auto-run:
 	while true; do \

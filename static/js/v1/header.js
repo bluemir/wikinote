@@ -116,7 +116,7 @@ var tmpl = (app) => html`
 		<!--input type="submit" value="Search"/-->
 	</form>
 	<nav id="breadcrumbs">
-		${app.breadcrumbs.map(item => html`/ <a href="${item.path}">${item.name}</a>`)}
+		${app.breadcrumbs.map(item => html`/ <a href="${item.path}">${item.name}</a> `)}
 	</nav>
 	<menu>
 		<!-- menu -->

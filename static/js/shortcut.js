@@ -1,4 +1,4 @@
-import $ from "../lib/minilib.module.js";
+import * as $ from "../lib/minilib.module.js";
 
 
 // tab + space
@@ -13,6 +13,7 @@ var L = {info: noop, log: noop}
 class Shortcut {
 	constructor(elem) {
 		if (!(elem instanceof EventTarget)) {
+			console.debug(elem)
 			throw Error("type error")
 		}
 
@@ -146,4 +147,3 @@ const toCode = {
 })();
 
 export {Shortcut};
-

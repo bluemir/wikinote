@@ -33,13 +33,6 @@ func (rule *ObjectRule) UnmarshalYAML(value *yaml.Node) error {
 	return nil
 }
 
-func must(buf []byte, err error) string {
-	if err != nil {
-		panic(buf)
-	}
-	return string(buf)
-}
-
 func (rule *Rule) IsMatchedAction(action string) bool {
 	if len(rule.Actions) == 0 {
 		return true // match all

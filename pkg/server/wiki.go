@@ -41,7 +41,6 @@ func (server *Server) HandleView(c *gin.Context) {
 
 		c.HTML(http.StatusOK, "/views/markdown.html", gin.H{
 			"data":       template.HTML(renderedData),
-			"breadcrumb": makeBreadcurmb(c.Request.URL.Path),
 			"footerData": footerData,
 		})
 		// markdown
@@ -78,10 +77,9 @@ func (server *Server) HandleEditForm(c *gin.Context) {
 		// return
 	}
 
-	c.HTML(http.StatusOK, "/edit.html", gin.H{
-		"data":       string(data),
-		"path":       c.Request.URL.Path,
-		"breadcrumb": makeBreadcurmb(c.Request.URL.Path),
+	c.HTML(http.StatusOK, "/editor.html", gin.H{
+		"data": string(data),
+		"path": c.Request.URL.Path,
 	})
 }
 func (server *Server) HandleUpdateWithForm(c *gin.Context) {

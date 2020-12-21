@@ -18,7 +18,7 @@ func (manager *Manager) Authz(ctx *Context) Result {
 	}
 	logrus.Tracef("lable: %#v", labels)
 
-	for k, _ := range labels {
+	for k := range labels {
 		if !strings.HasPrefix(k, "role/") {
 			continue
 		}
@@ -41,6 +41,7 @@ func (manager *Manager) Authz(ctx *Context) Result {
 			return Accept
 		}
 	}
+
 	if ctx.Subject.User == nil {
 		return NeedAuthn
 	}

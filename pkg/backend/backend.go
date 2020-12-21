@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
 	"github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v3"
 
 	"github.com/bluemir/wikinote/pkg/auth"
 	"github.com/bluemir/wikinote/pkg/fileattr"
@@ -42,13 +43,13 @@ type Backend struct {
 }
 
 func New(conf *Config) (*Backend, error) {
-
 	// Load config file
 	if err := loadConfigFile(conf); err != nil {
 		return nil, err
 	}
 
-	logrus.Debug(conf)
+	buf, _ := yaml.Marshal(conf)
+	logrus.Debugf("config:\n%s", buf)
 
 	// Init DB
 	dbPath := filepath.Join(conf.Wikipath, ".app/wikinote.db")

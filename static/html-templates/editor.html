@@ -1,4 +1,4 @@
-{{ define "/errors/not-found.html" }}
+{{ define "/editor.html" }}
 <html>
 	<head>
 		<meta charset="utf-8">
@@ -8,7 +8,7 @@
 	</head>
 	<body>
 		<wikinote-layout>
-			<h1>Not found</h1>
+			<wikinote-editor>{{ .data }}</wikinote-editor>
 		</wikinote-layout>
 	</body>
 </html>

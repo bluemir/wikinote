@@ -7,12 +7,16 @@ export var config = {
 	},
 }
 export function get(target, query) {
-	if(!(target instanceof Element)) {return document.querySelector(target)}
-	return target.querySelector(query);
+	if(target.querySelector instanceof Function) {
+		return target.querySelector(query);
+	}
+	return document.querySelector(target)
 }
 export function all(target, query) {
-	if(!(target instanceof Element)) {return document.querySelectorAll(target)}
-	return target.querySelectorAll(query);
+	if(target.querySelectorAll instanceof Function) {
+		return target.querySelectorAll(query);
+	}
+	return document.querySelectorAll(target)
 }
 export function create(tagname, attr) {
 	var newTag = document.createElement(tagname);
