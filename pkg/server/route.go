@@ -11,24 +11,22 @@ import (
 )
 
 func (server *Server) RegisterRoute(app gin.IRouter) {
-	indexRouter := queryrouter.New()
 	redirectToFrontPage := func(c *gin.Context) {
 		logrus.Debugf("redirect to front page: %s", server.Config.File.FrontPage)
-		c.Redirect(http.StatusTemporaryRedirect, server.Config.File.FrontPage)
+		c.Redirect(http.StatusTemporaryRedirect, "/"+server.Config.File.FrontPage)
 		c.Abort()
 		return
 	}
-	indexRouter.Register(http.MethodGet, "login", server.Authn, redirectToFrontPage)
-	indexRouter.Register(http.MethodGet, "*", redirectToFrontPage)
-	app.GET("/", indexRouter.Handler)
+	app.GET("/", redirectToFrontPage)
 
 	special := app.Group("/!")
 	{
-		special.Group("/static", staticCache).StaticFS("/", static.Files.HTTPBox()) // ...
+		special.Group("/static", staticCache).StaticFS("/", static.Files.HTTPBox())
 		special.Group("/lib", staticCache).StaticFS("/", static.NodeModules.HTTPBox())
 
 		// XXX for dev. must disable after dev
 		// special.PUT("/api/users/:name/role", server.HandleAPIUserUpdateRole)
+		special.GET("/login", server.Authn, redirectToFrontPage)
 
 		// TODO user manager
 
