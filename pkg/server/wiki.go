@@ -13,14 +13,13 @@ import (
 )
 
 func (server *Server) HandleView(c *gin.Context) {
-	log := logrus.WithField("method", "server.HandleView")
 	//logrus.Debugf("path: %s, accept: %+v", c.Request.URL.Path, c.GetHeader("Accept"))
 
 	switch strings.ToLower(filepath.Ext(c.Request.URL.Path)) {
 	case ".md":
 		data, err := server.FileRead(c.Request.URL.Path)
 		if err != nil {
-			log.Warnf("md file not found, %s", err)
+			logrus.Warnf("md file not found, %s", err)
 			c.HTML(http.StatusNotFound, "/errors/not-found.html", gin.H{
 				"breadcrumb": makeBreadcurmb(c.Request.URL.Path),
 			})
@@ -35,12 +34,12 @@ func (server *Server) HandleView(c *gin.Context) {
 
 		footerData, err := server.Backend.Plugin.WikiFooter(c.Request.URL.Path)
 		if err != nil {
-			log.Warn(err)
+			logrus.Warn(err)
 			c.HTML(http.StatusInternalServerError, "/errors/internal-server-error.html", gin.H{})
 			return
 		}
 
-		c.HTML(http.StatusOK, "/view/markdown.html", gin.H{
+		c.HTML(http.StatusOK, "/views/markdown.html", gin.H{
 			"data":       template.HTML(renderedData),
 			"breadcrumb": makeBreadcurmb(c.Request.URL.Path),
 			"footerData": footerData,
@@ -57,7 +56,7 @@ func (server *Server) HandleView(c *gin.Context) {
 	default:
 		// check ext and
 		// render md files or other rendering
-		log.Debugf("no ext: %s", c.Request.URL.Path)
+		logrus.Debugf("no ext: %s", c.Request.URL.Path)
 		// TODO CONFIG
 		c.Redirect(http.StatusTemporaryRedirect, c.Request.URL.Path+".md")
 	}

@@ -14,6 +14,7 @@ func (manager *Manager) Authz(ctx *Context) Result {
 	labels := map[string]string{"role/default": "true"}
 	if ctx.Subject.User != nil {
 		labels = ctx.Subject.User.Labels
+		labels["role/default"] = "true"
 	}
 	logrus.Tracef("lable: %#v", labels)
 

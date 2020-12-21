@@ -20,6 +20,10 @@ func New(db *gorm.DB, roles []Role) (*Manager, error) {
 		return nil, err
 	}
 
+	if len(roles) == 0 {
+		logrus.Warn("config dosen't have role. using defualt role.")
+	}
+
 	result := map[string]Role{}
 	for _, role := range roles {
 		result[role.Name] = role
@@ -29,7 +33,7 @@ func New(db *gorm.DB, roles []Role) (*Manager, error) {
 	if err != nil {
 		return nil, err
 	}
-	logrus.Tracef("%s", string(buf))
+	logrus.Tracef("roles: %s", string(buf))
 
 	return &Manager{db, result}, nil
 }

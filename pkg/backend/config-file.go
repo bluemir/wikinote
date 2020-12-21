@@ -10,11 +10,19 @@ import (
 var defaultConfig = `
 front-page: front-page.md
 plugins:
-  - name: __test__
-    options:
-      testmap:
-        v1: "foo"
-        v2: "bar"
+- name: __test__
+  options:
+    testmap:
+      v1: "foo"
+      v2: "bar"
+roles:
+- name: default
+  rules:
+  - actions:
+    - read
+    objects:
+    - 'kind == "wiki"'
+    - 'kind == "image"'
 `
 
 func loadConfigFile(conf *Config) error {

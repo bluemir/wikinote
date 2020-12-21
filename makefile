@@ -1,110 +1,90 @@
 VERSION?=$(shell git describe --tags --dirty --always)
-GIT_COMMIT_ID?=$(shell git rev-parse --short HEAD)
 export VERSION
-export GIT_COMMIT_ID
 
 IMPORT_PATH=$(shell cat go.mod | head -n 1 | awk '{print $$2}')
-BIN_NAME=$(notdir $(IMPORT_PATH))
+APP_NAME=$(notdir $(IMPORT_PATH))
 
 export GO111MODULE=on
-export GIT_TERMINAL_PROMPT=1
-
-DOCKER_IMAGE_NAME=bluemir/$(BIN_NAME)
 
 ## Go Sources
 GO_SOURCES = $(shell find . -name "vendor"  -prune -o \
                             -type f -name "*.go" -print)
 
 ## FE sources
-JS_SOURCES    = $(shell find app/js       -type f -name '*.js'   -print)
-HTML_SOURCES  = $(shell find app/html     -type f -name '*.html' -print)
-CSS_SOURCES   = $(shell find app/css      -type f -name '*.css'  -print)
-WEB_LIBS      = $(shell find app/lib      -type f                -print)
+JS_SOURCES    := $(shell find static/js             -type f -name '*.js'   -print)
+CSS_SOURCES   := $(shell find static/css            -type f -name '*.css'  -print)
+WEB_LIBS      := $(shell find static/lib            -type f                -print)
+HTML_SOURCES  := $(shell find static/html-templates -type f -name '*.html' -print)
 
-DISTS =
-DISTS += $(JS_SOURCES:app/js/%=build/dist/js/%)
-DISTS += $(CSS_SOURCES:app/css/%=build/dist/css/%)
-DISTS += $(WEB_LIBS:app/lib/%=build/dist/lib/%)
+STATICS :=
+STATICS += $(JS_SOURCES:%=build/%)
+STATICS += $(CSS_SOURCES:%=build/%)
+STATICS += $(WEB_LIBS:%=build/%)
 
-HTML_TEMPLATE = $(HTML_SOURCES:app/html/%=build/template/%)
+## see Makefile.d/nodejs.mk for using rollup, less or other tools
 
 default: build
 
-## Web dist
-build/dist/$(GIT_COMMIT_ID)/%: app/%
-build/dist/%: app/%
+# sub-makefiles
+# for build tools, docker build, deploy
+include makefile.d/*
+
+## Static files
+build/static/%: static/%
 	@mkdir -p $(dir $@)
 	cp $< $@
-#dist/css/%.css: $(CSS_SOURCES)
-#	lessc app/less/entry/$*.less $@
-## HTML template
-build/template/%: app/html/%
-	@mkdir -p $(dir $@)
-	cat $< | GIT_COMMIT_ID=$(GIT_COMMIT_ID) envsubst '$$GIT_COMMIT_ID' > $@
 
-build: build/$(BIN_NAME)
+build: build/$(APP_NAME)
 
-build/$(BIN_NAME).unpacked: $(GO_SOURCES) makefile
+build/$(APP_NAME).unpacked: $(GO_SOURCES) $(MAKEFILE_LIST)
+	@$(MAKE) build/tools/go
 	@mkdir -p build
 	go build -v \
-		-ldflags "-X main.VERSION=$(VERSION) -X main.GitCommitId=$(GIT_COMMIT_ID)" \
+		-trimpath \
+		-ldflags "\
+			-X main.AppName=$(APP_NAME) \
+			-X main.Version=$(VERSION)  \
+		" \
 		$(OPTIONAL_BUILD_ARGS) \
 		-o $@ main.go
-build/$(BIN_NAME): build/$(BIN_NAME).unpacked $(HTML_TEMPLATE) $(DISTS)
-	@mkdir -p build
+
+build/$(APP_NAME): build/$(APP_NAME).unpacked $(HTML_SOURCES) $(STATICS) $(MAKEFILE_LIST)
+	$(MAKE) build/tools/rice
+	@mkdir -p $(dir $<)
 	cp $< $@.tmp
 	rice append -v \
-		-i $(IMPORT_PATH)/pkg/dist \
+		-i $(IMPORT_PATH)/pkg/static \
 		--exec $@.tmp
-	mv build/$(BIN_NAME).tmp $@
-
-docker: build/.docker-image
-
-build/.docker-image: build/Dockerfile $(GO_SOURCES) $(HTML_TEMPLATE) $(DISTS)
-	docker build \
-		--build-arg VERSION=$(VERSION) \
-		-t $(DOCKER_IMAGE_NAME):$(VERSION) \
-		-f $< .
-	echo $(DOCKER_IMAGE_NAME):$(VERSION) > $@
-
-build/Dockerfile: export BIN_NAME:=$(BIN_NAME)
-build/Dockerfile: Dockerfile.template
-	@mkdir -p build
-	cat $< | envsubst '$$BIN_NAME' > $@
-
-
-push: build/.docker-image.pushed
-
-build/.docker-image.pushed: build/.docker-image
-	docker push $(shell cat build/.docker-image)
-	echo $(shell cat build/.docker-image) > $@
+	mv $@.tmp $@
 
 clean:
-	rm -rf build/
+	rm -rf build/ $(OPTIONAL_CLEAN_DIR)
 
-run: export LOG_LEVEL=TRACE
-run: build/$(BIN_NAME)
-	$< --admin-user root=1234 -w ./build/test-data -c ./build/test-data/.app/config.yaml serve
+run: build/$(APP_NAME)
+	$< -vvvv server
 
 auto-run:
 	while true; do \
-		$(MAKE) .sources | \
-		entr -rd $(MAKE) run ;  \
+		$(MAKE) .watched_sources | \
+		entr -rd $(MAKE) test run ;  \
 		echo "hit ^C again to quit" && sleep 1  \
 	; done
 
-.sources:
-	@echo \
-	makefile \
+reset:
+	ps -e | grep make | grep -v grep | awk '{print $$1}' | xargs kill
+
+## watched_sources
+.watched_sources: \
+	$(MAKEFILE_LIST) \
+	go.mod go.sum \
 	$(GO_SOURCES) \
 	$(JS_SOURCES) \
-	$(HTML_SOURCES) \
 	$(CSS_SOURCES) \
 	$(WEB_LIBS) \
-	$(HTML_TEMPLATE) \
-	| tr " " "\n"
+	$(HTML_SOURCES)
+	@echo $^ | tr " " "\n"
 
 test:
 	go test -v ./pkg/...
 
-.PHONY: build docker push clean run auto-run .sources test default
+.PHONY: build clean run auto-run reset .watched_sources test

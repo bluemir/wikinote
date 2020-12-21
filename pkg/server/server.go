@@ -7,17 +7,15 @@ import (
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/autotls"
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/pkg/backend"
-	"github.com/bluemir/wikinote/pkg/dist"
-	"github.com/bluemir/wikinote/pkg/query-router"
 )
 
 type Config struct {
-	Bind        string
-	TLSDomains  []string
-	GitCommitId string
+	Bind       string
+	TLSDomains []string
 }
 
 func Run(b *backend.Backend, conf *Config) error {
@@ -26,7 +24,7 @@ func Run(b *backend.Backend, conf *Config) error {
 	app := gin.New()
 
 	// Log
-	writer := logrus.New().Writer()
+	writer := logrus.WithField("from", "gin").Writer()
 	defer writer.Close()
 	app.Use(gin.LoggerWithWriter(writer))
 
@@ -38,64 +36,13 @@ func Run(b *backend.Backend, conf *Config) error {
 	app.Use(sessions.Sessions("session", store))
 
 	// Renderer
-	app.HTMLRender = loadTemplates()
-
-	// Root
-	indexRouter := queryrouter.New()
-	redirectToFrontPage := func(c *gin.Context) {
-		logrus.Debugf("redirect to front page: %s", b.Config.File.FrontPage)
-		c.Redirect(http.StatusTemporaryRedirect, b.Config.File.FrontPage)
-		c.Abort()
-		return
-	}
-	indexRouter.Register(http.MethodGet, "login", server.Authn, redirectToFrontPage)
-	indexRouter.Register(http.MethodGet, "*", redirectToFrontPage)
-	app.GET("/", indexRouter.Handler)
-
-	special := app.Group("/!")
-	{
-		//special.StaticFS("/static/", dist.Files.HTTPBox())
-		special.Group("/static").StaticFS(conf.GitCommitId, dist.Files.HTTPBox()) // ...
-
-		// XXX for dev. must disable after dev
-		// special.PUT("/api/users/:name/role", server.HandleAPIUserUpdateRole)
-
-		// TODO user manager
-
-		// Register
-		special.GET("/auth/register", server.HandleRegisterForm)
-		special.POST("/auth/register", server.HandleRegister)
-
-		// auth
-		special.Use(server.Authn)
-		special.POST("/api/preview", server.HandlePreview) // render body
-		special.GET("/search", server.Authz("search"), server.HandleSearch)
-
-		// plugins
-		server.Backend.Plugin.RouteHook(special.Group("/plugins"))
+	if html, err := NewRenderer(); err != nil {
+		return errors.WithStack(err)
+	} else {
+		app.SetHTMLTemplate(html)
 	}
 
-	app.Use(server.Authn)
-	// - GET            render file or render functional page
-	//   - edit      : show editor
-	//   - delete    : show delete check page
-	//   - raw       : show raw text(not rendered)
-	// - POST           create or update file with form submit
-	// - PUT            create or update file with ajax
-	// - DELETE         delete file
-
-	queryRouter := queryrouter.New()
-	queryRouter.Register(http.MethodGet, "edit", server.Authz("update"), server.HandleEditForm)
-	queryRouter.Register(http.MethodGet, "raw", server.Authz("read"), server.HandleRaw)
-	queryRouter.Register(http.MethodGet, "delete", server.Authz("delete"), server.HandleDeleteForm)
-	queryRouter.Register(http.MethodGet, "attribute", server.Authz("read"), server.HandleAttributeGet)
-	queryRouter.Register(http.MethodPut, "attribute", server.Authz("update"), server.HandleAttributeUpdate)
-	queryRouter.Register(http.MethodGet, "*", server.Authz("read"), server.HandleView)
-	queryRouter.Register(http.MethodPost, "*", server.Authz("update"), server.HandleUpdateWithForm)
-	queryRouter.Register(http.MethodPut, "*", server.Authz("update"), server.HandleUpdate)
-	queryRouter.Register(http.MethodDelete, "*", server.Authz("delete"), server.HandleDelete)
-
-	app.NoRoute(queryRouter.Handler)
+	server.RegisterRoute(app)
 
 	if len(conf.TLSDomains) > 0 {
 		logrus.Warn("ignore bind or port option")

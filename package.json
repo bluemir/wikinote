@@ -1,0 +1,11 @@
+{
+  "name": "wikinote",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:bluemir/wikinote.git",
+  "author": "BlueMir <bluemir@bluemir.me>",
+  "license": "MIT",
+  "dependencies": {
+    "lit-html": "^1.3.0"
+  }
+}
