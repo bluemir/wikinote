@@ -1,6 +1,6 @@
 module github.com/bluemir/wikinote
 
-go 1.15
+go 1.16
 
 require (
 	github.com/GeertJohan/go.rice v1.0.2
@@ -10,23 +10,25 @@ require (
 	github.com/daaku/go.zipexe v1.0.1 // indirect
 	github.com/gin-contrib/multitemplate v0.0.0-20190914010127-bba2ccfe37ec
 	github.com/gin-contrib/sessions v0.0.1
-	github.com/gin-gonic/autotls v0.0.0-20190904071645-689297a2fe35
-	github.com/gin-gonic/gin v1.6.3
-	github.com/go-playground/validator/v10 v10.4.1 // indirect
-	github.com/golang/protobuf v1.4.3 // indirect
-	github.com/json-iterator/go v1.1.10 // indirect
+	github.com/gin-gonic/autotls v0.0.3
+	github.com/gin-gonic/gin v1.7.1
+	github.com/go-playground/validator/v10 v10.6.1 // indirect
+	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/json-iterator/go v1.1.11 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mattn/go-sqlite3 v1.14.7 // indirect
-	github.com/pkg/errors v0.8.1
+	github.com/pkg/errors v0.9.1
 	github.com/rs/xid v1.2.1
 	github.com/russross/blackfriday/v2 v2.0.1
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
-	github.com/sirupsen/logrus v1.7.0
-	github.com/ugorji/go v1.2.2 // indirect
-	golang.org/x/crypto v0.0.0-20201217014255-9d1352758620 // indirect
-	golang.org/x/sys v0.0.0-20201221093633-bc327ba9c2f0 // indirect
-	google.golang.org/protobuf v1.25.0 // indirect
+	github.com/sirupsen/logrus v1.8.1
+	github.com/ugorji/go v1.2.5 // indirect
+	golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a // indirect
+	golang.org/x/net v0.0.0-20210510120150-4163338589ed // indirect
+	golang.org/x/sys v0.0.0-20210511113859-b0526f3d8744 // indirect
+	golang.org/x/text v0.3.6 // indirect
+	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
