@@ -1,10 +1,10 @@
 package auth
 
 import (
-	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	yaml "gopkg.in/yaml.v3"
+	"gorm.io/gorm"
 )
 
 type Manager struct {
@@ -16,7 +16,7 @@ func New(db *gorm.DB, roles []Role) (*Manager, error) {
 	if err := db.AutoMigrate(
 		&User{},
 		&Token{},
-	).Error; err != nil {
+	); err != nil {
 		return nil, err
 	}
 

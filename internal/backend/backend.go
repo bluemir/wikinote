@@ -4,12 +4,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 
 	"github.com/bluemir/wikinote/internal/auth"
 	"github.com/bluemir/wikinote/internal/fileattr"
@@ -56,11 +56,15 @@ func New(conf *Config) (*Backend, error) {
 	if err := os.MkdirAll(filepath.Dir(dbPath), 0755); err != nil {
 		return nil, err
 	}
-	db, err := gorm.Open("sqlite3", dbPath)
+	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to connect database")
 	}
-	db.DB().SetMaxOpenConns(1)
+	if rawDB, err := db.DB(); err != nil {
+		return nil, err
+	} else {
+		rawDB.SetMaxOpenConns(1)
+	}
 
 	fa, err := fileattr.New(db)
 	if err != nil {

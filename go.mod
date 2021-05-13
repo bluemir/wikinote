@@ -14,10 +14,10 @@ require (
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
 	github.com/golang/protobuf v1.4.3 // indirect
-	github.com/jinzhu/gorm v1.9.16
 	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
+	github.com/mattn/go-sqlite3 v1.14.7 // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/rs/xid v1.2.1
 	github.com/russross/blackfriday/v2 v2.0.1
@@ -31,4 +31,6 @@ require (
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
+	gorm.io/driver/sqlite v1.1.4 // indirect
+	gorm.io/gorm v1.21.9 // indirect
 )

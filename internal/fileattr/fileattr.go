@@ -1,8 +1,8 @@
 package fileattr
 
 import (
-	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
+	"gorm.io/gorm"
 )
 
 type FileAttr struct {
@@ -22,7 +22,7 @@ type Store struct {
 func New(db *gorm.DB) (*Store, error) {
 	if err := db.AutoMigrate(
 		&FileAttr{},
-	).Error; err != nil {
+	); err != nil {
 		return nil, errors.Wrap(err, "auto migrate is failed")
 	}
 
@@ -56,8 +56,8 @@ func (store *Store) Delete(attr *FileAttr) error {
 	return store.db.Where(attr).Delete(attr).Error
 }
 
-var (
-	IsNotFound = gorm.IsRecordNotFoundError
-)
+func IsNotFound(err error) bool {
+	return gorm.ErrRecordNotFound == err
+}
 
 // need Raw method ?

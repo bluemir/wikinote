@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/jinzhu/gorm"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
 func (m *Manager) Default(name, unhashedKey string) (*Token, error) {
@@ -19,7 +19,7 @@ func (m *Manager) Default(name, unhashedKey string) (*Token, error) {
 		UserName:  name,
 		HashedKey: hash(unhashedKey, salt(name)),
 	}).Take(token).Error; err != nil {
-		if gorm.IsRecordNotFoundError(err) {
+		if err == gorm.ErrRecordNotFound {
 			return nil, ErrUnauthorized
 		}
 		return nil, err
