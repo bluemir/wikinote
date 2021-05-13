@@ -24,7 +24,7 @@ func Run(b *backend.Backend, conf *Config) error {
 	app := gin.New()
 
 	// Log
-	writer := logrus.WithField("from", "gin").Writer()
+	writer := logrus.WithFields(logrus.Fields{}).WriterLevel(logrus.DebugLevel)
 	defer writer.Close()
 	app.Use(gin.LoggerWithWriter(writer))
 

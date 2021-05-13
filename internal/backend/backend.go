@@ -1,14 +1,9 @@
 package backend
 
 import (
-	"os"
-	"path/filepath"
-
 	"github.com/pkg/errors"
-	"github.com/rs/xid"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
 	"github.com/bluemir/wikinote/internal/auth"
@@ -51,63 +46,25 @@ func New(conf *Config) (*Backend, error) {
 	buf, _ := yaml.Marshal(conf)
 	logrus.Debugf("config:\n%s", buf)
 
-	// Init DB
-	dbPath := filepath.Join(conf.Wikipath, ".app/wikinote.db")
-	if err := os.MkdirAll(filepath.Dir(dbPath), 0755); err != nil {
-		return nil, err
-	}
-	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to connect database")
-	}
-	if rawDB, err := db.DB(); err != nil {
-		return nil, err
-	} else {
-		rawDB.SetMaxOpenConns(1)
-	}
+	backend := &Backend{Config: conf}
 
-	fa, err := fileattr.New(db)
-	if err != nil {
+	if err := backend.initDB(); err != nil {
+		return nil, err
+	}
+	if err := backend.initFileAttr(); err != nil {
 		return nil, errors.Wrap(err, "failed to init file attribute module")
 	}
-
-	// Init Auth Module
-	authManager, err := auth.New(db, conf.File.Roles)
-	if err != nil {
+	if err := backend.initAuth(); err != nil {
 		return nil, errors.Wrap(err, "failed to init auth module")
 	}
-
-	for name, key := range conf.AdminUsers {
-		if key == "" {
-			key = xid.New().String()
-			logrus.Warnf("generate key: '%s' '%s'", name, key)
-		}
-		if err := authManager.EnsureUser(name, map[string]string{
-			"role/root": "true",
-		}); err != nil {
-			return nil, err
-		}
-		if err := authManager.RevokeTokenAll(name); err != nil {
-			return nil, err
-		}
-		if _, err := authManager.IssueToken(name, key); err != nil {
-			return nil, err
-		}
+	if err := backend.initAdminUser(); err != nil {
+		return nil, errors.Wrap(err, "failed to init admin user")
 	}
-
-	// Init Plugins
-	pluginManager, err := plugins.New(conf.File.Plugins, fa)
-	if err != nil {
-		return nil, err
+	if err := backend.initPlugins(); err != nil {
+		return nil, errors.Wrap(err, "failed to init admin user")
 	}
 
 	logrus.Trace("backend initailized")
 
-	return &Backend{
-		Config:   conf,
-		Auth:     authManager,
-		Plugin:   pluginManager,
-		FileAttr: fa,
-		db:       db,
-	}, nil
+	return backend, nil
 }
