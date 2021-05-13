@@ -1,0 +1,246 @@
+@import url(./color.css);
+
+html, body {
+	/* layout */
+	margin:  0px;
+	padding: 0px;
+
+	overflow: hidden;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	position: fixed;
+
+	/* grid */
+	display: grid;
+	grid-template-areas: "header" "body";
+	grid-template-rows: auto 1fr;
+}
+
+header {
+	/* color */
+	background: var(--header-background-color);
+	color: var(--header-font-color);
+
+	box-shadow : 0 5px 3px rgba(128,128,128,.5);
+
+	/* layout */
+	grid-area: header;
+
+}
+header .container {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	grid-template-areas:
+		"logo search"
+		"logo menu"
+		"nav  menu";
+}
+header a {
+	color: var(--header-font-color);
+	text-decoration: none;
+}
+header h1 {
+	margin:  0px;
+	padding: 0px;
+
+	grid-area: logo;
+}
+header menu {
+	margin:  0px;
+	padding: 0px;
+
+	grid-area: menu;
+	justify-self: end;
+	align-self: end;
+}
+header menu ul {
+	margin:  0px;
+	padding: 0px;
+}
+header nav {
+	grid-area: nav;
+}
+
+header form {
+	grid-area: search;
+	justify-self: end;
+}
+
+.page {
+	background: var(--body-padding-background-color);
+
+	/* layout */
+	grid-area: body;
+	overflow-y: scroll;
+}
+
+.container {
+	max-width: 960px;
+	margin: auto;
+}
+
+/* menu */
+header menu ul {
+	list-style: none;
+}
+header menu a {
+	color: var(--menu-font-color);
+	white-space: nowrap;
+}
+header menu ul li {
+	padding: 0.3rem 0.7rem;
+	display: inline-block;
+	position: relative;
+}
+header menu ul li:hover {
+	background: var(--menu-hover-background-color);
+}
+header menu ul.sub {
+	display: none;
+	position: absolute;
+	right : 0rem;
+	top: 100%;
+
+	background: var(--sub-menu-background-color);
+}
+header menu li:hover ul.sub {
+	display: block;
+}
+
+header menu ul.sub li {
+	padding: 0.3rem 1.2rem;
+	display: block;
+}
+header menu ul.sub li:hover {
+	background: var(--sub-menu-hover-background-color);
+}
+/* page */
+.page article.container {
+	background: var(--article-background-color);
+
+	min-height: 20rem;
+	overflow: hidden;
+}
+
+/* edit */
+.page .panel.editor {
+
+}
+.page .panel.editor textarea {
+	width: 100%;
+	box-sizing: border-box;
+	min-height: 40rem;
+	tab-size: 4;
+}
+/* wiki-contents */
+.wiki-contents h1 {
+	font-size: 2rem;
+	text-shadow: 1px 1px 5px var(--gray);
+}
+.wiki-contents h2 {
+	font-size: 1.7rem;
+	border-bottom: 1px solid var(--gray);
+}
+.wiki-contents h3 {
+	font-size: 1.5rem;
+}
+.wiki-contents h4 {
+	font-size: 1.3rem;
+}
+.wiki-contents h5 {
+	font-size: 1.2rem;
+}
+table {
+	border-collapse: collapse;
+}
+table th, table td {
+	border: 1px solid var(--gray);
+}
+.wiki-contents a {
+	color: var(--link-font-color);
+	text-decoration: none;
+}
+.wiki-contents a:hover {
+	text-decoration: underline;
+}
+/* preview */
+.tabs .editor, .tabs .preview, .tabs .attribute {
+	display: none;
+}
+.tabs[state=editor] .editor {
+	display: block;
+}
+.tabs[state=preview] .preview {
+	display: block;
+}
+
+.tabs[state=attribute] .attribute {
+	display: block;
+}
+.tabs menu {
+	margin: 0rem;
+	margin-top: 1rem;
+	padding: 0rem;
+
+	border-bottom: 1px solid var(--button-background-color);
+}
+.tabs .btn[tab] {
+	color: var(--button-font-color);
+}
+
+.tabs[state=editor]  .btn[tab=editor] {
+	color: var(--button-selected-font-color);
+}
+.tabs[state=preview] .btn[tab=preview] {
+	color: var(--button-selected-font-color);
+}
+.tabs[state=attribute] .btn[tab=attribute] {
+	color: var(--button-selected-font-color);
+}
+
+
+/* btn */
+.btn {
+	background: var(--button-background-color);
+	color: var(--button-font-color);
+	border: none;
+	font-weight: bold;
+	padding: 0.1rem 0.5rem;
+	height: 1.4rem;
+	text-decoration: none;
+}
+.btn:hover {
+	color: var(--button-hover-font-color);
+}
+.marginer {
+	margin: 2rem;
+}
+/* breadcrumb */
+#breadcrumbs {
+	font-size: 0.8rem;
+	margin-bottom: 0.3rem;
+	color: var(--gray);
+}
+#breadcrumbs a {
+	color: var(--gray);
+}
+#breadcrumbs a:hover {
+	color: var(--white);
+}
+
+/* footer */
+footer {
+	margin-top: 1rem;
+	width :100%;
+	background: var(--body-padding-background-color);
+	text-align: center;
+	margin: 0rem;
+	padding: 0.5rem;
+}
+footer a {
+	color: var(--link-font-color);
+}
+/* search */
+

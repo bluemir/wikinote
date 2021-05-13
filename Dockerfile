@@ -1,11 +1,10 @@
 ARG VERSION=dev
-FROM fedora:33 as build-env
+FROM fedora:34 as build-env
 
 RUN echo "fastestmirror=1" >> /etc/dnf/dnf.conf
 RUN dnf install -y \
     make findutils which \
     golang nodejs \
-    protobuf protobuf-compiler protobuf-devel \
     && dnf clean all
 
 ENV GOPATH=/root/go
@@ -14,10 +13,11 @@ ENV PATH=$PATH:/root/go/bin
 # pre build
 WORKDIR /pre-build
 
-ADD go.mod go.sum package.json yarn.lock Makefile.d/tools.mk ./
+ADD go.mod go.sum package.json yarn.lock Makefile  ./
+ADD scripts/makefile.d/ scripts/makefile.d/
 
 ## install build tools
-RUN make -f tools.mk tools
+RUN make build-tools
 
 ## download dependancy
 ### go
@@ -36,17 +36,13 @@ ARG VERSION
 ## copy source
 ADD . /src
 
-ARG APP_NAME
-RUN make build/$APP_NAME
+RUN make build/wikinote
 
 ################################################################################
 # running image
-FROM fedora:33
+FROM fedora:34
 
-WORKDIR /
-ARG APP_NAME
-ENV APP_NAME $APP_NAME
-COPY --from=build-env /src/build/$APP_NAME /bin/$APP_NAME
+COPY --from=build-env /src/build/wikinote /bin/wikinote
 
-CMD $APP_NAME
+CMD wikinote
 

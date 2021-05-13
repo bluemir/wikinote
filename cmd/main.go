@@ -7,8 +7,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"gopkg.in/alecthomas/kingpin.v2"
 
-	"github.com/bluemir/wikinote/pkg/backend"
-	"github.com/bluemir/wikinote/pkg/server"
+	"github.com/bluemir/wikinote/internal/backend"
+	"github.com/bluemir/wikinote/internal/server"
 )
 
 const (

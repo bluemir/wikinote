@@ -1,0 +1,9 @@
+{
+  "name": "bm.js",
+  "version": "1.0.0",
+  "description": "bluemir's micro javascript library. light-weight & simple & vanilla friendly library.",
+  "main": "bm.module.js",
+  "repository": "https://github.com/bluemir/bm.js",
+  "author": "BlueMir <bluemir@bluemir.me>",
+  "license": "MIT"
+}

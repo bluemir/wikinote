@@ -8,10 +8,10 @@ import (
 	"github.com/bluemir/wikinote/cmd"
 
 	// plugins
-	_ "github.com/bluemir/wikinote/pkg/plugins/__test__"
-	_ "github.com/bluemir/wikinote/pkg/plugins/discus"
-	_ "github.com/bluemir/wikinote/pkg/plugins/recently-changes"
-	_ "github.com/bluemir/wikinote/pkg/plugins/utteranc.es"
+	_ "github.com/bluemir/wikinote/internal/plugins/__test__"
+	_ "github.com/bluemir/wikinote/internal/plugins/discus"
+	_ "github.com/bluemir/wikinote/internal/plugins/recently-changes"
+	_ "github.com/bluemir/wikinote/internal/plugins/utteranc.es"
 )
 
 var Version string
