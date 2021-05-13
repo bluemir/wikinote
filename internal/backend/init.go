@@ -29,6 +29,8 @@ func (backend *Backend) initDB() error {
 	} else {
 		rawDB.SetMaxOpenConns(1)
 	}
+
+	backend.db = db
 	return nil
 }
 

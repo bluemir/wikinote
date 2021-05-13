@@ -1,4 +1,3 @@
-//import * as $ from "../lib/minilib.module.js";
 import * as $ from "../lib/bm.js/bm.module.js";
 
 

@@ -8,7 +8,16 @@ export var config = {
 	hook: {
 		preRequest: function(method, url, opt) { return opt }
 	},
+	plugin: {
+		/*
+		import {config} from "../lib/bm.js/bm.module.js";
+		import * as lithtml from 'lit-html';
+
+		config.plugin.lithtml = lithtml;
+		*/
+	},
 }
+
 export function get(target, query) {
 	if(target.querySelector instanceof Function) {
 		return target.querySelector(query);
@@ -21,23 +30,25 @@ export function all(target, query) {
 	}
 	return document.querySelectorAll(target);
 }
-export function create(tagname, attr) {
+export function create(tagname, attr = {}) {
 	var newTag = document.createElement(tagname);
-	if (attr && attr.$text){
+	if (attr.$text){
 		newTag.appendChild(document.createTextNode(attr.$text));
 	}
-	if (attr && attr.$html){
+	if (attr.$html){
 		newTag.innerHTML = attr.$html;
 	}
-	if (attr && attr.$child) {
+	if (attr.$child) {
 		newTag.appendChild(attr.$child)
 	}
-	for(var key in (attr || {})){
-		if (key[0] == "$") {
-			continue; //skip
-		}
-		newTag.setAttribute(key, attr[key]);
+	if (attr.$values) {
+		Object.entries(attr.$values).forEach(([k, v]) => {
+			newTag[k] = v;
+		});
 	}
+	Object.entries(attr).filter(([key, values]) => key[0] != "$").forEach(([key, value]) => {
+		newTag.setAttribute(key, value);
+	});
 	return newTag;
 }
 export async function request(method, url, options) {
@@ -93,7 +104,7 @@ export async function request(method, url, options) {
 		switch (typeof opts.body) {
 			case "object":
 				if (opts.body instanceof FormData) {
-					req.send(opt.body);
+					req.send(opts.body);
 				} else {
 					req.setRequestHeader("Content-Type", "application/json")
 					req.send(JSON.stringify(opts.body))
@@ -260,8 +271,9 @@ Object.keyValues= function(obj, f) {
 	});
 }
 
+const sig = "__bm.js_inserted__"
 function extend(TargetClass, proto){
-	if (TargetClass.hasOwnProperty("__minilib_inserted__")) {
+	if (TargetClass.hasOwnProperty(sig)) {
 		console.trace("already installed")
 		return // already inserted
 	}
@@ -274,7 +286,7 @@ function extend(TargetClass, proto){
 		TargetClass.prototype[name] = proto[name];
 	});
 
-	TargetClass.__minilib_inserted__ = true
+	TargetClass[sig] = true
 }
 extend(Node, {
 	appendTo: function(target) {
@@ -388,6 +400,51 @@ export class CustomElement extends HTMLElement {
 		}
 		return this["--handler"][name];
 	}
+	static define(name) {
+		if (!name) {
+			name = transformCamelcaseToElementName(this.name)
+		}
+		// TODO validation check
+		// TODO conflict check
+		console.debug("regitster element", name);
+		customElements.define(name, this);
+	}
+	render() {
+		if(config.plugin.lithtml) {
+			config.plugin.lithtml.render(this.constructor.T(this), this.shadow)
+		}
+		// TODO other template engine
+	}
+}
+function transformCamelcaseToElementName(name) {
+	let t = "";
+	let tokens = [];
+	for (let i = 0; i < name.length; i ++){
+		let c = name[i];
+
+		if (/[A-Z]/.test(c)) {
+			if (/^[A-Z]+$/.test(t)) {
+				t += c;
+			} else {
+				tokens.push(t);
+				t = c;
+			}
+		} else if(/[_]/.test(c)) {
+			tokens.push(t);
+			t = "";
+		} else {
+			if (/^[A-Z]+$/.test(t)) {
+				// pick last
+				tokens.push(t.substring(0, t.length-1));
+				t = t[t.length-1]+c;
+			} else {
+				t += c;
+			}
+		}
+	}
+	tokens.push(t);
+
+	return tokens.filter(t => t.length > 0).map(t => t.toLowerCase()).join("-");
 }
 
 export class AwaitEventTarget {
@@ -444,23 +501,27 @@ export class AwaitQueue {
 				}
 			}
 			return {
-				value: (value) => {
-					return new Promise((resolve) => {
-						this.resolve = resolve.bind(this, value);
-					});
-				},
+				value: new Promise((resolve) => {
+					this.resolve = resolve.bind(this);
+				}),
 			};
 		}
 		return { next }
 	}
 	add(f) {
-		this.queue.push(f)
 		if(this.resolve) {
-			this.resolve();
+			this.resolve(f);
 			this.resolve = null;
+			return
 		}
+		this.queue.push(f)
 	}
 	get length() {
 		return this.queue.length;
 	}
+}
+
+// for test
+export var __test__ = {
+	transformCamelcaseToElementName,
 }
