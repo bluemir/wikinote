@@ -18,8 +18,12 @@ type Config struct {
 	TLSDomains []string
 }
 
+func NewConfig() *Config {
+	return &Config{}
+}
+
 func Run(b *backend.Backend, conf *Config) error {
-	server := &Server{b}
+	server := &Server{Backend: b}
 
 	app := gin.New()
 
@@ -64,6 +68,7 @@ func Run(b *backend.Backend, conf *Config) error {
 
 type Server struct {
 	*backend.Backend
+	etag string
 }
 
 func (server *Server) HandleNotImplemented(c *gin.Context) {

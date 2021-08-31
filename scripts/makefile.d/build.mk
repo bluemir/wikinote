@@ -20,6 +20,7 @@ build/$(APP_NAME).unpacked: $(GO_SOURCES) $(MAKEFILE_LIST)
 build/$(APP_NAME): build/$(APP_NAME).unpacked $(MAKEFILE_LIST)
 	@$(MAKE) build/tools/rice
 	@mkdir -p $(dir $@)
+	date --rfc-3339=ns > build/static/.time
 	cp $< $@.tmp
 	rice append -v \
 		-i $(IMPORT_PATH)/internal/static \

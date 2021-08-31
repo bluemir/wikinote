@@ -1,11 +1,14 @@
 package server
 
 import (
+	"crypto"
+	"encoding/hex"
+	"io"
 	"net/http"
 	"strings"
 
+	"github.com/bluemir/wikinote/internal/buildinfo"
 	"github.com/gin-gonic/gin"
-	"github.com/rs/xid"
 )
 
 func (server *Server) static(path string) func(c *gin.Context) {
@@ -14,14 +17,24 @@ func (server *Server) static(path string) func(c *gin.Context) {
 	}
 }
 
-var etag = xid.New().String()
+func (server *Server) initEtag() error {
+	hashed := crypto.SHA512.New()
 
-func staticCache(c *gin.Context) {
+	io.WriteString(hashed, buildinfo.AppName)
+	io.WriteString(hashed, buildinfo.Version)
+	io.WriteString(hashed, buildinfo.BuildTime)
+
+	server.etag = hex.EncodeToString(hashed.Sum(nil))[:20]
+
+	return nil
+}
+
+func (server *Server) staticCache(c *gin.Context) {
 	c.Header("Cache-Control", "no-cache, max-age=86400")
-	c.Header("ETag", etag)
+	c.Header("ETag", server.etag)
 
 	if match := c.GetHeader("If-None-Match"); match != "" {
-		if strings.Contains(match, etag) {
+		if strings.Contains(match, server.etag) {
 			c.Status(http.StatusNotModified)
 			c.Abort()
 			return

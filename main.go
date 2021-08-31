@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/cmd"
+	"github.com/bluemir/wikinote/internal/buildinfo"
 
 	// plugins
 	_ "github.com/bluemir/wikinote/internal/plugins/__test__"
@@ -18,6 +19,9 @@ var Version string
 var AppName string
 
 func main() {
+	buildinfo.AppName = AppName
+	buildinfo.Version = Version
+
 	if err := cmd.Run(AppName, Version); err != nil {
 		logrus.Fatal(err)
 		os.Exit(1)

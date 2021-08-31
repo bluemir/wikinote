@@ -20,9 +20,7 @@ func (server *Server) HandleView(c *gin.Context) {
 		data, err := server.FileRead(c.Request.URL.Path)
 		if err != nil {
 			logrus.Warnf("md file not found, %s", err)
-			c.HTML(http.StatusNotFound, "/errors/not-found.html", gin.H{
-				"breadcrumb": makeBreadcurmb(c.Request.URL.Path),
-			})
+			c.HTML(http.StatusNotFound, "/errors/not-found.html", gin.H{})
 			return
 		}
 
@@ -143,26 +141,4 @@ func (server *Server) HandlePreview(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
 	c.Data(http.StatusOK, "text/html", renderedData)
-}
-
-// using in template
-type Breadcrumb struct {
-	Name string
-	Path string
-}
-
-func makeBreadcurmb(p string) []Breadcrumb {
-	result := []Breadcrumb{}
-	arr := strings.Split(p, "/")
-	for index, name := range arr {
-		if name == "" {
-			continue
-		}
-		p := path.Join(arr[:index+1]...)
-		result = append(result, Breadcrumb{
-			Name: name,
-			Path: path.Join("/", p),
-		})
-	}
-	return result
 }

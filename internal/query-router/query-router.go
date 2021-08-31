@@ -9,22 +9,28 @@ import (
 
 func New() QueryRouter {
 	return &router{
-		handlers: map[string]map[string][]func(c *gin.Context){
-			http.MethodGet:    map[string][]func(c *gin.Context){},
-			http.MethodPost:   map[string][]func(c *gin.Context){},
-			http.MethodPut:    map[string][]func(c *gin.Context){},
-			http.MethodDelete: map[string][]func(c *gin.Context){},
+		handlers: map[string]map[string][]gin.HandlerFunc{
+
+			http.MethodGet:    map[string][]gin.HandlerFunc{},
+			http.MethodPost:   map[string][]gin.HandlerFunc{},
+			http.MethodPut:    map[string][]gin.HandlerFunc{},
+			http.MethodDelete: map[string][]gin.HandlerFunc{},
 		},
 	}
 }
 
 type QueryRouter interface {
-	Register(method string, query string, handlers ...func(c *gin.Context))
+	GET(query string, handlers ...gin.HandlerFunc)
+	POST(query string, handlers ...gin.HandlerFunc)
+	PUT(query string, handlers ...gin.HandlerFunc)
+	DELETE(query string, handlers ...gin.HandlerFunc)
+
+	Register(method string, query string, handlers ...gin.HandlerFunc)
 	Handler(c *gin.Context)
 }
 
 type router struct {
-	handlers map[string]map[string][]func(c *gin.Context)
+	handlers map[string]map[string][]gin.HandlerFunc
 }
 
 func (r *router) Handler(c *gin.Context) {
@@ -63,7 +69,19 @@ func (r *router) Handler(c *gin.Context) {
 		}
 	}
 }
-func (r *router) Register(method string, query string, handlers ...func(c *gin.Context)) {
+func (r *router) GET(query string, handlers ...gin.HandlerFunc) {
+	r.Register(http.MethodGet, query, handlers...)
+}
+func (r *router) POST(query string, handlers ...gin.HandlerFunc) {
+	r.Register(http.MethodPost, query, handlers...)
+}
+func (r *router) PUT(query string, handlers ...gin.HandlerFunc) {
+	r.Register(http.MethodPut, query, handlers...)
+}
+func (r *router) DELETE(query string, handlers ...gin.HandlerFunc) {
+	r.Register(http.MethodDelete, query, handlers...)
+}
+func (r *router) Register(method string, query string, handlers ...gin.HandlerFunc) {
 	// TODO dup check
 	// TODO nil check
 	r.handlers[method][query] = handlers

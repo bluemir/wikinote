@@ -11,22 +11,15 @@ import (
 )
 
 func (server *Server) RegisterRoute(app gin.IRouter) {
-	redirectToFrontPage := func(c *gin.Context) {
-		logrus.Debugf("redirect to front page: %s", server.Config.File.FrontPage)
-		c.Redirect(http.StatusTemporaryRedirect, "/"+server.Config.File.FrontPage)
-		c.Abort()
-		return
-	}
-	app.GET("/", redirectToFrontPage)
+	app.GET("/", server.redirectToFrontPage)
 
 	special := app.Group("/!")
 	{
-		special.Group("/static", staticCache).StaticFS("/", static.Files.HTTPBox())
-		special.Group("/lib", staticCache).StaticFS("/", static.NodeModules.HTTPBox())
+		special.Group("/static", server.staticCache).StaticFS("/", static.Files.HTTPBox())
 
 		// XXX for dev. must disable after dev
 		// special.PUT("/api/users/:name/role", server.HandleAPIUserUpdateRole)
-		special.GET("/login", server.Authn, redirectToFrontPage)
+		special.GET("/login", server.Authn, server.redirectToFrontPage)
 
 		// TODO user manager
 
@@ -52,16 +45,23 @@ func (server *Server) RegisterRoute(app gin.IRouter) {
 	// - PUT            create or update file with ajax
 	// - DELETE         delete file
 
-	queryRouter := queryrouter.New()
-	queryRouter.Register(http.MethodGet, "edit", server.Authz("update"), server.HandleEditForm)
-	queryRouter.Register(http.MethodGet, "raw", server.Authz("read"), server.HandleRaw)
-	queryRouter.Register(http.MethodGet, "delete", server.Authz("delete"), server.HandleDeleteForm)
-	queryRouter.Register(http.MethodGet, "attribute", server.Authz("read"), server.HandleAttributeGet)
-	queryRouter.Register(http.MethodPut, "attribute", server.Authz("update"), server.HandleAttributeUpdate)
-	queryRouter.Register(http.MethodGet, "*", server.Authz("read"), server.HandleView)
-	queryRouter.Register(http.MethodPost, "*", server.Authz("update"), server.HandleUpdateWithForm)
-	queryRouter.Register(http.MethodPut, "*", server.Authz("update"), server.HandleUpdate)
-	queryRouter.Register(http.MethodDelete, "*", server.Authz("delete"), server.HandleDelete)
-
-	app.Use(queryRouter.Handler)
+	pages := queryrouter.New()
+	{
+		pages.GET("edit", server.Authz("update"), server.HandleEditForm)
+		pages.GET("raw", server.Authz("read"), server.HandleRaw)
+		pages.GET("delete", server.Authz("delete"), server.HandleDeleteForm)
+		pages.GET("attribute", server.Authz("read"), server.HandleAttributeGet)
+		pages.PUT("attribute", server.Authz("update"), server.HandleAttributeUpdate)
+		pages.GET("*", server.Authz("read"), server.HandleView)
+		pages.POST("*", server.Authz("update"), server.HandleUpdateWithForm)
+		pages.PUT("*", server.Authz("update"), server.HandleUpdate)
+		pages.DELETE("*", server.Authz("delete"), server.HandleDelete)
+	}
+	app.Use(pages.Handler)
+}
+func (server *Server) redirectToFrontPage(c *gin.Context) {
+	logrus.Debugf("redirect to front page: %s", server.Config.File.FrontPage)
+	c.Redirect(http.StatusTemporaryRedirect, "/"+server.Config.File.FrontPage)
+	c.Abort()
+	return
 }
