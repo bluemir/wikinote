@@ -21,7 +21,7 @@ run: build/$(APP_NAME)
 	$< -vvv server --admin-user root=1234 --wiki-path=runtime --config=runtime/.app/config.yaml
 
 test:
-	go test -v ./internal/...
+	go test ./...
 
 clean:
 	rm -rf build/ $(OPTIONAL_CLEAN_DIR)

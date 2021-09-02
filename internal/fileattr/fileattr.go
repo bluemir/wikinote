@@ -55,7 +55,6 @@ func (store *Store) Save(attr *FileAttr) error {
 func (store *Store) Delete(attr *FileAttr) error {
 	return store.db.Where(attr).Delete(attr).Error
 }
-
 func IsNotFound(err error) bool {
 	return gorm.ErrRecordNotFound == err
 }

@@ -8,6 +8,7 @@ require (
 	github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf // indirect
 	github.com/antonmedv/expr v0.0.0-20190828073954-2acac392c0b7
 	github.com/daaku/go.zipexe v1.0.1 // indirect
+	github.com/gabriel-vasile/mimetype v1.3.1 // indirect
 	github.com/gin-contrib/multitemplate v0.0.0-20190914010127-bba2ccfe37ec
 	github.com/gin-contrib/sessions v0.0.1
 	github.com/gin-gonic/autotls v0.0.3
@@ -23,6 +24,7 @@ require (
 	github.com/russross/blackfriday/v2 v2.0.1
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.8.1
+	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/ugorji/go v1.2.5 // indirect
 	golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a // indirect
 	golang.org/x/net v0.0.0-20210510120150-4163338589ed // indirect

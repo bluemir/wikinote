@@ -10,7 +10,6 @@ import (
 )
 
 func (server *Server) Authn(c *gin.Context) {
-	log := logrus.WithField("method", "BaiscAuthn")
 	token, err := server.Backend.Auth.HTTP(c.Request.Header)
 
 	if err != nil {
@@ -26,7 +25,7 @@ func (server *Server) Authn(c *gin.Context) {
 			return
 		}
 	}
-	log.Tracef("auth as '%s'", token.UserName)
+	logrus.Tracef("auth as '%s'", token.UserName)
 
 	// check Authz with token
 
@@ -36,7 +35,6 @@ func (server *Server) Authn(c *gin.Context) {
 
 }
 func (server *Server) Authz(action string) func(c *gin.Context) {
-	log := logrus.WithField("method", "Authz")
 	return func(c *gin.Context) {
 		subject, err := server.Auth.Subject(Token(c))
 		if err != nil {
@@ -57,14 +55,14 @@ func (server *Server) Authz(action string) func(c *gin.Context) {
 			Action:  action,
 		}
 
-		log.Trace(ctx)
+		logrus.Trace(ctx)
 
 		switch server.Auth.Authz(ctx) {
 		case auth.Accept:
-			log.Trace("accepted")
+			logrus.Trace("accepted")
 			return
 		case auth.Reject:
-			log.Trace("rejected")
+			logrus.Trace("rejected")
 			c.HTML(http.StatusForbidden, "/errors/forbidden.html", gin.H{})
 			c.Abort()
 			return

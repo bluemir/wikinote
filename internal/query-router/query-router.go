@@ -35,8 +35,8 @@ type router struct {
 
 func (r *router) Handler(c *gin.Context) {
 	log := logrus.
-		WithField("method", "queryrotuer.Handler").
-		WithField("method", c.Request.Method)
+		WithField("method", c.Request.Method).
+		WithField("uri", c.Request.RequestURI)
 
 	log.Trace("start route")
 
