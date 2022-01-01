@@ -7,8 +7,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"gopkg.in/alecthomas/kingpin.v2"
 
-	"github.com/bluemir/wikinote/internal/backend"
-	"github.com/bluemir/wikinote/internal/server"
+	"github.com/bluemir/wikinote/cmd/config"
+
+	serverCmd "github.com/bluemir/wikinote/cmd/server"
 )
 
 const (
@@ -17,45 +18,17 @@ const (
 )
 
 func Run(AppName string, Version string) error {
-	conf := struct {
-		Backend   backend.Config
-		Server    server.Config
-		logLevel  int
-		logFormat string
-	}{
-		Backend: backend.InitConfig(),
-	}
+	conf := config.NewConfig()
 
 	app := kingpin.New(AppName, describe)
 	app.Version(Version)
 
 	app.Flag("verbose", "Log level").
 		Short('v').
-		CounterVar(&conf.logLevel)
+		CounterVar(&conf.LogLevel)
 	app.Flag("log-format", "Log format").
-		StringVar(&conf.logFormat)
-	app.PreAction(func(*kingpin.ParseContext) error {
-		level := logrus.Level(conf.logLevel) + defaultLogLevel
-		logrus.SetOutput(os.Stderr)
-		logrus.SetLevel(level)
-		logrus.SetReportCaller(true)
-		logrus.Infof("logrus level: %s", level)
-
-		switch conf.logFormat {
-		case "text-color":
-			logrus.SetFormatter(&logrus.TextFormatter{ForceColors: true})
-		case "text":
-			logrus.SetFormatter(&logrus.TextFormatter{})
-		case "json":
-			logrus.SetFormatter(&logrus.JSONFormatter{})
-		case "":
-			// do nothing. it means smart.
-		default:
-			return errors.Errorf("unknown log format")
-		}
-
-		return nil
-	})
+		StringVar(&conf.LogFormat)
+	app.PreAction(setupLogger(conf))
 
 	// app flags
 	app.Flag("wiki-path", "wiki data path").
@@ -72,27 +45,39 @@ func Run(AppName string, Version string) error {
 		StringMapVar(&conf.Backend.AdminUsers)
 
 	// server flags
-	serverCmd := app.Command("server", "server")
-	{
-		serverCmd.Flag("bind", "bind").
-			Default(":4000").
-			StringVar(&conf.Server.Bind)
 
-		serverCmd.Flag("tls-domain", "tls domain").
-			StringsVar(&conf.Server.TLSDomains)
+	serverCmd.Register(app.Command("server", "server"), conf)
+	//clientCmd.Register(app.Command("client", "client"))
+
+	_, err := app.Parse(os.Args[1:])
+	if err != nil {
+		return err
 	}
+	logrus.Debug("Shutdown")
 
-	cmd := kingpin.MustParse(app.Parse(os.Args[1:]))
-	switch cmd {
-	case serverCmd.FullCommand():
-		logrus.Debugf("%#v", conf)
-		b, err := backend.New(&conf.Backend)
-		if err != nil {
-			logrus.Fatal(err)
-			return err
+	return nil
+}
+func setupLogger(conf *config.Config) func(*kingpin.ParseContext) error {
+	return func(*kingpin.ParseContext) error {
+		level := logrus.Level(conf.LogLevel) + defaultLogLevel
+		logrus.SetOutput(os.Stderr)
+		logrus.SetLevel(level)
+		logrus.SetReportCaller(true)
+		logrus.Infof("logrus level: %s", level)
+
+		switch conf.LogFormat {
+		case "text-color":
+			logrus.SetFormatter(&logrus.TextFormatter{ForceColors: true})
+		case "text":
+			logrus.SetFormatter(&logrus.TextFormatter{})
+		case "json":
+			logrus.SetFormatter(&logrus.JSONFormatter{})
+		case "":
+			// do nothing. it means smart.
+		default:
+			return errors.Errorf("unknown log format")
 		}
-		return server.Run(b, &conf.Server)
-	default:
-		return errors.New("not implements command")
+
+		return nil
 	}
 }
