@@ -6,6 +6,8 @@ APP_NAME=$(notdir $(IMPORT_PATH))
 
 export GO111MODULE=on
 
+export PATH:=${PATH}:./build/tools/
+
 # go build args
 OPTIONAL_BUILD_ARGS :=
 
@@ -13,22 +15,26 @@ default: build
 
 # sub-makefiles
 # for build tools, docker build, deploy, static web files.
-include scripts/makefile.d/*
+include scripts/makefile.d/*.mk
 
-build: build/$(APP_NAME)
+##@ General
+clean: ## Clean up
+	rm -rf build/ $(OPTIONAL_CLEAN)
 
-run: build/$(APP_NAME)
-	$< -vvv server --admin-user root=1234 --wiki-path=runtime --config=runtime/.app/config.yaml
+build-tools: ## Install build tools
+	# Build tool installed
+tools: build-tools ## Install tools(include build tools)
+	# Tool installed
 
-test:
-	go test ./...
+help: ## Display this help
+	# requirement
+	#  - golang: 1.16.x
+	#  - node  : 14.16.x
+	#  - make  : 4.3 (*CAUTION* osx has lower verion of make)
+	#
+	@echo -e "# Usage:"
+	@echo -e "#   make \033[36m<target>\033[0m"
+	@awk 'BEGIN {FS = ":.*##";} /^[a-zA-Z_0-9-]+:.*?##/ { printf "#   \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "#\n# \033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
-clean:
-	rm -rf build/ $(OPTIONAL_CLEAN_DIR)
-
-tools: build-tools
-	@echo "--- done ---"
-
-
-.PHONY: default build run test clean tools build-tools
+.PHONY: default build run test clean tools build-tools help
 

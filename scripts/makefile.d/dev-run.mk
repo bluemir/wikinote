@@ -1,5 +1,8 @@
+##@ Run
 
-dev-run:
+run: build/$(APP_NAME) ## Run web app
+	$< -vvv server --admin-user root=1234 --wiki-path=runtime --config=runtime/.app/config.yaml
+dev-run: ## Run dev server. If detect file change, automatically rebuild&restart server
 	@$(MAKE) build/tools/entr
 	while true; do \
 		$(MAKE) .watched_sources | \
@@ -7,9 +10,8 @@ dev-run:
 		echo "hit ^C again to quit" && sleep 1 \
 	; done
 
-reset:
+reset: ## Kill all make process. Use when dev-run stuck.
 	ps -e | grep make | grep -v grep | awk '{print $$1}' | xargs kill
-
 
 ## watched_sources
 .watched_sources: \
