@@ -22,7 +22,8 @@ STATICS += build/static/js/v1/index.js                   # entrypoint
 build/static/js/%: $(JS_SOURCES) build/yarn-updated
 	@$(MAKE) build/tools/npx
 	@mkdir -p $(dir $@)
-	npx rollup $(@:build/static/%=web/%) --file $@ --format es -m -p '@rollup/plugin-node-resolve'
+	npx esbuild $(@:build/static/%=web/%) --outdir=$(dir $@) \
+		--bundle --minify --sourcemap --format=esm
 
 ## less
 ## yarn add --dev less

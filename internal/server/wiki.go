@@ -15,7 +15,10 @@ import (
 
 func parseMIME(mime string) (string, string) {
 	arr := strings.SplitN(strings.SplitN(mime, ";", 2)[0], "/", 2)
-	return arr[0], arr[1]
+	if len(arr) > 1 {
+		return arr[0], arr[1]
+	}
+	return arr[0], ""
 }
 func (server *Server) HandleView(c *gin.Context) {
 	ctype := mime.TypeByExtension(filepath.Ext(c.Request.URL.Path))

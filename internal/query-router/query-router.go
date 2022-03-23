@@ -10,7 +10,6 @@ import (
 func New() QueryRouter {
 	return &router{
 		handlers: map[string]map[string][]gin.HandlerFunc{
-
 			http.MethodGet:    map[string][]gin.HandlerFunc{},
 			http.MethodPost:   map[string][]gin.HandlerFunc{},
 			http.MethodPut:    map[string][]gin.HandlerFunc{},
