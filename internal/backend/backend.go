@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/bluemir/wikinote/internal/auth"
+	"github.com/bluemir/wikinote/internal/backend/files"
 	"github.com/bluemir/wikinote/internal/fileattr"
 	"github.com/bluemir/wikinote/internal/plugins"
 )
@@ -35,6 +36,8 @@ type Backend struct {
 	Plugin   *plugins.Manager
 	FileAttr *fileattr.Store
 	db       *gorm.DB
+
+	files files.FileStore
 }
 
 func New(conf *Config) (*Backend, error) {
@@ -62,6 +65,9 @@ func New(conf *Config) (*Backend, error) {
 	}
 	if err := backend.initPlugins(); err != nil {
 		return nil, errors.Wrap(err, "failed to init admin user")
+	}
+	if err := backend.initFileStore(); err != nil {
+		return nil, errors.Wrap(err, "failed to init file store")
 	}
 
 	logrus.Trace("backend initailized")

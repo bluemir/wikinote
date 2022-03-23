@@ -11,6 +11,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/bluemir/wikinote/internal/auth"
+	"github.com/bluemir/wikinote/internal/backend/files/local"
 	"github.com/bluemir/wikinote/internal/fileattr"
 	"github.com/bluemir/wikinote/internal/plugins"
 )
@@ -92,5 +93,13 @@ func (backend *Backend) initPlugins() error {
 	}
 	backend.Plugin = m
 
+	return nil
+}
+func (backend *Backend) initFileStore() error {
+	s, err := local.New(backend.Config.Wikipath)
+	if err != nil {
+		return err
+	}
+	backend.files = s
 	return nil
 }

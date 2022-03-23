@@ -1,8 +1,6 @@
 package backend
 
 import (
-	"io/ioutil"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -37,8 +35,7 @@ func (backend *Backend) Object(path string) (map[string]string, error) {
 }
 
 func (backend *Backend) FileRead(path string) ([]byte, error) {
-	// data, err := backend.plugins.triggerFileReadHook(path, data)
-	return ioutil.ReadFile(backend.getFullPath(path))
+	return backend.files.Read(path)
 }
 
 func (backend *Backend) FileWrite(path string, data []byte) error {
@@ -47,23 +44,9 @@ func (backend *Backend) FileWrite(path string, data []byte) error {
 		return err
 	}
 
-	fullpath := backend.getFullPath(path)
-	dirpath := filepath.Dir(fullpath)
-	if err := os.MkdirAll(dirpath, 0755); err != nil {
-		return err
-	}
-
-	if err := ioutil.WriteFile(backend.getFullPath(path), data, 0644); err != nil {
-		return err
-	}
-
-	return nil
+	return backend.files.Write(path, data)
 }
 
 func (backend *Backend) FileDelete(path string) error {
-	return os.Remove(backend.getFullPath(path))
-}
-
-func (backend *Backend) getFullPath(path string) string {
-	return filepath.Join(backend.Config.Wikipath, path)
+	return backend.files.Delete(path)
 }
