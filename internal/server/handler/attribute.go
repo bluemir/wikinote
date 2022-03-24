@@ -1,4 +1,4 @@
-package server
+package handler
 
 import (
 	"net/http"
@@ -8,8 +8,8 @@ import (
 	"github.com/bluemir/wikinote/internal/fileattr"
 )
 
-func (server *Server) HandleAttributeGet(c *gin.Context) {
-	attrs, err := server.Backend.FileAttr.Find(&fileattr.FileAttr{Path: c.Request.URL.Path})
+func (handler *Handler) AttributeGet(c *gin.Context) {
+	attrs, err := handler.backend.FileAttr.Find(&fileattr.FileAttr{Path: c.Request.URL.Path})
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
@@ -19,14 +19,14 @@ func (server *Server) HandleAttributeGet(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, result)
 }
-func (server *Server) HandleAttributeUpdate(c *gin.Context) {
+func (handler *Handler) AttributeUpdate(c *gin.Context) {
 	req := map[string]string{}
 	if err := c.ShouldBind(&req); err != nil {
 		c.HTML(http.StatusBadRequest, "/errors/internal-server-error.html", gin.H{})
 		return
 	}
 	for k, v := range req {
-		if err := server.Backend.FileAttr.Save(&fileattr.FileAttr{
+		if err := handler.backend.FileAttr.Save(&fileattr.FileAttr{
 			Path:  c.Request.URL.Path,
 			Key:   k,
 			Value: v,
@@ -36,7 +36,7 @@ func (server *Server) HandleAttributeUpdate(c *gin.Context) {
 			return
 		}
 	}
-	attrs, err := server.Backend.FileAttr.Find(&fileattr.FileAttr{
+	attrs, err := handler.backend.FileAttr.Find(&fileattr.FileAttr{
 		Path: c.Request.URL.Path,
 	})
 	if err != nil {
@@ -49,7 +49,7 @@ func (server *Server) HandleAttributeUpdate(c *gin.Context) {
 			continue
 		}
 
-		if err := server.Backend.FileAttr.Delete(&attr); err != nil {
+		if err := handler.backend.FileAttr.Delete(&attr); err != nil {
 			c.HTML(http.StatusInternalServerError, "/errors/not-found.html", gin.H{})
 			c.Abort()
 			return

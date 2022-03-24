@@ -1,4 +1,4 @@
-package server
+package handler
 
 import (
 	"net/http"
@@ -6,10 +6,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (server *Server) HandleSearch(c *gin.Context) {
+func (handler *Handler) Search(c *gin.Context) {
 	query := c.Query("q")
 
-	result, err := server.FileSearch(query)
+	result, err := handler.backend.FileSearch(query)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err)
 		return

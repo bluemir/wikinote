@@ -29,8 +29,8 @@ func (server *Server) RegisterRoute(app gin.IRouter) {
 
 		// auth
 		special.Use(server.Authn)
-		special.POST("/api/preview", server.HandlePreview) // render body
-		special.GET("/search", server.Authz("search"), server.HandleSearch)
+		special.POST("/api/preview", server.handler.Preview) // render body
+		special.GET("/search", server.Authz("search"), server.handler.Search)
 
 		// plugins
 		server.Backend.Plugin.RouteHook(special.Group("/plugins"))
@@ -47,15 +47,15 @@ func (server *Server) RegisterRoute(app gin.IRouter) {
 
 	pages := queryrouter.New()
 	{
-		pages.GET("edit", server.Authz("update"), server.HandleEditForm)
-		pages.GET("raw", server.Authz("read"), server.HandleRaw)
-		pages.GET("delete", server.Authz("delete"), server.HandleDeleteForm)
-		pages.GET("attribute", server.Authz("read"), server.HandleAttributeGet)
-		pages.PUT("attribute", server.Authz("update"), server.HandleAttributeUpdate)
-		pages.GET("*", server.Authz("read"), server.HandleView)
-		pages.POST("*", server.Authz("update"), server.HandleUpdateWithForm)
-		pages.PUT("*", server.Authz("update"), server.HandleUpdate)
-		pages.DELETE("*", server.Authz("delete"), server.HandleDelete)
+		pages.GET("edit", server.Authz("update"), server.handler.EditForm)
+		pages.GET("raw", server.Authz("read"), server.handler.Raw)
+		pages.GET("delete", server.Authz("delete"), server.handler.DeleteForm)
+		pages.GET("attribute", server.Authz("read"), server.handler.AttributeGet)
+		pages.PUT("attribute", server.Authz("update"), server.handler.AttributeUpdate)
+		pages.GET("*", server.Authz("read"), server.handler.View)
+		pages.POST("*", server.Authz("update"), server.handler.UpdateWithForm)
+		pages.PUT("*", server.Authz("update"), server.handler.Update)
+		pages.DELETE("*", server.Authz("delete"), server.handler.Delete)
 	}
 	app.Use(pages.Handler)
 }

@@ -35,6 +35,7 @@ func (backend *Backend) Object(path string) (map[string]string, error) {
 }
 
 func (backend *Backend) FileRead(path string) ([]byte, error) {
+	// TODO post hook?
 	return backend.files.Read(path)
 }
 

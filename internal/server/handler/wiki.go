@@ -1,4 +1,4 @@
-package server
+package handler
 
 import (
 	"html/template"
@@ -20,7 +20,7 @@ func parseMIME(mime string) (string, string) {
 	}
 	return arr[0], ""
 }
-func (server *Server) HandleView(c *gin.Context) {
+func (handler *Handler) View(c *gin.Context) {
 	ctype := mime.TypeByExtension(filepath.Ext(c.Request.URL.Path))
 	category, subtype := parseMIME(ctype)
 	logrus.Debugf("mime: %s", ctype)
@@ -29,19 +29,19 @@ func (server *Server) HandleView(c *gin.Context) {
 	case "text":
 		switch subtype {
 		case "markdown":
-			data, err := server.FileRead(c.Request.URL.Path)
+			data, err := handler.backend.FileRead(c.Request.URL.Path)
 			if err != nil {
 				logrus.Warnf("md file not found, %s", err)
 				c.HTML(http.StatusNotFound, "/errors/not-found.html", gin.H{})
 				return
 			}
-			renderedData, err := server.Render(data)
+			renderedData, err := handler.backend.Render(data)
 			if err != nil {
 				c.HTML(http.StatusInternalServerError, "/errors/internal-server-error.html", gin.H{})
 				return
 			}
 
-			footerData, err := server.Backend.Plugin.WikiFooter(c.Request.URL.Path)
+			footerData, err := handler.backend.Plugin.WikiFooter(c.Request.URL.Path)
 			if err != nil {
 				logrus.Warn(err)
 				c.HTML(http.StatusInternalServerError, "/errors/internal-server-error.html", gin.H{})
@@ -62,10 +62,10 @@ func (server *Server) HandleView(c *gin.Context) {
 	}
 }
 
-func (server *Server) HandleRaw(c *gin.Context) {
+func (handler *Handler) Raw(c *gin.Context) {
 	logrus.Infof("[View] serve raw file: '%s'", c.Request.URL.Path)
 
-	buf, err := server.FileRead(c.Request.URL.Path)
+	buf, err := handler.backend.FileRead(c.Request.URL.Path)
 	if err != nil {
 		c.Status(http.StatusNotFound)
 		return
@@ -76,10 +76,10 @@ func (server *Server) HandleRaw(c *gin.Context) {
 
 	c.Data(http.StatusOK, http.DetectContentType(buf), buf)
 }
-func (server *Server) HandleEditForm(c *gin.Context) {
+func (handler *Handler) EditForm(c *gin.Context) {
 	path := c.Request.URL.Path
 
-	data, err := server.FileRead(path)
+	data, err := handler.backend.FileRead(path)
 	if err != nil {
 		// Create new file
 		// c.HTML(http.StatusInternalServerError, "/errors/internal-server-error.html", gin.H{"msg": err.Error()})
@@ -92,7 +92,7 @@ func (server *Server) HandleEditForm(c *gin.Context) {
 		"path": c.Request.URL.Path,
 	})
 }
-func (server *Server) HandleUpdateWithForm(c *gin.Context) {
+func (handler *Handler) UpdateWithForm(c *gin.Context) {
 	p := c.Request.URL.Path
 	req := &struct {
 		Data string `form:"data"`
@@ -103,21 +103,21 @@ func (server *Server) HandleUpdateWithForm(c *gin.Context) {
 		return
 	}
 
-	if err := server.FileWrite(p, []byte(req.Data)); err != nil {
+	if err := handler.backend.FileWrite(p, []byte(req.Data)); err != nil {
 		c.HTML(http.StatusInternalServerError, "/errors/not-found.html", gin.H{})
 		c.Abort()
 		return
 	}
 	c.Redirect(http.StatusSeeOther, p)
 }
-func (server *Server) HandleUpdate(c *gin.Context) {
+func (handler *Handler) Update(c *gin.Context) {
 	p := c.Request.URL.Path
 	data, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	if err := server.FileWrite(p, data); err != nil {
+	if err := handler.backend.FileWrite(p, data); err != nil {
 		c.HTML(http.StatusInternalServerError, "/errors/not-found.html", gin.H{})
 		c.Abort()
 		return
@@ -125,30 +125,30 @@ func (server *Server) HandleUpdate(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{})
 }
-func (server *Server) HandleDeleteForm(c *gin.Context) {
+func (handler *Handler) DeleteForm(c *gin.Context) {
 	c.HTML(http.StatusOK, "/delete.html", gin.H{
 		"name": path.Base(c.Request.URL.Path),
 	})
 }
-func (server *Server) HandleDelete(c *gin.Context) {
+func (handler *Handler) Delete(c *gin.Context) {
 	if c.GetHeader("X-Confirm") != path.Base(c.Request.URL.Path) {
 		c.HTML(http.StatusBadRequest, "/errors/bad-request.html", gin.H{})
 		return
 	}
 
-	err := server.Backend.FileDelete(c.Request.URL.Path)
+	err := handler.backend.FileDelete(c.Request.URL.Path)
 	if err != nil {
 		c.HTML(http.StatusInternalServerError, "/errors/internal-sever-error.html", gin.H{})
 		return
 	}
 	c.Status(http.StatusNoContent)
 }
-func (server *Server) HandlePreview(c *gin.Context) {
+func (handler *Handler) Preview(c *gin.Context) {
 	data, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
-	renderedData, err := server.Render(data)
+	renderedData, err := handler.backend.Render(data)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}

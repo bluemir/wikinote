@@ -11,6 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/internal/backend"
+	"github.com/bluemir/wikinote/internal/server/handler"
 )
 
 type Config struct {
@@ -23,7 +24,14 @@ func NewConfig() *Config {
 }
 
 func Run(b *backend.Backend, conf *Config) error {
-	server := &Server{Backend: b}
+	h, err := handler.New(b)
+	if err != nil {
+		return err
+	}
+	server := &Server{
+		Backend: b,
+		handler: h,
+	}
 
 	app := gin.New()
 
@@ -68,7 +76,8 @@ func Run(b *backend.Backend, conf *Config) error {
 
 type Server struct {
 	*backend.Backend
-	etag string
+	handler *handler.Handler
+	etag    string
 }
 
 func (server *Server) HandleNotImplemented(c *gin.Context) {
