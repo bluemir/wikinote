@@ -18,7 +18,7 @@ func (m *Manager) IssueToken(username, unhashedKey string) (*Token, error) {
 	}
 
 	token := &Token{
-		UserName:  username,
+		Username:  username,
 		HashedKey: hash(unhashedKey, salt(username)),
 		RevokeKey: fmt.Sprintf("%s-%s", xid.New(), hash(username+time.Now().String(), "__revoke__")),
 	}
@@ -31,5 +31,13 @@ func (m *Manager) RevokeToken(revokeKey string) error {
 	return m.db.Where(&Token{RevokeKey: revokeKey}).Delete(&Token{RevokeKey: revokeKey}).Error
 }
 func (m *Manager) RevokeTokenAll(username string) error {
-	return m.db.Where(&Token{UserName: username}).Delete(&Token{UserName: username}).Error
+	return m.db.Where(&Token{Username: username}).Delete(&Token{Username: username}).Error
+}
+func (m *Manager) GenerateToken(username string, expiredTime time.Time) (string, error) {
+	newKey := hash(xid.New().String(), "__salt__") // TODO Salt
+
+	if _, err := m.IssueToken(username, newKey); err != nil {
+		return "", err
+	}
+	return newKey, nil
 }

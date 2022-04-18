@@ -54,6 +54,7 @@ func Run(b *backend.Backend, conf *Config) error {
 		app.SetHTMLTemplate(html)
 	}
 
+	// Register Routing
 	server.RegisterRoute(app)
 
 	if len(conf.TLSDomains) > 0 {

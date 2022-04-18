@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 
+	"github.com/bluemir/wikinote/internal/auth"
 	"github.com/bluemir/wikinote/internal/query-router"
 	"github.com/bluemir/wikinote/internal/static"
 )
@@ -30,7 +31,7 @@ func (server *Server) RegisterRoute(app gin.IRouter) {
 		// auth
 		special.Use(server.Authn)
 		special.POST("/api/preview", server.handler.Preview) // render body
-		special.GET("/search", server.Authz("search"), server.handler.Search)
+		special.GET("/search", server.Authz(Global, "search"), server.handler.Search)
 
 		// plugins
 		server.Backend.Plugin.RouteHook(special.Group("/plugins"))
@@ -47,15 +48,15 @@ func (server *Server) RegisterRoute(app gin.IRouter) {
 
 	pages := queryrouter.New()
 	{
-		pages.GET("edit", server.Authz("update"), server.handler.EditForm)
-		pages.GET("raw", server.Authz("read"), server.handler.Raw)
-		pages.GET("delete", server.Authz("delete"), server.handler.DeleteForm)
-		pages.GET("attribute", server.Authz("read"), server.handler.AttributeGet)
-		pages.PUT("attribute", server.Authz("update"), server.handler.AttributeUpdate)
-		pages.GET("*", server.Authz("read"), server.handler.View)
-		pages.POST("*", server.Authz("update"), server.handler.UpdateWithForm)
-		pages.PUT("*", server.Authz("update"), server.handler.Update)
-		pages.DELETE("*", server.Authz("delete"), server.handler.Delete)
+		pages.GET("edit", server.Authz(Page, "update"), server.handler.EditForm)
+		pages.GET("raw", server.Authz(Page, "read"), server.handler.Raw)
+		pages.GET("delete", server.Authz(Page, "delete"), server.handler.DeleteForm)
+		pages.GET("attribute", server.Authz(PageAttr, "read"), server.handler.AttributeGet)
+		pages.PUT("attribute", server.Authz(PageAttr, "update"), server.handler.AttributeUpdate)
+		pages.GET("*", server.Authz(Page, "read"), server.handler.View)
+		pages.POST("*", server.Authz(Page, "update"), server.handler.UpdateWithForm)
+		pages.PUT("*", server.Authz(Page, "update"), server.handler.Update)
+		pages.DELETE("*", server.Authz(Page, "delete"), server.handler.Delete)
 	}
 	app.Use(pages.Handler)
 }
@@ -64,4 +65,13 @@ func (server *Server) redirectToFrontPage(c *gin.Context) {
 	c.Redirect(http.StatusTemporaryRedirect, "/"+server.Config.File.FrontPage)
 	c.Abort()
 	return
+}
+func Page(c *gin.Context) (auth.Resource, error) {
+	return auth.KeyValues{}, nil
+}
+func PageAttr(c *gin.Context) (auth.Resource, error) {
+	return auth.KeyValues{}, nil
+}
+func Global(c *gin.Context) (auth.Resource, error) {
+	return auth.KeyValues{}, nil
 }

@@ -10,7 +10,7 @@ import (
 )
 
 func (server *Server) Authn(c *gin.Context) {
-	token, err := server.Backend.Auth.HTTP(c.Request.Header)
+	user, err := server.Backend.Auth.HTTP(c.Request)
 
 	if err != nil {
 		switch err {
@@ -25,61 +25,60 @@ func (server *Server) Authn(c *gin.Context) {
 			return
 		}
 	}
-	logrus.Tracef("auth as '%s'", token.UserName)
+	logrus.Tracef("auth as '%s'", user.Name)
 
 	// check Authz with token
 
-	c.Set(TOKEN, token)
+	c.Set(SessionKeyUser, user)
 
 	return // next
 
 }
-func (server *Server) Authz(action string) func(c *gin.Context) {
+
+func getUser(c *gin.Context) (*auth.User, error) {
+	u, exist := c.Get(SessionKeyUser)
+	if !exist {
+		return nil, auth.ErrUnauthorized // TODO
+	}
+	user, ok := u.(*auth.User)
+	if !ok {
+		return nil, auth.ErrUnauthorized // TODO
+	}
+	return user, nil
+}
+
+type ResourceGetter func(c *gin.Context) (auth.Resource, error)
+
+func (server *Server) Authz(r ResourceGetter, verb auth.Verb) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		subject, err := server.Auth.Subject(Token(c))
+		user, err := getUser(c)
+		//subject, err := server.Auth.Subject(Token(c))
+		if err != nil {
+			c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", gin.H{})
+			c.Abort()
+			return
+		}
+		resource, err := r(c)
 		if err != nil {
 			c.HTML(http.StatusInternalServerError, "/errors/internal-server-error.html", gin.H{})
 			c.Abort()
 			return
 		}
-		object, err := server.Backend.Object(c.Request.RequestURI)
+
+		allowed, err := server.Auth.IsAllow(resource, verb, user)
 		if err != nil {
-			c.HTML(http.StatusInternalServerError, "/errors/internal-server-error.html", gin.H{})
+			c.HTML(http.StatusInternalServerError, "/errors/internal-server-error.html", gin.H{"err": err.Error()})
 			c.Abort()
 			return
 		}
-
-		ctx := &auth.Context{
-			Subject: subject,
-			Object:  object,
-			Action:  action,
-		}
-
-		logrus.Trace(ctx)
-
-		switch server.Auth.Authz(ctx) {
-		case auth.Accept:
-			logrus.Trace("accepted")
-			return
-		case auth.Reject:
+		if !allowed {
 			logrus.Trace("rejected")
 			c.HTML(http.StatusForbidden, "/errors/forbidden.html", gin.H{})
 			c.Abort()
 			return
-		case auth.Error:
-			c.HTML(http.StatusInternalServerError, "/errors/internal-server-error.html", gin.H{"err": err.Error()})
-			c.Abort()
-			return
-		case auth.NeedAuthn:
-			c.Header("WWW-Authenticate", AuthenicateString)
-			c.HTML(http.StatusUnauthorized, "/errors/unauthorized.html", gin.H{})
-			c.Abort()
-			return
-		default:
-			c.HTML(http.StatusInternalServerError, "/errors/internal-server-error.html", gin.H{})
-			c.Abort()
-			return
 		}
+		logrus.Trace("accepted")
+
 	}
 }
 

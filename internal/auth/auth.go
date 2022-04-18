@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	yaml "gopkg.in/yaml.v3"
 	"gorm.io/gorm"
@@ -16,6 +15,7 @@ func New(db *gorm.DB, roles []Role) (*Manager, error) {
 	if err := db.AutoMigrate(
 		&User{},
 		&Token{},
+		&RoleBinding{},
 	); err != nil {
 		return nil, err
 	}
@@ -37,24 +37,4 @@ func New(db *gorm.DB, roles []Role) (*Manager, error) {
 	logrus.Tracef("roles: \n%s", string(buf))
 
 	return &Manager{db, result}, nil
-}
-
-func (m *Manager) Subject(token *Token) (Subject, error) {
-	subject := Subject{Token: token}
-	if token == nil {
-		return subject, nil // nil token mean guest
-	}
-
-	// find user
-	user, ok, err := m.GetUser(token.UserName)
-	if !ok {
-		return subject, errors.Errorf("user not found")
-	}
-	if err != nil {
-		return subject, err
-	}
-
-	subject.User = user
-
-	return subject, nil
 }

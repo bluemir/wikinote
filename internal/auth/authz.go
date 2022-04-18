@@ -1,50 +1,44 @@
 package auth
 
 import (
-	"strings"
-
 	"github.com/sirupsen/logrus"
 )
 
-func (manager *Manager) Authz(ctx *Context) Result {
-	logrus.Tracef("user: %#v", ctx.Subject.User)
-	logrus.Tracef("object: %#v", ctx.Object)
-	logrus.Tracef("action: %s", ctx.Action)
+func (manager *Manager) IsAllow(resource Resource, verb Verb, user *User) (bool, error) {
+	logrus.Tracef("user: %#v", user)
+	logrus.Tracef("resource: %#v", resource)
+	logrus.Tracef("verb: %s", verb)
 
-	labels := map[string]string{"role/default": "true"}
-	if ctx.Subject.User != nil {
-		labels = ctx.Subject.User.Labels
-		labels["role/default"] = "true"
+	roles, err := manager.getBindingRoles(user)
+	if err != nil {
+		return false, err
 	}
-	logrus.Tracef("lable: %#v", labels)
-
-	for k := range labels {
-		if !strings.HasPrefix(k, "role/") {
-			continue
-		}
-		role := strings.TrimPrefix(k, "role/")
-
-		// find role.. load from file when load auth module
-		r := manager.roles[role]
-		logrus.Tracef("role: %#v", r)
-
-		for _, rule := range r.Rules {
-			logrus.Trace("rule", rule)
-			if rule.IsNotMatchedObject(ctx.Object) {
-				continue
-			}
-			if rule.IsNotMatchedAction(ctx.Action) {
-				continue
-			}
-
-			// all matched
-			return Accept
+	for _, role := range roles {
+		if role.IsAllow(resource, verb) {
+			return true, nil
 		}
 	}
 
-	if ctx.Subject.User == nil {
-		return NeedAuthn
+	return false, nil
+}
+func (manager *Manager) getBindingRoles(user *User) ([]Role, error) {
+	// if user nil, it's guest
+	if user == nil {
+		return []Role{manager.roles["guest"]}, nil
 	}
 
-	return Reject
+	bindings := []RoleBinding{}
+	if err := manager.db.Where(RoleBinding{
+		Username: user.Name,
+	}).Find(bindings).Error; err != nil {
+		return nil, err
+	}
+
+	result := []Role{}
+
+	for _, b := range bindings {
+		result = append(result, manager.roles[b.Rolename])
+	}
+
+	return result, nil
 }
