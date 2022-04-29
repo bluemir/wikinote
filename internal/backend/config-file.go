@@ -18,11 +18,10 @@ plugins:
 roles:
 - name: default
   rules:
-  - actions:
+  - verbs:
     - read
-    objects:
-    - 'kind == "wiki"'
-    - 'kind == "image"'
+    resource:
+      kind: "%image,wiki"
 `
 
 func loadConfigFile(conf *Config) error {

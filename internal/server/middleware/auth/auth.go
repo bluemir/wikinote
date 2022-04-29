@@ -4,11 +4,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/internal/auth"
+	"github.com/bluemir/wikinote/internal/server/handler"
 )
 
 type Resource = auth.Resource
@@ -16,10 +17,10 @@ type Verb = auth.Verb
 type KeyValues = auth.KeyValues
 
 const (
-	SessionKeyUser = "token"
-
 	ContextKeyManager = "__auth_manager__"
 	ContextKeyUser    = "__auth_user__"
+
+	realm = "wikinote.bluemir.me"
 )
 
 func Middleware(m *auth.Manager) gin.HandlerFunc {
@@ -31,55 +32,54 @@ func manager(c *gin.Context) *auth.Manager {
 	return c.MustGet(ContextKeyManager).(*auth.Manager)
 }
 
-func RequireLogin(c *gin.Context) {
-	user, err := User(c)
-	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, err)
-	}
-
-	c.Set(ContextKeyUser, user)
-}
 func User(c *gin.Context) (*auth.User, error) {
 	// 1. try to get user from context
 	if u, ok := c.Get(ContextKeyUser); ok {
+		logrus.Debug(u)
 		if user, ok := u.(*auth.User); ok {
 			return user, nil
 		}
 	}
 
-	// 2. next check session
-	session := sessions.Default(c)
-	u := session.Get(SessionKeyUser)
-	if u != nil {
-		if user, ok := u.(*auth.User); ok {
-			c.Set(ContextKeyUser, user)
-			return user, nil
-		}
-	}
-
-	// 3. check api token or basic auth
+	// 2. check basic auth or token
 	user, err := manager(c).HTTP(c.Request)
 	if err != nil {
-		return nil, auth.ErrUnauthorized
+		return nil, err
 	}
+
+	// set user to context
 	c.Set(ContextKeyUser, user)
+
 	return user, nil
 }
 
-type ResourceGetter func(c *gin.Context) auth.Resource
+func RequestLogin(c *gin.Context) {
+	_, err := User(c)
 
-func Authz(r ResourceGetter, verb Verb) gin.HandlerFunc {
+	if errors.Is(err, auth.ErrUnauthorized) {
+		handler.ErrorHandler(c, err)
+		return
+	}
+}
+
+type ResourceGetter func(c *gin.Context) (auth.Resource, error)
+
+func Authz(getResource ResourceGetter, verb Verb) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user, err := User(c)
-		if err != nil {
-			c.AbortWithError(http.StatusUnauthorized, err)
+		if err != nil && !errors.Is(err, auth.ErrUnauthorized) {
+			handler.ErrorHandler(c, err)
 			return
 		}
 
-		resource := r(c)
+		resource, err := getResource(c)
+		if err != nil {
+			handler.ErrorHandler(c, err)
+			return
+		}
 
-		if ok, err := manager(c).IsAllow(resource, verb, user); err != nil || !ok {
-			c.AbortWithError(http.StatusForbidden, errors.New("Forbidden"))
+		if err := manager(c).IsAllow(resource, verb, user); err != nil {
+			handler.ErrorHandler(c, err)
 			return
 		}
 	}
@@ -91,20 +91,20 @@ func IssueToken(c *gin.Context) {
 	}{}
 
 	if err := c.ShouldBind(&req); err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		handler.ErrorHandler(c, err)
 		return
 	}
 
 	user, err := manager(c).Default(req.Username, req.Password)
 	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, err)
+		handler.ErrorHandler(c, err)
 		return
 	}
 
 	t := time.Now().Add(6 * time.Hour)
-	token, err := manager(c).GenerateToken(user.Name, t)
+	token, err := manager(c).NewHTTPToken(user.Name, t)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		handler.ErrorHandler(c, err)
 		return
 	}
 
@@ -113,13 +113,9 @@ func IssueToken(c *gin.Context) {
 		"expiredAt": t.Format(time.RFC3339),
 	})
 }
-
-/*
 func RevokeToken(c *gin.Context) {
-
-	if err := manager(c).RevokeToken(c.Request); err != nil {
-		c.AbortWithError(http.StatusUnauthorized, err)
+	if err := manager(c).RevokeHTTPToken(c.Request); err != nil {
+		handler.ErrorHandler(c, err)
 		return
 	}
 }
-*/

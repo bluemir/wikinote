@@ -7,8 +7,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/bluemir/wikinote/internal/buildinfo"
+	"github.com/gin-contrib/location"
 	"github.com/gin-gonic/gin"
+
+	"github.com/bluemir/wikinote/internal/buildinfo"
 )
 
 func (server *Server) static(path string) func(c *gin.Context) {
@@ -42,4 +44,18 @@ func (server *Server) staticCache(c *gin.Context) {
 	}
 
 	c.Request.Header.Del("If-Modified-Since") // only accept etag
+}
+
+func fixURL(c *gin.Context) {
+	url := location.Get(c)
+
+	// QUESTION is it right?
+	c.Request.URL.Scheme = url.Scheme
+	c.Request.URL.Host = url.Host
+}
+func markAPI(c *gin.Context) {
+	c.SetAccepted("application/json")
+}
+func markHTML(c *gin.Context) {
+	c.SetAccepted("text/html")
 }

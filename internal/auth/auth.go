@@ -8,10 +8,11 @@ import (
 
 type Manager struct {
 	db    *gorm.DB
+	salt  string
 	roles map[string]Role
 }
 
-func New(db *gorm.DB, roles []Role) (*Manager, error) {
+func New(db *gorm.DB, salt string, roles []Role) (*Manager, error) {
 	if err := db.AutoMigrate(
 		&User{},
 		&Token{},
@@ -36,5 +37,9 @@ func New(db *gorm.DB, roles []Role) (*Manager, error) {
 	}
 	logrus.Tracef("roles: \n%s", string(buf))
 
-	return &Manager{db, result}, nil
+	return &Manager{
+		db:    db,
+		salt:  salt,
+		roles: result,
+	}, nil
 }

@@ -21,6 +21,7 @@ func parseMIME(mime string) (string, string) {
 	return arr[0], ""
 }
 func (handler *Handler) View(c *gin.Context) {
+	logrus.Trace("view handler")
 	ctype := mime.TypeByExtension(filepath.Ext(c.Request.URL.Path))
 	category, subtype := parseMIME(ctype)
 	logrus.Debugf("mime: %s", ctype)

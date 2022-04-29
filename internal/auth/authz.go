@@ -2,24 +2,29 @@ package auth
 
 import (
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
-func (manager *Manager) IsAllow(resource Resource, verb Verb, user *User) (bool, error) {
+func (manager *Manager) IsAllow(resource Resource, verb Verb, user *User) error {
 	logrus.Tracef("user: %#v", user)
 	logrus.Tracef("resource: %#v", resource)
 	logrus.Tracef("verb: %s", verb)
 
 	roles, err := manager.getBindingRoles(user)
 	if err != nil {
-		return false, err
+		return err
 	}
+	logrus.Tracef("%+v", roles)
 	for _, role := range roles {
 		if role.IsAllow(resource, verb) {
-			return true, nil
+			return nil
 		}
 	}
-
-	return false, nil
+	if user != nil {
+		return ErrForbidden
+	} else {
+		return ErrUnauthorized
+	}
 }
 func (manager *Manager) getBindingRoles(user *User) ([]Role, error) {
 	// if user nil, it's guest
@@ -31,6 +36,9 @@ func (manager *Manager) getBindingRoles(user *User) ([]Role, error) {
 	if err := manager.db.Where(RoleBinding{
 		Username: user.Name,
 	}).Find(bindings).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return []Role{}, nil
+		}
 		return nil, err
 	}
 

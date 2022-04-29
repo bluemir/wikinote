@@ -1,17 +1,17 @@
-package server
+package handler
 
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
-
 	"github.com/bluemir/wikinote/internal/auth"
+	"github.com/gin-gonic/gin"
 )
 
-func (server *Server) HandleRegisterForm(c *gin.Context) {
+func (handler *Handler) RegisterForm(c *gin.Context) {
 	c.HTML(http.StatusOK, "/register.html", gin.H{})
 }
-func (server *Server) HandleRegister(c *gin.Context) {
+
+func (handler *Handler) Register(c *gin.Context) {
 	req := &struct {
 		Name     string `form:"name"`
 		Password string `form:"password"`
@@ -20,7 +20,6 @@ func (server *Server) HandleRegister(c *gin.Context) {
 	}{}
 
 	if err := c.ShouldBind(req); err != nil {
-		// Set cookie?
 		c.HTML(http.StatusBadRequest, "/errors/bad-request.html", gin.H{
 			"retryURL": "/!/auth/register",
 		})
@@ -36,9 +35,8 @@ func (server *Server) HandleRegister(c *gin.Context) {
 		return
 	}
 
-	err := server.Auth.CreateUser(req.Name, auth.Labels{
+	err := handler.backend.Auth.CreateUser(req.Name, auth.Labels{
 		"wikinote.io/email": req.Email,
-		//"role/default":      "true",
 	})
 	if err != nil {
 		c.HTML(http.StatusInternalServerError, "/errors/internal-server-error.html", gin.H{
@@ -49,7 +47,7 @@ func (server *Server) HandleRegister(c *gin.Context) {
 		return
 	}
 
-	_, err = server.Auth.IssueToken(req.Name, req.Password)
+	_, err = handler.backend.Auth.IssueToken(req.Name, req.Password, nil)
 	if err != nil {
 		c.HTML(http.StatusInternalServerError, "errors/internal-server-error.html", gin.H{
 			"retryURL": "/!/auth/register",

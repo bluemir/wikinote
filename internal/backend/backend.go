@@ -21,6 +21,7 @@ func InitConfig() Config {
 type Config struct {
 	Wikipath   string
 	ConfigFile string
+	Salt       string
 
 	AdminUsers map[string]string
 

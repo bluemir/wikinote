@@ -1,7 +1,7 @@
 ##@ Run
 
 run: build/$(APP_NAME) ## Run web app
-	$< -vvv server --admin-user root=1234 --wiki-path=runtime --config=runtime/.app/config.yaml
+	$< -vv server --admin-user root=1234 --wiki-path=runtime --config=runtime/.app/config.yaml
 dev-run: ## Run dev server. If detect file change, automatically rebuild&restart server
 	@$(MAKE) build/tools/entr
 	while true; do \

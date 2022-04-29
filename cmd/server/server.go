@@ -10,15 +10,9 @@ import (
 )
 
 func Register(cmd *kingpin.CmdClause, conf *config.Config) {
-
-	//////////
-	// server flags
 	cmd.Flag("bind", "bind").
 		Default(":4000").
 		StringVar(&conf.Server.Bind)
-
-	cmd.Flag("tls-domain", "tls domain").
-		StringsVar(&conf.Server.TLSDomains)
 
 	cmd.Action(func(*kingpin.ParseContext) error {
 		logrus.Debugf("%#v", conf)

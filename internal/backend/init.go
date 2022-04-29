@@ -51,7 +51,7 @@ func (backend *Backend) initAuth() error {
 		return errors.Errorf("require db")
 	}
 
-	m, err := auth.New(backend.db, backend.Config.File.Roles)
+	m, err := auth.New(backend.db, backend.Config.Salt, backend.Config.File.Roles)
 	if err != nil {
 		return err
 	}
@@ -77,7 +77,7 @@ func (backend *Backend) initAdminUser() error {
 		if err := backend.Auth.RevokeTokenAll(name); err != nil {
 			return err
 		}
-		if _, err := backend.Auth.IssueToken(name, key); err != nil {
+		if _, err := backend.Auth.IssueToken(name, key, nil); err != nil {
 			return err
 		}
 	}

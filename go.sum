@@ -23,6 +23,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/gdamore/encoding v1.0.0/go.mod h1:alR0ol34c49FCSBLjhosxzcPHQbf2trDkoo5dl+VrEg=
 github.com/gdamore/tcell v1.3.0/go.mod h1:Hjvr+Ofd+gLglo7RYKxxnzCBmev3BzsS67MebKS4zMM=
+github.com/gin-contrib/location v0.0.2 h1:QZKh1+K/LLR4KG/61eIO3b7MLuKi8tytQhV6texLgP4=
+github.com/gin-contrib/location v0.0.2/go.mod h1:NGoidiRlf0BlA/VKSVp+g3cuSMeTmip/63PhEjRhUAc=
 github.com/gin-contrib/sessions v0.0.4 h1:gq4fNa1Zmp564iHP5G6EBuktilEos8VKhe2sza1KMgo=
 github.com/gin-contrib/sessions v0.0.4/go.mod h1:pQ3sIyviBBGcxgyR8mkeJuXbeV3h3NYmhJADQTq5+Vo=
 github.com/gin-contrib/sse v0.1.0 h1:Y/yl/+YNO8GZSjAhjMsSuLt29uWRFHdHYUb5lYOV9qE=

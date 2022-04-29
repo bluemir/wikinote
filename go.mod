@@ -8,6 +8,7 @@ require (
 	github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137 // indirect
 	github.com/antonmedv/expr v1.9.0
 	github.com/daaku/go.zipexe v1.0.1 // indirect
+	github.com/gin-contrib/location v0.0.2 // indirect
 	github.com/gin-contrib/sessions v0.0.4
 	github.com/gin-gonic/autotls v0.0.3
 	github.com/gin-gonic/gin v1.7.7

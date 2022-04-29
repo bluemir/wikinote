@@ -6,17 +6,17 @@ import (
 	yaml "gopkg.in/yaml.v3"
 )
 
-type ObjectRule struct {
+type RuleExpr struct {
 	*vm.Program
 }
 
-func (rule *ObjectRule) MarshalYAML() (interface{}, error) {
+func (rule *RuleExpr) MarshalYAML() (interface{}, error) {
 	return map[string]string{"source": string(rule.Source.Content())}, nil
 }
-func (rule *ObjectRule) UnmarshalYAML(value *yaml.Node) error {
+func (rule *RuleExpr) UnmarshalYAML(value *yaml.Node) error {
 	source := value.Value
 
-	p, err := expr.Compile(source)
+	p, err := expr.Compile(source, expr.AsBool())
 	if err != nil {
 		return err
 	}
@@ -24,11 +24,19 @@ func (rule *ObjectRule) UnmarshalYAML(value *yaml.Node) error {
 	rule.Program = p
 	return nil
 }
+func (rule *RuleExpr) isFulfill(resource Resource, verb Verb) bool {
+	env := map[string]interface{}{
+		//"resource": resource.Keys(),
+		"verb": verb,
+	}
+	vm.Run(rule.Program, env)
+	return false
+}
 
 func (role *Role) IsAllow(resource Resource, verb Verb) bool {
 	for _, rule := range role.Rules {
 		for _, v := range rule.Verbs {
-			if rule.Resource.isSubsetOf(resource) && v == verb {
+			if ResourceExprs(rule.Resource).isFulfill(resource) && v == verb {
 				return true
 			}
 		}

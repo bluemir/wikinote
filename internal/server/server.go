@@ -1,26 +1,30 @@
 package server
 
 import (
-	"net/http"
-
+	"github.com/gin-contrib/location"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
-	"github.com/gin-gonic/autotls"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/internal/backend"
 	"github.com/bluemir/wikinote/internal/server/handler"
+	authMiddleware "github.com/bluemir/wikinote/internal/server/middleware/auth"
 )
 
 type Config struct {
-	Bind       string
-	TLSDomains []string
+	Bind string
 }
 
 func NewConfig() *Config {
 	return &Config{}
+}
+
+type Server struct {
+	*backend.Backend
+	handler *handler.Handler
+	etag    string
 }
 
 func Run(b *backend.Backend, conf *Config) error {
@@ -28,6 +32,7 @@ func Run(b *backend.Backend, conf *Config) error {
 	if err != nil {
 		return err
 	}
+
 	server := &Server{
 		Backend: b,
 		handler: h,
@@ -43,6 +48,8 @@ func Run(b *backend.Backend, conf *Config) error {
 	// Recovery
 	app.Use(gin.Recovery())
 
+	app.Use(location.Default(), fixURL)
+
 	// Session
 	store := cookie.NewStore([]byte("__wikinote__"))
 	app.Use(sessions.Sessions("session", store))
@@ -54,35 +61,11 @@ func Run(b *backend.Backend, conf *Config) error {
 		app.SetHTMLTemplate(html)
 	}
 
+	app.Use(authMiddleware.Middleware(server.Backend.Auth))
+
 	// Register Routing
 	server.RegisterRoute(app)
 
-	if len(conf.TLSDomains) > 0 {
-		logrus.Warn("ignore bind or port option")
-		logrus.Info("Run http redirect server")
-		go http.ListenAndServe(":80", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			logrus.Infof("hit the http request: %s", r.RequestURI)
-			http.Redirect(w, r, "https://"+conf.TLSDomains[0]+r.RequestURI, http.StatusPermanentRedirect)
-		}))
-
-		logrus.Infof("Enable Auto TLS @ %s", conf.TLSDomains)
-		logrus.Infof("Run Server")
-
-		return autotls.Run(app, conf.TLSDomains...)
-	} else {
-		logrus.Infof("Run Server on %s", conf.Bind)
-		return app.Run(conf.Bind)
-	}
-}
-
-type Server struct {
-	*backend.Backend
-	handler *handler.Handler
-	etag    string
-}
-
-func (server *Server) HandleNotImplemented(c *gin.Context) {
-	c.String(http.StatusNotImplemented, "text/plain", "not implemeted")
-	c.Abort()
-	return
+	logrus.Infof("Run Server on %s", conf.Bind)
+	return app.Run(conf.Bind)
 }
