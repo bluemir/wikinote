@@ -22,7 +22,8 @@ func TestParseResourceExpr(t *testing.T) {
 			Source: "~value",
 			Result: ResourceExpr{
 				Value: "value",
-				Op:    OpNotEqual,
+				Op:    OpEqual,
+				Flag:  FlagNot,
 			},
 		},
 		{
@@ -36,7 +37,8 @@ func TestParseResourceExpr(t *testing.T) {
 			Source: "~+value",
 			Result: ResourceExpr{
 				Value: "value",
-				Op:    OpNotContain,
+				Op:    OpContain,
+				Flag:  FlagNot,
 			},
 		},
 		{
@@ -64,7 +66,8 @@ func TestParseResourceExpr(t *testing.T) {
 			Source: "~%value1,value2",
 			Result: ResourceExpr{
 				Value: "value1,value2",
-				Op:    OpNotIn,
+				Op:    OpIn,
+				Flag:  FlagNot,
 			},
 		},
 		{
@@ -98,7 +101,8 @@ func TestIsFulfilled(t *testing.T) {
 		{
 			Expr: ResourceExpr{
 				Value: "value",
-				Op:    OpNotEqual,
+				Op:    OpEqual,
+				Flag:  FlagNot,
 			},
 			Value:  "value",
 			Result: false,
@@ -106,7 +110,8 @@ func TestIsFulfilled(t *testing.T) {
 		{
 			Expr: ResourceExpr{
 				Value: "value",
-				Op:    OpNotEqual,
+				Op:    OpEqual,
+				Flag:  FlagNot,
 			},
 			Value:  "value1",
 			Result: true,
@@ -119,10 +124,101 @@ func TestIsFulfilled(t *testing.T) {
 			Value:  "value1",
 			Result: true,
 		},
+		{
+			Expr: ResourceExpr{
+				Value: "value",
+				Op:    OpHasSuffix,
+			},
+			Value:  "test-value",
+			Result: true,
+		},
+		{
+			Expr: ResourceExpr{
+				Value: "value1,value2",
+				Op:    OpIn,
+			},
+			Value:  "value2",
+			Result: true,
+		},
 	}
 	for _, tc := range tcs {
 		res := tc.Expr.isFulfill(tc.Value)
 
 		assert.Equal(t, res, tc.Result)
+	}
+}
+func TestResourceExprToString(t *testing.T) {
+	tcs := []struct {
+		Result string
+		Source ResourceExpr
+	}{
+		{
+			Source: ResourceExpr{
+				Value: "value",
+				Op:    OpEqual,
+			},
+			Result: "value",
+		},
+		{
+			Result: "~value",
+			Source: ResourceExpr{
+				Value: "value",
+				Op:    OpEqual,
+				Flag:  FlagNot,
+			},
+		},
+		{
+			Result: "+value",
+			Source: ResourceExpr{
+				Value: "value",
+				Op:    OpContain,
+			},
+		},
+		{
+			Result: "~+value",
+			Source: ResourceExpr{
+				Value: "value",
+				Op:    OpContain,
+				Flag:  FlagNot,
+			},
+		},
+		{
+			Result: "^value",
+			Source: ResourceExpr{
+				Value: "value",
+				Op:    OpHasPrefix,
+			},
+		},
+		{
+			Result: "$value",
+			Source: ResourceExpr{
+				Value: "value",
+				Op:    OpHasSuffix,
+			},
+		},
+		{
+			Result: "%value1,value2",
+			Source: ResourceExpr{
+				Value: "value1,value2",
+				Op:    OpIn,
+			},
+		},
+		{
+			Result: "~%value1,value2",
+			Source: ResourceExpr{
+				Value: "value1,value2",
+				Op:    OpIn,
+				Flag:  FlagNot,
+			},
+		},
+		{
+			Result: "",
+			Source: ResourceExpr{
+				Value: "",
+			},
+		},
+	}
+	for _, tc := range tcs {
+		assert.Equal(t, tc.Result, tc.Source.String())
 	}
 }
