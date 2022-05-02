@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"strings"
+
 	"github.com/sirupsen/logrus"
 	yaml "gopkg.in/yaml.v3"
 )
@@ -18,23 +20,87 @@ func (exprs ResourceExprs) isFulfill(resource Resource) bool {
 
 type ResourceExpr struct {
 	Value string
-	Op    ResourceOp
+	Op    ResourceExprOp
 }
-type ResourceOp int
+
+func parseResourceExpr(src string) ResourceExpr {
+	if l := len(src); l < 1 || (l < 2 && src[0] == '~') {
+		return ResourceExpr{}
+	}
+	switch src[0] {
+	case '~':
+		switch src[1] {
+		case '+':
+			return ResourceExpr{
+				Value: src[2:],
+				Op:    OpNotContain,
+			}
+		case '%':
+			return ResourceExpr{
+				Value: src[2:],
+				Op:    OpNotIn,
+			}
+		default:
+			return ResourceExpr{
+				Value: src[1:],
+				Op:    OpNotEqual,
+			}
+		}
+	case '+':
+		return ResourceExpr{
+			Value: src[1:],
+			Op:    OpContain,
+		}
+	case '^':
+		return ResourceExpr{
+			Value: src[1:],
+			Op:    OpHasPrefix,
+		}
+	case '$':
+		return ResourceExpr{
+			Value: src[1:],
+			Op:    OpHasSuffix,
+		}
+	case '%':
+		return ResourceExpr{
+			Value: src[1:],
+			Op:    OpIn,
+		}
+	default:
+		return ResourceExpr{
+			Value: src,
+		}
+	}
+}
+
+type ResourceExprOp int
 
 const (
-	Equal ResourceOp = iota
-	NotEqual
-	Contain
-	NotContain
-	HasPrefix
-	HasSuffix
-	Regexp
-	In
+	OpEqual ResourceExprOp = iota
+	OpNotEqual
+	OpContain
+	OpNotContain
+	OpHasPrefix
+	OpHasSuffix
+	OpIn
+	OpNotIn
+	//OpRegexp
 )
+
+type ResourceExprDecorator func(b bool) bool
+
+func NotDecorator(b bool) bool {
+	return !b
+}
 
 func (expr ResourceExpr) isFulfill(v string) bool {
 	switch expr.Op {
+	case OpNotEqual:
+		return v != expr.Value
+	case OpContain:
+		return strings.Contains(v, expr.Value)
+	case OpNotContain:
+		return !strings.Contains(v, expr.Value)
 	default:
 		return v == expr.Value
 	}

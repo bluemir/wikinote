@@ -39,11 +39,3 @@ func (kvs KeyValues) Get(key string) string {
 func (kvs KeyValues) KeyValues() KeyValues {
 	return kvs
 }
-func (kvs KeyValues) isSubsetOf(resource Resource) bool {
-	for k, v := range kvs {
-		if resource.Get(k) != v {
-			return false
-		}
-	}
-	return true
-}
