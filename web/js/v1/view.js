@@ -1,7 +1,5 @@
 import * as $ from "../../lib/bm.js/bm.module.js";
 import {html, render} from 'lit-html';
-//import * as $ from "/!/static/lib/bm.js/bm.module.js";
-//import {html, render} from '/!/lib/lit-html/lit-html.js';
 
 var tmpl = (app) => html`
 	<style>
@@ -14,6 +12,9 @@ var tmpl = (app) => html`
 		a {
 			color: var(--link-fg-color);
 			text-decoration: none;
+		}
+		a:hover {
+			text-decoration: underline;
 		}
 		h1 {
 			font-size: 2rem;
@@ -53,6 +54,7 @@ class WikinoteView extends $.CustomElement {
 		// slot? or dom migrate?,
 		//$.get(this.shadow, ".placeholder").innerHTML = this.innerHTML;
 		this.shadow.append(...this.childNodes);
+		// https://stackoverflow.com/questions/61626493/slotted-css-selector-for-nested-children-in-shadowdom-slot
 	}
 
 	async render() {

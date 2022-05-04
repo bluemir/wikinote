@@ -1,6 +1,8 @@
 package server
 
 import (
+	"net/http"
+
 	"github.com/gin-contrib/location"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -63,9 +65,13 @@ func Run(b *backend.Backend, conf *Config) error {
 
 	app.Use(authMiddleware.Middleware(server.Backend.Auth))
 
+	app.GET("/favicon.ico", NotFound)
 	// Register Routing
 	server.RegisterRoute(app)
 
 	logrus.Infof("Run Server on %s", conf.Bind)
 	return app.Run(conf.Bind)
+}
+func NotFound(c *gin.Context) {
+	c.String(http.StatusNotFound, "Not Found")
 }

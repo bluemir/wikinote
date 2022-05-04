@@ -21,7 +21,7 @@ build/docker-image.pushed: build/docker-image
 	echo $(shell cat $<) > $@
 
 docker-run: build/docker-image ## Run docker container
-	docker run -it --rm -v $(PWD)/runtime:/var/run/config $(shell cat $<) $(APP_NAME) -vvvv server
+	docker run -it --rm -v $(PWD)/runtime:/var/run/wiki $(shell cat $<) $(APP_NAME) -vvv server
 
 .watched_sources: Dockerfile
 

@@ -35,7 +35,7 @@ func (manager *Manager) getBindingRoles(user *User) ([]Role, error) {
 	bindings := []RoleBinding{}
 	if err := manager.db.Where(RoleBinding{
 		Username: user.Name,
-	}).Find(bindings).Error; err != nil {
+	}).Find(&bindings).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return []Role{}, nil
 		}

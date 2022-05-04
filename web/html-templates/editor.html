@@ -1,15 +1,17 @@
 {{ define "/editor.html" }}
+<!DOCTYPE html>
 <html>
 	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<script type="module" src="/!/static/js/v1/index.js"></script>
+		<style>@import "/!/static/css/root.css";</style>
 	</head>
 	<body>
 		<wikinote-layout>
 			<wikinote-editor>{{ .data }}</wikinote-editor>
 		</wikinote-layout>
+		<script type="module" src="/!/static/js/v1/index.js"></script>
 	</body>
 </html>
 {{ end }}

@@ -44,6 +44,7 @@ var tmpl = (app) => html`
 	form {
 		grid-area: search;
 		justify-self: end;
+		padding: 0 0.7rem;
 	}
 
 	a {

@@ -41,7 +41,7 @@ func (m *Manager) HTTPHeaderString(header string) (*User, error) {
 	}
 }
 func split2(str string, sep string) (string, string) {
-	arr := strings.SplitN(str, " ", 2)
+	arr := strings.SplitN(str, sep, 2)
 	if len(arr) < 2 {
 		return arr[0], ""
 	}

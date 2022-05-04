@@ -53,6 +53,7 @@ class WikinoteLayout extends $.CustomElement {
 	constructor() {
 		super();
 
+		this.render();
 		this.on("connected", () => this.render())
 	}
 

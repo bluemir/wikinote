@@ -60,9 +60,9 @@ func (r *router) Handler(c *gin.Context) {
 			return
 		}
 	}
+
 	if hs, ok := qh["*"]; ok {
 		for _, h := range hs {
-			logrus.Warn(c.IsAborted())
 			if c.IsAborted() {
 				return
 			}

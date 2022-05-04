@@ -39,7 +39,7 @@ build-tools: build/tools/go build/tools/rice
 build/tools/go:
 	@which $(notdir $@) || echo "see https://golang.org/doc/install"
 build/tools/rice: build/tools/go
-	@which $(notdir $@) || (./scripts/go-install-tool.sh github.com/GeertJohan/go.rice/rice)
+	@which $(notdir $@) || (./scripts/makefile.d/go-install-tool.sh github.com/GeertJohan/go.rice/rice)
 
 .PHONY: fmt
 fmt: ## Run go fmt against code

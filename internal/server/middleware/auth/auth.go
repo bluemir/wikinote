@@ -42,6 +42,7 @@ func User(c *gin.Context) (*auth.User, error) {
 	}
 
 	// 2. check basic auth or token
+	logrus.Trace("check")
 	user, err := manager(c).HTTP(c.Request)
 	if err != nil {
 		return nil, err
