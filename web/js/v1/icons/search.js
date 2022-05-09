@@ -29,4 +29,4 @@ class IconSearch extends $.CustomElement {
 		render(tmpl(this), this.shadow);
 	}
 }
-customElements.define("icon-search", WikinoteHeader);
+customElements.define("icon-search", IconSearch);

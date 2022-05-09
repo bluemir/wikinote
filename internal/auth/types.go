@@ -1,11 +1,24 @@
 package auth
 
+import "strings"
+
 type User struct {
 	ID     uint   `gorm:"primary_key"`
 	Name   string `gorm:"unique"`
 	Labels Labels `sql:"type:json"`
 	Salt   string
 }
+
+func (user User) Roles() []string {
+	result := []string{}
+	for k := range user.Labels {
+		if strings.HasPrefix(k, "role/") {
+			result = append(result, strings.TrimPrefix(k, "role/"))
+		}
+	}
+	return result
+}
+
 type Token struct {
 	ID        uint `gorm:"primary_key"`
 	Username  string
@@ -21,10 +34,7 @@ type Rule struct {
 	Verbs    []Verb        `yaml:"verbs"`
 	Expr     RuleExpr      `yaml:"expr"`
 }
-type RoleBinding struct {
-	Username string
-	Rolename string
-}
+
 type Resource interface {
 	Get(key string) string
 	KeyValues() KeyValues

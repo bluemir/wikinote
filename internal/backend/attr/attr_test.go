@@ -1,4 +1,4 @@
-package fileattr
+package attr
 
 import (
 	"testing"

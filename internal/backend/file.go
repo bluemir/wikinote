@@ -1,39 +1,5 @@
 package backend
 
-import (
-	"path/filepath"
-	"strings"
-
-	"github.com/bluemir/wikinote/internal/fileattr"
-)
-
-func (backend *Backend) Object(path string) (map[string]string, error) {
-	if strings.HasPrefix(path, "/!/") {
-		return map[string]string{"kind": "special"}, nil
-	}
-	// TODO make kind from ext
-	attrs, err := backend.FileAttr.Find(&fileattr.FileAttr{
-		Path: path,
-	})
-
-	if err != nil {
-		return map[string]string{}, err
-	}
-
-	result := map[string]string{}
-	for _, attr := range attrs {
-		result[attr.Key] = attr.Value
-	}
-
-	ext := filepath.Ext(path)
-	switch ext {
-	case ".md":
-		result["kind"] = "wiki"
-	}
-
-	return result, nil
-}
-
 func (backend *Backend) FileRead(path string) ([]byte, error) {
 	// TODO post hook?
 	return backend.files.Read(path)

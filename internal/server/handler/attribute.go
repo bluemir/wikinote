@@ -5,11 +5,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/bluemir/wikinote/internal/fileattr"
+	"github.com/bluemir/wikinote/internal/backend/attr"
 )
 
 func (handler *Handler) AttributeGet(c *gin.Context) {
-	attrs, err := handler.backend.FileAttr.Find(&fileattr.FileAttr{Path: c.Request.URL.Path})
+	attrs, err := handler.backend.FileAttr.Find(&attr.FileAttr{Path: c.Request.URL.Path})
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
@@ -26,7 +26,7 @@ func (handler *Handler) AttributeUpdate(c *gin.Context) {
 		return
 	}
 	for k, v := range req {
-		if err := handler.backend.FileAttr.Save(&fileattr.FileAttr{
+		if err := handler.backend.FileAttr.Save(&attr.FileAttr{
 			Path:  c.Request.URL.Path,
 			Key:   k,
 			Value: v,
@@ -36,7 +36,7 @@ func (handler *Handler) AttributeUpdate(c *gin.Context) {
 			return
 		}
 	}
-	attrs, err := handler.backend.FileAttr.Find(&fileattr.FileAttr{
+	attrs, err := handler.backend.FileAttr.Find(&attr.FileAttr{
 		Path: c.Request.URL.Path,
 	})
 	if err != nil {

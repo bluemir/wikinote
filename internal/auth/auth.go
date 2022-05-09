@@ -16,7 +16,6 @@ func New(db *gorm.DB, salt string, roles []Role) (*Manager, error) {
 	if err := db.AutoMigrate(
 		&User{},
 		&Token{},
-		&RoleBinding{},
 	); err != nil {
 		return nil, err
 	}

@@ -11,95 +11,74 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/bluemir/wikinote/internal/auth"
-	"github.com/bluemir/wikinote/internal/backend/files/local"
-	"github.com/bluemir/wikinote/internal/fileattr"
+	"github.com/bluemir/wikinote/internal/backend/attr"
+	"github.com/bluemir/wikinote/internal/backend/files"
 	"github.com/bluemir/wikinote/internal/plugins"
 )
 
-func (backend *Backend) initDB() error {
-	dbPath := filepath.Join(backend.Config.Wikipath, ".app/wikinote.db")
+func initDB(wikipath string) (*gorm.DB, error) {
+	dbPath := filepath.Join(wikipath, ".app/wikinote.db")
+
 	if err := os.MkdirAll(filepath.Dir(dbPath), 0755); err != nil {
-		return err
+		return nil, err
 	}
 	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
 	if err != nil {
-		return errors.Wrap(err, "failed to connect database")
+		return nil, errors.Wrap(err, "failed to connect database")
 	}
 	if rawDB, err := db.DB(); err != nil {
-		return err
+		return nil, err
 	} else {
 		rawDB.SetMaxOpenConns(1)
 	}
 
-	backend.db = db
-	return nil
+	return db, nil
 }
 
-func (backend *Backend) initFileAttr() error {
-	if backend.db == nil {
-		return errors.Errorf("require db")
-	}
-	fa, err := fileattr.New(backend.db)
-	if err != nil {
-		return err
-	}
-	backend.FileAttr = fa
-	return nil
+func initFileAttr(db *gorm.DB) (*attr.Store, error) {
+	return attr.New(db)
 }
-func (backend *Backend) initAuth() error {
-	if backend.db == nil {
-		return errors.Errorf("require db")
-	}
-
-	m, err := auth.New(backend.db, backend.Config.Salt, backend.Config.File.Roles)
-	if err != nil {
-		return err
-	}
-	backend.Auth = m
-
-	return nil
+func initAuth(db *gorm.DB, salt string, roles []auth.Role) (*auth.Manager, error) {
+	return auth.New(db, salt, roles)
 }
-func (backend *Backend) initAdminUser() error {
-	if backend.Auth == nil {
-		return errors.Errorf("require auth")
-	}
 
-	for name, key := range backend.Config.AdminUsers {
+func initAdminUser(auth *auth.Manager, users map[string]string) error {
+	for name, key := range users {
 		if key == "" {
 			key = xid.New().String()
 			logrus.Warnf("generate key: '%s' '%s'", name, key)
 		}
-		if err := backend.Auth.EnsureUser(name, map[string]string{
-			"role/root": "true",
-		}); err != nil {
+		// ensure user
+		user, ok, err := auth.GetUser(name)
+		if err != nil {
 			return err
 		}
-		if err := backend.Auth.RevokeTokenAll(name); err != nil {
-			return err
+		if !ok {
+			err := auth.CreateUser(name, map[string]string{
+				"role/admin": "true",
+			})
+			if err != nil {
+				return err
+			}
+		} else {
+			user.Labels["role/admin"] = "true"
+			if err := auth.UpdateUser(user); err != nil {
+				return err
+			}
 		}
-		if _, err := backend.Auth.IssueToken(name, key, nil); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-func (backend *Backend) initPlugins() error {
-	if backend.FileAttr == nil {
-		return errors.Errorf("require auth")
-	}
-	m, err := plugins.New(backend.Config.File.Plugins, backend.FileAttr)
-	if err != nil {
-		return err
-	}
-	backend.Plugin = m
 
+		if err := auth.RevokeTokenAll(name); err != nil {
+			return err
+		}
+		if _, err := auth.IssueToken(name, key, nil); err != nil {
+			return err
+		}
+	}
 	return nil
 }
-func (backend *Backend) initFileStore() error {
-	s, err := local.New(backend.Config.Wikipath)
-	if err != nil {
-		return err
-	}
-	backend.files = s
-	return nil
+func initPlugins(configs []plugins.PluginConfig, attr *attr.Store) (*plugins.Manager, error) {
+	return plugins.New(configs, attr)
+}
+func initFileStore(wikipath string) (*files.FileStore, error) {
+	return files.New(wikipath)
 }

@@ -1,12 +1,11 @@
 package config
 
 import (
-	"github.com/bluemir/wikinote/internal/backend"
 	"github.com/bluemir/wikinote/internal/server"
 )
 
 type Config struct {
-	Backend   backend.Config
+	Backend   BackendCLIOptions
 	Server    server.Config
 	LogLevel  int
 	LogFormat string
@@ -14,6 +13,13 @@ type Config struct {
 
 func NewConfig() *Config {
 	return &Config{
-		Backend: backend.InitConfig(),
+		Backend: BackendCLIOptions{
+			AdminUsers: map[string]string{},
+		},
 	}
+}
+
+type BackendCLIOptions struct {
+	Wikipath   string
+	AdminUsers map[string]string
 }

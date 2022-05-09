@@ -1,4 +1,4 @@
-package fileattr
+package attr
 
 import (
 	"github.com/pkg/errors"
@@ -17,6 +17,14 @@ type ListOption struct {
 
 type Store struct {
 	db *gorm.DB
+}
+
+type FindOption func()
+type AttrStore interface {
+	Find(q *FileAttr, opts ...FindOption) ([]FileAttr, error)
+	Take(path, key string) (*FileAttr, error)
+	Save(attr *FileAttr) error
+	Delete(attr *FileAttr) error
 }
 
 func New(db *gorm.DB) (*Store, error) {

@@ -36,11 +36,6 @@ func Run(AppName string, Version string) error {
 		Default(os.ExpandEnv("$HOME/wiki")).
 		PlaceHolder("$HOME/wiki").
 		StringVar(&conf.Backend.Wikipath)
-	app.Flag("config", "config file").
-		Short('c').
-		Default(os.ExpandEnv("$HOME/wiki/.app/config.yaml")).
-		PlaceHolder("$HOME/wiki/.app/config.yaml").
-		StringVar(&conf.Backend.ConfigFile)
 	app.Flag("admin-user", "admin user").
 		StringMapVar(&conf.Backend.AdminUsers)
 

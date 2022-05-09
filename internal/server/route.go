@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -59,12 +60,12 @@ func (server *Server) RegisterRoute(app gin.IRouter) {
 		pages.PUT("*", authz(Page, "update"), server.handler.Update)
 		pages.DELETE("*", authz(Page, "delete"), server.handler.Delete)
 
-		app.Use(pages.Handler)
+		app.Use(rejectDotApp, pages.Handler)
 	}
 }
 func (server *Server) redirectToFrontPage(c *gin.Context) {
-	logrus.Debugf("redirect to front page: %s", server.Config.File.FrontPage)
-	c.Redirect(http.StatusTemporaryRedirect, "/"+server.Config.File.FrontPage)
+	logrus.Debugf("redirect to front page: %s", server.Config.FrontPage)
+	c.Redirect(http.StatusTemporaryRedirect, "/"+server.Config.FrontPage)
 	c.Abort()
 	return
 }
@@ -82,4 +83,10 @@ func PageAttr(c *gin.Context) (auth.Resource, error) {
 }
 func Global(c *gin.Context) (auth.Resource, error) {
 	return auth.KeyValues{}, nil
+}
+func rejectDotApp(c *gin.Context) {
+	if strings.HasPrefix(c.Request.URL.Path, "/.app") {
+		c.Abort()
+		return
+	}
 }

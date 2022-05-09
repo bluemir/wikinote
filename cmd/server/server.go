@@ -16,7 +16,7 @@ func Register(cmd *kingpin.CmdClause, conf *config.Config) {
 
 	cmd.Action(func(*kingpin.ParseContext) error {
 		logrus.Debugf("%#v", conf)
-		b, err := backend.New(&conf.Backend)
+		b, err := backend.New(conf.Backend.Wikipath, conf.Backend.AdminUsers)
 		if err != nil {
 			logrus.Fatal(err)
 			return err

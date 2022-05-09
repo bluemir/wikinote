@@ -2,6 +2,7 @@ package backend
 
 import (
 	"io/ioutil"
+	"path/filepath"
 
 	"github.com/sirupsen/logrus"
 	yaml "gopkg.in/yaml.v3"
@@ -24,17 +25,22 @@ roles:
       kind: "%image,wiki"
 `
 
-func loadConfigFile(conf *Config) error {
-	if err := yaml.Unmarshal([]byte(defaultConfig), &conf.File); err != nil {
-		return err
+func loadConfigFile(wikipath string) (*Config, error) {
+	configPath := filepath.Join(wikipath, ".app/config.yaml")
+	conf := Config{}
+	if err := yaml.Unmarshal([]byte(defaultConfig), &conf); err != nil {
+		return nil, err
 	}
-	buf, err := ioutil.ReadFile(conf.ConfigFile)
+
+	buf, err := ioutil.ReadFile(configPath)
 	if err != nil {
 		logrus.Warn("config.yaml not exist.", err)
-	} else {
-		if err = yaml.Unmarshal(buf, &conf.File); err != nil {
-			logrus.Warn("config.yaml not parsed.", err)
-		}
+		return &conf, nil
 	}
-	return nil
+
+	if err = yaml.Unmarshal(buf, &conf); err != nil {
+		logrus.Warn("config.yaml not parsed.", err)
+	}
+
+	return &conf, nil
 }

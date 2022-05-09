@@ -1,11 +1,11 @@
 package plugins
 
 import (
-	"github.com/bluemir/wikinote/internal/fileattr"
+	"github.com/bluemir/wikinote/internal/backend/attr"
 )
 
-type Store = fileattr.Store
-type FileAttr = fileattr.FileAttr
-type ListOption = fileattr.ListOption
+type Store = attr.Store
+type FileAttr = attr.FileAttr
+type ListOption = attr.ListOption
 
-var IsNotFound = fileattr.IsNotFound
+var IsNotFound = attr.IsNotFound

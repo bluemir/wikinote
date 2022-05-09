@@ -7,70 +7,71 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/bluemir/wikinote/internal/auth"
+	"github.com/bluemir/wikinote/internal/backend/attr"
 	"github.com/bluemir/wikinote/internal/backend/files"
-	"github.com/bluemir/wikinote/internal/fileattr"
 	"github.com/bluemir/wikinote/internal/plugins"
 )
 
-func InitConfig() Config {
-	return Config{
-		AdminUsers: map[string]string{},
-	}
-}
-
 type Config struct {
-	Wikipath   string
-	ConfigFile string
-	Salt       string
-
-	AdminUsers map[string]string
-
-	File struct {
-		FrontPage string                 `yaml:"front-page"`
-		Plugins   []plugins.PluginConfig `yaml:"plugins"`
-		Roles     []auth.Role            `yaml:"roles"`
-	}
+	Salt      string                 `yaml:"salt"`
+	FrontPage string                 `yaml:"front-page"`
+	Plugins   []plugins.PluginConfig `yaml:"plugins"`
+	Roles     []auth.Role            `yaml:"roles"`
 }
 type Backend struct {
 	Config   *Config
+	db       *gorm.DB
 	Auth     *auth.Manager
 	Plugin   *plugins.Manager
-	FileAttr *fileattr.Store
-	db       *gorm.DB
-
-	files files.FileStore
+	FileAttr *attr.Store
+	files    *files.FileStore
 }
 
-func New(conf *Config) (*Backend, error) {
+func New(wikipath string, users map[string]string) (*Backend, error) {
 	// Load config file
-	if err := loadConfigFile(conf); err != nil {
+	conf, err := loadConfigFile(wikipath)
+	if err != nil {
 		return nil, err
 	}
 
 	buf, _ := yaml.Marshal(conf)
 	logrus.Debugf("config:\n%s", buf)
 
-	backend := &Backend{Config: conf}
-
-	if err := backend.initDB(); err != nil {
+	db, err := initDB(wikipath)
+	if err != nil {
 		return nil, err
 	}
-	if err := backend.initFileAttr(); err != nil {
+
+	fileAttr, err := initFileAttr(db)
+	if err != nil {
 		return nil, errors.Wrap(err, "failed to init file attribute module")
 	}
-	if err := backend.initAuth(); err != nil {
+
+	auth, err := initAuth(db, conf.Salt, conf.Roles)
+	if err != nil {
 		return nil, errors.Wrap(err, "failed to init auth module")
 	}
-	if err := backend.initAdminUser(); err != nil {
+
+	if err := initAdminUser(auth, users); err != nil {
 		return nil, errors.Wrap(err, "failed to init admin user")
 	}
-	if err := backend.initPlugins(); err != nil {
-		return nil, errors.Wrap(err, "failed to init admin user")
-	}
-	if err := backend.initFileStore(); err != nil {
+	store, err := initFileStore(wikipath)
+	if err != nil {
 		return nil, errors.Wrap(err, "failed to init file store")
 	}
+	plugin, err := initPlugins(conf.Plugins, fileAttr)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to init admin user")
+	}
 
+	backend := &Backend{
+		Config:   conf,
+		db:       db,
+		FileAttr: fileAttr,
+		Auth:     auth,
+		Plugin:   plugin,
+		files:    store,
+	}
 	logrus.Trace("backend initailized")
 
 	return backend, nil
