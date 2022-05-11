@@ -5,7 +5,7 @@ import (
 )
 
 type Store = attr.Store
-type FileAttr = attr.FileAttr
+type FileAttr = attr.Attribute
 type ListOption = attr.ListOption
 
 var IsNotFound = attr.IsNotFound

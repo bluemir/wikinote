@@ -9,7 +9,7 @@ import (
 )
 
 func (handler *Handler) AttributeGet(c *gin.Context) {
-	attrs, err := handler.backend.FileAttr.Find(&attr.FileAttr{Path: c.Request.URL.Path})
+	attrs, err := handler.backend.AttrFind(&attr.Attribute{Path: c.Request.URL.Path})
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
@@ -26,7 +26,7 @@ func (handler *Handler) AttributeUpdate(c *gin.Context) {
 		return
 	}
 	for k, v := range req {
-		if err := handler.backend.FileAttr.Save(&attr.FileAttr{
+		if err := handler.backend.AttrSave(&attr.Attribute{
 			Path:  c.Request.URL.Path,
 			Key:   k,
 			Value: v,
@@ -36,7 +36,7 @@ func (handler *Handler) AttributeUpdate(c *gin.Context) {
 			return
 		}
 	}
-	attrs, err := handler.backend.FileAttr.Find(&attr.FileAttr{
+	attrs, err := handler.backend.AttrFind(&attr.Attribute{
 		Path: c.Request.URL.Path,
 	})
 	if err != nil {
@@ -49,7 +49,7 @@ func (handler *Handler) AttributeUpdate(c *gin.Context) {
 			continue
 		}
 
-		if err := handler.backend.FileAttr.Delete(&attr); err != nil {
+		if err := handler.backend.AttrDelete(&attr); err != nil {
 			c.HTML(http.StatusInternalServerError, "/errors/not-found.html", gin.H{})
 			c.Abort()
 			return

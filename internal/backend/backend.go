@@ -13,18 +13,18 @@ import (
 )
 
 type Config struct {
-	Salt      string                 `yaml:"salt"`
-	FrontPage string                 `yaml:"front-page"`
-	Plugins   []plugins.PluginConfig `yaml:"plugins"`
-	Roles     []auth.Role            `yaml:"roles"`
+	Salt    string                 `yaml:"salt"`
+	Plugins []plugins.PluginConfig `yaml:"plugins"`
+	Roles   []auth.Role            `yaml:"roles"`
 }
 type Backend struct {
-	Config   *Config
-	db       *gorm.DB
-	Auth     *auth.Manager
-	Plugin   *plugins.Manager
-	FileAttr *attr.Store
-	files    *files.FileStore
+	Config *Config
+	Auth   *auth.Manager
+
+	db     *gorm.DB
+	files  *files.FileStore
+	attr   *attr.Store
+	Plugin *plugins.Manager
 }
 
 func New(wikipath string, users map[string]string) (*Backend, error) {
@@ -42,7 +42,7 @@ func New(wikipath string, users map[string]string) (*Backend, error) {
 		return nil, err
 	}
 
-	fileAttr, err := initFileAttr(db)
+	attr, err := initFileAttr(db)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to init file attribute module")
 	}
@@ -59,18 +59,18 @@ func New(wikipath string, users map[string]string) (*Backend, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to init file store")
 	}
-	plugin, err := initPlugins(conf.Plugins, fileAttr)
+	plugin, err := initPlugins(conf.Plugins, attr)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to init admin user")
 	}
 
 	backend := &Backend{
-		Config:   conf,
-		db:       db,
-		FileAttr: fileAttr,
-		Auth:     auth,
-		Plugin:   plugin,
-		files:    store,
+		Config: conf,
+		db:     db,
+		attr:   attr,
+		Auth:   auth,
+		Plugin: plugin,
+		files:  store,
 	}
 	logrus.Trace("backend initailized")
 

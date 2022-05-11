@@ -19,7 +19,7 @@ func TestSimpleSave(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := store.Save(&FileAttr{
+	if err := store.Save(&Attribute{
 		Path:  "/dummy",
 		Key:   "foo",
 		Value: "bar",
@@ -27,7 +27,7 @@ func TestSimpleSave(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	attr, err := store.Take(&FileAttr{
+	attr, err := store.Take(&Attribute{
 		Path: "/dummy",
 		Key:  "foo",
 	})
@@ -35,7 +35,7 @@ func TestSimpleSave(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	assert.Equal(t, &FileAttr{
+	assert.Equal(t, &Attribute{
 		Path:  "/dummy",
 		Key:   "foo",
 		Value: "bar",
@@ -52,7 +52,7 @@ func TestSimpleNotFound(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := store.Save(&FileAttr{
+	if err := store.Save(&Attribute{
 		Path:  "/path1",
 		Key:   "foo",
 		Value: "bar",
@@ -60,13 +60,13 @@ func TestSimpleNotFound(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = store.Take(&FileAttr{
+	_, err = store.Take(&Attribute{
 		Path: "/path2",
 		Key:  "foo",
 	})
 	assert.True(t, IsNotFound(err))
 
-	_, err = store.Take(&FileAttr{
+	_, err = store.Take(&Attribute{
 		Path: "/path1",
 		Key:  "bar",
 	})

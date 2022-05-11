@@ -64,9 +64,10 @@ func (server *Server) RegisterRoute(app gin.IRouter) {
 	}
 }
 func (server *Server) redirectToFrontPage(c *gin.Context) {
-	logrus.Debugf("redirect to front page: %s", server.Config.FrontPage)
-	c.Redirect(http.StatusTemporaryRedirect, "/"+server.Config.FrontPage)
+	logrus.Debugf("redirect to front page: %s", server.frontPage)
+	c.Redirect(http.StatusTemporaryRedirect, "/"+server.frontPage)
 	c.Abort()
+
 	return
 }
 func Page(c *gin.Context) (auth.Resource, error) {

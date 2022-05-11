@@ -16,7 +16,8 @@ import (
 )
 
 type Config struct {
-	Bind string
+	Bind      string
+	FrontPage string
 }
 
 func NewConfig() *Config {
@@ -25,8 +26,9 @@ func NewConfig() *Config {
 
 type Server struct {
 	*backend.Backend
-	handler *handler.Handler
-	etag    string
+	handler   *handler.Handler
+	frontPage string
+	etag      string
 }
 
 func Run(b *backend.Backend, conf *Config) error {
@@ -36,8 +38,9 @@ func Run(b *backend.Backend, conf *Config) error {
 	}
 
 	server := &Server{
-		Backend: b,
-		handler: h,
+		Backend:   b,
+		handler:   h,
+		frontPage: conf.FrontPage,
 	}
 
 	app := gin.New()

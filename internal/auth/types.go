@@ -18,6 +18,12 @@ func (user User) Roles() []string {
 	}
 	return result
 }
+func (user *User) AddRole(role string) {
+	user.Labels["role/"+role] = "true"
+}
+func (user *User) RemoveRole(role string) {
+	delete(user.Labels, "role/"+role)
+}
 
 type Token struct {
 	ID        uint `gorm:"primary_key"`

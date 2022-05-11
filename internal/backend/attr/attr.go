@@ -5,7 +5,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type FileAttr struct {
+type Attribute struct {
 	Path  string `gorm:"primary_key"`
 	Key   string `gorm:"primary_key"`
 	Value string
@@ -21,15 +21,15 @@ type Store struct {
 
 type FindOption func()
 type AttrStore interface {
-	Find(q *FileAttr, opts ...FindOption) ([]FileAttr, error)
-	Take(path, key string) (*FileAttr, error)
-	Save(attr *FileAttr) error
-	Delete(attr *FileAttr) error
+	Find(q *Attribute, opts ...FindOption) ([]Attribute, error)
+	Take(path, key string) (*Attribute, error)
+	Save(attr *Attribute) error
+	Delete(attr *Attribute) error
 }
 
 func New(db *gorm.DB) (*Store, error) {
 	if err := db.AutoMigrate(
-		&FileAttr{},
+		&Attribute{},
 	); err != nil {
 		return nil, errors.Wrap(err, "auto migrate is failed")
 	}
@@ -37,30 +37,30 @@ func New(db *gorm.DB) (*Store, error) {
 	return &Store{db}, nil
 }
 
-func (store *Store) Find(attr *FileAttr) ([]FileAttr, error) {
-	attrs := []FileAttr{}
+func (store *Store) Find(attr *Attribute) ([]Attribute, error) {
+	attrs := []Attribute{}
 	if err := store.db.Where(attr).Find(&attrs).Error; err != nil {
 		return nil, err
 	}
 	return attrs, nil
 }
-func (store *Store) Search(attr *FileAttr, opt *ListOption) ([]FileAttr, error) {
-	attrs := []FileAttr{}
+func (store *Store) Search(attr *Attribute, opt *ListOption) ([]Attribute, error) {
+	attrs := []Attribute{}
 	err := store.db.Where(attr).Order(opt.Order).Limit(opt.Limit).Find(&attrs).Error
 	return attrs, err
 }
-func (store *Store) Take(attr *FileAttr) (*FileAttr, error) {
-	result := &FileAttr{}
+func (store *Store) Take(attr *Attribute) (*Attribute, error) {
+	result := &Attribute{}
 	if err := store.db.Where(attr).Take(result).Error; err != nil {
 		return nil, err
 	}
 	return result, nil
 }
-func (store *Store) Save(attr *FileAttr) error {
+func (store *Store) Save(attr *Attribute) error {
 	//TODO check empty value
 	return store.db.Save(attr).Error
 }
-func (store *Store) Delete(attr *FileAttr) error {
+func (store *Store) Delete(attr *Attribute) error {
 	return store.db.Where(attr).Delete(attr).Error
 }
 func IsNotFound(err error) bool {
