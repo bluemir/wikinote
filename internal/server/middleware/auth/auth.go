@@ -42,7 +42,6 @@ func User(c *gin.Context) (*auth.User, error) {
 	}
 
 	// 2. check basic auth or token
-	logrus.Trace("check")
 	user, err := manager(c).HTTP(c.Request)
 	if err != nil {
 		return nil, err
@@ -54,13 +53,24 @@ func User(c *gin.Context) (*auth.User, error) {
 	return user, nil
 }
 
-func RequestLogin(c *gin.Context) {
+func Login(c *gin.Context) {
 	_, err := User(c)
 
 	if errors.Is(err, auth.ErrUnauthorized) {
 		handler.ErrorHandler(c, err)
 		return
 	}
+}
+func Me(c *gin.Context) {
+	user, err := User(c)
+	if errors.Is(err, auth.ErrUnauthorized) {
+		handler.ErrorHandler(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, user)
+}
+func Logout(c *gin.Context) {
+	handler.ErrorHandler(c, auth.ErrUnauthorized)
 }
 
 type ResourceGetter func(c *gin.Context) (auth.Resource, error)

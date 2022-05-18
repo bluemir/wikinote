@@ -3,10 +3,10 @@ package auth
 import "strings"
 
 type User struct {
-	ID     uint   `gorm:"primary_key"`
-	Name   string `gorm:"unique"`
-	Labels Labels `sql:"type:json"`
-	Salt   string
+	ID     uint   `gorm:"primary_key" json:"-"`
+	Name   string `gorm:"unique" json:"name"`
+	Labels Labels `sql:"type:json" json:"labels"`
+	Salt   string `json:"-"`
 }
 
 func (user User) Roles() []string {

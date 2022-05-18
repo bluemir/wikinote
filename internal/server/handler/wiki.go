@@ -57,7 +57,10 @@ func (handler *Handler) View(c *gin.Context) {
 		}
 		//case "video":
 	case "image":
-		c.HTML(http.StatusOK, "/view/image.html", c)
+		//handler.backend.FileExist(
+		c.HTML(http.StatusOK, "/views/image.html", gin.H{
+			"path": c.Request.URL.Path,
+		})
 	default:
 		c.Redirect(http.StatusTemporaryRedirect, c.Request.URL.Path+".md")
 	}
@@ -129,6 +132,11 @@ func (handler *Handler) Update(c *gin.Context) {
 func (handler *Handler) DeleteForm(c *gin.Context) {
 	c.HTML(http.StatusOK, "/delete.html", gin.H{
 		"name": path.Base(c.Request.URL.Path),
+	})
+}
+func (handler *Handler) UploadForm(c *gin.Context) {
+	c.HTML(http.StatusOK, "/upload.html", gin.H{
+		"path": path.Base(c.Request.URL.Path),
 	})
 }
 func (handler *Handler) Delete(c *gin.Context) {

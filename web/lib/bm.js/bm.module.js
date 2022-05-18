@@ -93,6 +93,7 @@ export async function request(method, url, options) {
 			// so forced set header
 			req.open(method, resolveParam(url, opts.params) + queryString(opts.query), true, opts.auth.user, opts.auth.password);
 			req.setRequestHeader("Authorization", "Basic " + btoa(opts.auth.user+":"+opts.auth.password));
+			console.log(req)
 		} else {
 			req.open(method, resolveParam(url, opts.params) + queryString(opts.query), true);
 		}

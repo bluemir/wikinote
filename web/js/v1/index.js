@@ -5,3 +5,4 @@ import "./view.js";
 import "./main.js";
 import "./search.js";
 import "./icons/search.js";
+import "./views/image.js";

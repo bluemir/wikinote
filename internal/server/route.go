@@ -23,7 +23,9 @@ func (server *Server) RegisterRoute(app gin.IRouter) {
 	{
 		special.Group("/static", server.staticCache).StaticFS("/", static.Files.HTTPBox())
 
-		special.GET("/login", auth.RequestLogin, server.redirectToFrontPage)
+		special.GET("/auth/login", auth.Login, server.redirectToFrontPage)
+		special.GET("/auth/logout", auth.Logout, server.redirectToFrontPage)
+		special.GET("/auth/me", auth.Me)
 
 		// TODO user manager
 
@@ -53,6 +55,7 @@ func (server *Server) RegisterRoute(app gin.IRouter) {
 		pages.GET("edit", authz(Page, "update"), server.handler.EditForm)
 		pages.GET("raw", authz(Page, "read"), server.handler.Raw)
 		pages.GET("delete", authz(Page, "delete"), server.handler.DeleteForm)
+		pages.GET("upload", authz(Page, "update"), server.handler.UploadForm)
 		pages.GET("attribute", authz(PageAttr, "read"), server.handler.AttributeGet)
 		pages.PUT("attribute", authz(PageAttr, "update"), server.handler.AttributeUpdate)
 		pages.GET("*", authz(Page, "read"), server.handler.View)
@@ -67,7 +70,6 @@ func (server *Server) redirectToFrontPage(c *gin.Context) {
 	logrus.Debugf("redirect to front page: %s", server.frontPage)
 	c.Redirect(http.StatusTemporaryRedirect, "/"+server.frontPage)
 	c.Abort()
-
 	return
 }
 func Page(c *gin.Context) (auth.Resource, error) {
@@ -80,6 +82,7 @@ func Page(c *gin.Context) (auth.Resource, error) {
 func PageAttr(c *gin.Context) (auth.Resource, error) {
 	return auth.KeyValues{
 		"kind": "attribute",
+		"path": c.Request.URL.Path,
 	}, nil
 }
 func Global(c *gin.Context) (auth.Resource, error) {

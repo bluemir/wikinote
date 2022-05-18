@@ -3,15 +3,21 @@ package backend
 import (
 	"bytes"
 
-	//"gopkg.in/russross/blackfriday.v2"
-	//"github.com/russross/blackfriday"
 	"github.com/russross/blackfriday/v2"
 )
 
 func (backend *Backend) Render(input []byte) ([]byte, error) {
 	return blackfriday.Run(
 		bytes.Replace(input, []byte("\r\n"), []byte("\n"), -1),
-		blackfriday.WithExtensions(blackfriday.CommonExtensions|blackfriday.Footnotes|blackfriday.AutoHeadingIDs),
+		blackfriday.WithExtensions(
+			0|
+				blackfriday.CommonExtensions|
+				blackfriday.Footnotes|
+				blackfriday.FencedCode|
+				blackfriday.Autolink|
+				blackfriday.AutoHeadingIDs|
+				blackfriday.Tables,
+		),
 		blackfriday.WithRenderer(
 			blackfriday.NewHTMLRenderer(blackfriday.HTMLRendererParameters{
 				Flags: blackfriday.CommonHTMLFlags | blackfriday.HrefTargetBlank, //| TOC

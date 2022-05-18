@@ -1,6 +1,8 @@
 import * as $ from "../../lib/bm.js/bm.module.js";
 import {html, render} from 'lit-html';
 
+import * as api from "v1/api.js";
+
 var tmpl = (app) => html`
 <style>
 	@import url("/!/static/css/color.css");
@@ -112,7 +114,7 @@ var tmpl = (app) => html`
 	</h1>
 	<form action="/!/search" method="GET">
 		<!-- TODO icon -->
-		<input type="text" placeholder="Search" name="q"/><button type="submit">&#x1F50D;</button>
+		<input type="text" placeholder="Search" name="q"/><button type="submit"><icon-search></icon-search></button>
 		<!--input type="submit" value="Search"/-->
 	</form>
 	<nav id="breadcrumbs">
@@ -128,8 +130,7 @@ var tmpl = (app) => html`
 					<li><a href="?delete">Delete</a></li>
 					<hr>
 					<!-- TODO make split -->
-					<li><a href="/!/auth/logout">Logout</a></li>
-					<li><a href="/!/login">Login</a></li>
+					<li><a href="/!/auth/login"  @click=${evt => app.login(evt)} >Login</a></li>
 					<li><a href="/!/auth/register">Sign Up</a></li>
 					<li><a href="/!/user">Users</a></li>
 				</ul>
@@ -163,6 +164,15 @@ class WikinoteHeader extends $.CustomElement {
 			}
 		});
 	}
+	async login(evt) {
+		evt.preventDefault();
+		const me = await api.me();
 
+		let res = await $.request("GET", "/!/auth/login", {
+			query: {
+				"exclude": me.name, //username
+			},
+		});
+	}
 }
 customElements.define("wikinote-header", WikinoteHeader);
