@@ -12,6 +12,7 @@
 	- Viewer
 		- 댓글 Plugin(https://utteranc.es/)
 		- TAG
+		- Recently updated
 - 권한 시스템
 	- 아무나 읽되, 쓰는 사람은 일부
 	- login
@@ -26,6 +27,10 @@
 
 ## TODO
 - [ ] UI 구조개선
-- [ ] 파일 업로드
+- [x] 파일 업로드
 - [x] image viewer
-- [ ] image uploader
+- [x] image uploader
+- [ ] file upload with drag and drop
+- [x] Edit 에서 tab key 수정
+- [ ] image viewer max width
+

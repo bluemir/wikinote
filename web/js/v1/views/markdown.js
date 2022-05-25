@@ -1,4 +1,4 @@
-import * as $ from "../../lib/bm.js/bm.module.js";
+import * as $ from "bm.js/bm.module.js";
 import {html, render} from 'lit-html';
 
 var tmpl = (app) => html`
@@ -42,7 +42,7 @@ var tmpl = (app) => html`
 	</style>
 `;
 
-class WikinoteView extends $.CustomElement {
+class WikinoteViewerMarkdown extends $.CustomElement {
 	constructor() {
 		super();
 
@@ -64,4 +64,4 @@ class WikinoteView extends $.CustomElement {
 
 	// event listener
 }
-customElements.define("wikinote-view", WikinoteView);
+customElements.define("wikinote-viewer-markdown", WikinoteViewerMarkdown);

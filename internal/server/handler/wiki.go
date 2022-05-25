@@ -20,11 +20,13 @@ func parseMIME(mime string) (string, string) {
 	}
 	return arr[0], ""
 }
+func filetype(path string) (string, string) {
+	ctype := mime.TypeByExtension(filepath.Ext(path))
+	return parseMIME(ctype)
+}
 func (handler *Handler) View(c *gin.Context) {
 	logrus.Trace("view handler")
-	ctype := mime.TypeByExtension(filepath.Ext(c.Request.URL.Path))
-	category, subtype := parseMIME(ctype)
-	logrus.Debugf("mime: %s", ctype)
+	category, subtype := filetype(c.Request.URL.Path)
 
 	switch category {
 	case "text":
@@ -81,20 +83,21 @@ func (handler *Handler) Raw(c *gin.Context) {
 	c.Data(http.StatusOK, http.DetectContentType(buf), buf)
 }
 func (handler *Handler) EditForm(c *gin.Context) {
-	path := c.Request.URL.Path
+	category, _ := filetype(c.Request.URL.Path)
 
-	data, err := handler.backend.FileRead(path)
-	if err != nil {
-		// Create new file
-		// c.HTML(http.StatusInternalServerError, "/errors/internal-server-error.html", gin.H{"msg": err.Error()})
-		// c.Abort()
-		// return
+	switch category {
+	case "text":
+		data, err := handler.backend.FileRead(c.Request.URL.Path)
+		c.HTML(http.StatusOK, "/editor.html", gin.H{
+			"data":  string(data),
+			"path":  c.Request.URL.Path,
+			"isNew": err != nil,
+		})
+	default:
+		c.HTML(http.StatusOK, "/upload.html", gin.H{
+			"path": c.Request.URL.Path,
+		})
 	}
-
-	c.HTML(http.StatusOK, "/editor.html", gin.H{
-		"data": string(data),
-		"path": c.Request.URL.Path,
-	})
 }
 func (handler *Handler) UpdateWithForm(c *gin.Context) {
 	p := c.Request.URL.Path
@@ -121,6 +124,7 @@ func (handler *Handler) Update(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
+	logrus.Tracef("%x", data[:8])
 	if err := handler.backend.FileWrite(p, data); err != nil {
 		c.HTML(http.StatusInternalServerError, "/errors/not-found.html", gin.H{})
 		c.Abort()

@@ -1,8 +1,8 @@
-import * as $ from "../../lib/bm.js/bm.module.js";
+import * as $ from "bm.js/bm.module.js";
 import {html, render} from 'lit-html';
 //import * as $ from "/!/static/lib/bm.js/bm.module.js";
 //import {html, render} from '/!/lib/lit-html/lit-html.js';
-import {Shortcut} from "../shortcut.js";
+import {Shortcut} from "shortcut.js";
 
 var tmpl = (app) => html`
 <style>
@@ -95,8 +95,6 @@ var tmpl = (app) => html`
 class WikinoteEditor extends $.CustomElement {
 	constructor() {
 		super();
-
-		this.on("connected", () => this.onConnected())
 	}
 
 	onConnected() {
@@ -110,6 +108,7 @@ class WikinoteEditor extends $.CustomElement {
 		sc.add("alt + a",     e => this.attribute());
 
 		var editorShotcut = new Shortcut($.get(this.shadow, "form"));
+
 		editorShotcut.add("tab", e => this.addTab());
 		editorShotcut.add("ctrl + s", e => this.save(e));
 	}

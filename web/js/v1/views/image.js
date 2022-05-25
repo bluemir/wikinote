@@ -13,7 +13,7 @@ var tmpl = (app) => html`
 	<img src=${app.attr("url")} />
 `;
 
-class WikinoteViewImage extends $.CustomElement {
+class WikinoteViewerImage extends $.CustomElement {
 	constructor() {
 		super();
 
@@ -31,4 +31,4 @@ class WikinoteViewImage extends $.CustomElement {
 
 	// event listener
 }
-customElements.define("wikinote-view-image", WikinoteViewImage);
+customElements.define("wikinote-viewer-image", WikinoteViewerImage);

@@ -1,8 +1,9 @@
 import "./layout.js";
 import "./header.js";
 import "./editor.js";
-import "./view.js";
 import "./main.js";
 import "./search.js";
+import "./upload.js";
 import "./icons/search.js";
 import "./views/image.js";
+import "./views/markdown.js";

@@ -106,6 +106,12 @@ export async function request(method, url, options) {
 			case "object":
 				if (opts.body instanceof FormData) {
 					req.send(opts.body);
+				} else if(opts.body instanceof File) {
+					let file = opts.body;
+					if (file.type != "") {
+						req.setRequestHeader("Content-Type", file.type)
+					}
+					req.send(file);
 				} else {
 					req.setRequestHeader("Content-Type", "application/json")
 					req.send(JSON.stringify(opts.body))

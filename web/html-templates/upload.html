@@ -1,4 +1,4 @@
-{{ define "/views/image.html" }}
+{{ define "/upload.html" }}
 <!DOCTYPE html>
 <html>
 	<head>
@@ -9,7 +9,7 @@
 	</head>
 	<body>
 		<wikinote-layout>
-			<wikinote-viewer-image url="{{.path}}?raw"></wikinote-viewer-image>
+			<wikinote-upload path="{{.path}}"></wikinote-upload>
 		</wikinote-layout>
 		<script type="module" src="/!/static/js/v1/index.js"></script>
 	</body>
