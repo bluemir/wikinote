@@ -27,10 +27,14 @@
 
 ## TODO
 - [ ] UI 구조개선
+	- CustomElement(not React)
+	- muti page application
 - [x] 파일 업로드
 - [x] image viewer
 - [x] image uploader
 - [ ] file upload with drag and drop
 - [x] Edit 에서 tab key 수정
-- [ ] image viewer max width
-
+- [x] image viewer max width
+- [ ] video viewer
+- [x] Profile
+- [ ] Logout(hidden from menu, for debug)

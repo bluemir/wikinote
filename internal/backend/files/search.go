@@ -31,7 +31,7 @@ func (fs *FileStore) Search(query string) (map[string][]SearchResult, error) {
 		case ".pdf", ".mp4", ".mp3":
 			// if binary
 			return nil
-		case ".md":
+		case ".md", ".txt", ".html":
 			break
 		default:
 			return nil

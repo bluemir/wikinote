@@ -1,4 +1,4 @@
-package handler
+package errors
 
 import (
 	"net/http"
@@ -13,7 +13,15 @@ import (
 	"github.com/bluemir/wikinote/internal/server/middleware/reqtype"
 )
 
-func ErrorHandler(c *gin.Context, err error) {
+type HTTPErrorHandlerOption func(int, *HTTPErrorResponse, reqtype.ReqType) (int, *HTTPErrorResponse, reqtype.ReqType)
+
+func WithType(reqType reqtype.ReqType) HTTPErrorHandlerOption {
+	return func(code int, res *HTTPErrorResponse, t reqtype.ReqType) (int, *HTTPErrorResponse, reqtype.ReqType) {
+		return code, res, reqType
+	}
+}
+
+func HTTPErrorHandler(c *gin.Context, err error, opts ...HTTPErrorHandlerOption) {
 	c.Abort()
 
 	if c.Writer.Written() && c.Writer.Size() > 0 {
@@ -23,6 +31,11 @@ func ErrorHandler(c *gin.Context, err error) {
 
 	code := findErrorCode(err)
 	res := makeErrorResponse(err)
+	t := reqtype.FindRequestType(c)
+
+	for _, f := range opts {
+		code, res, t = f(code, res, t)
+	}
 
 	logrus.Debug(code, res)
 
@@ -30,7 +43,7 @@ func ErrorHandler(c *gin.Context, err error) {
 		c.Header(auth.HeaderWWWAuthenticate, "basic realm="+c.Request.URL.Host)
 	}
 
-	switch reqtype.FindRequestType(c) {
+	switch t {
 	case reqtype.API:
 		c.JSON(code, res)
 		return

@@ -13,6 +13,9 @@ import (
 
 func NewRenderer() (*template.Template, error) {
 	tmpl := template.New("__root__")
+	tmpl.Funcs(template.FuncMap{
+		"join": strings.Join,
+	})
 
 	static.HTMLTemplates.Walk("/", func(path string, info os.FileInfo, err error) error {
 		logrus.Tracef("find %s", path)

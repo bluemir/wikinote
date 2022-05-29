@@ -9,6 +9,9 @@ var tmpl = (app) => html`
 			display: block;
 			min-height: 30rem;
 		}
+		img {
+			max-width: 100%;
+		}
 	</style>
 	<img src=${app.attr("url")} />
 `;

@@ -9,7 +9,6 @@ dev-run: ## Run dev server. If detect file change, automatically rebuild&restart
 		entr -rd $(MAKE) test run ;  \
 		echo "hit ^C again to quit" && sleep 1 \
 	; done
-
 reset: ## Kill all make process. Use when dev-run stuck.
 	ps -e | grep make | grep -v grep | awk '{print $$1}' | xargs kill
 

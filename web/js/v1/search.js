@@ -1,4 +1,4 @@
-import * as $ from "../../lib/bm.js/bm.module.js";
+import * as $ from "bm.js/bm.module.js";
 import {html, render} from 'lit-html';
 
 var tmpl = (app) => html`

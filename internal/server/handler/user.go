@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/bluemir/wikinote/internal/auth"
+	"github.com/bluemir/wikinote/internal/server/middleware/reqtype"
 	"github.com/gin-gonic/gin"
 )
 
@@ -58,4 +59,15 @@ func (handler *Handler) Register(c *gin.Context) {
 	}
 
 	c.HTML(http.StatusOK, "/welcome.html", gin.H{})
+}
+func (handler *Handler) Profile(c *gin.Context) {
+	user, err := User(c)
+	if err != nil {
+		HTTPErrorHandler(c, err, WithType(reqtype.API))
+		return
+	}
+
+	c.HTML(http.StatusOK, "/profile.html", gin.H{
+		"user": user,
+	})
 }

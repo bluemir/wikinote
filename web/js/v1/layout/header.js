@@ -1,4 +1,4 @@
-import * as $ from "../../lib/bm.js/bm.module.js";
+import * as $ from "bm.js/bm.module.js";
 import {html, render} from 'lit-html';
 
 import * as api from "v1/api.js";
@@ -115,7 +115,6 @@ var tmpl = (app) => html`
 	<form action="/!/search" method="GET">
 		<!-- TODO icon -->
 		<input type="text" placeholder="Search" name="q"/><button type="submit"><icon-search></icon-search></button>
-		<!--input type="submit" value="Search"/-->
 	</form>
 	<nav id="breadcrumbs">
 		${app.breadcrumbs.map(item => html`/ <a href="${item.path}">${item.name}</a> `)}
@@ -131,6 +130,7 @@ var tmpl = (app) => html`
 					<hr>
 					<!-- TODO make split -->
 					<li><a href="/!/auth/login"  @click=${evt => app.login(evt)} >Login</a></li>
+					<li><a href="/!/auth/profile">Profile</a></li>
 					<li><a href="/!/auth/register">Sign Up</a></li>
 					<li><a href="/!/user">Users</a></li>
 				</ul>

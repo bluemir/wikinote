@@ -25,7 +25,8 @@ func (server *Server) RegisterRoute(app gin.IRouter) {
 
 		special.GET("/auth/login", auth.Login, server.redirectToFrontPage)
 		special.GET("/auth/logout", auth.Logout, server.redirectToFrontPage)
-		special.GET("/auth/me", auth.Me)
+		special.GET("/auth/profile", server.handler.Profile)
+		special.GET("/auth/me", auth.Me) // XXX it is API....
 
 		// TODO user manager
 

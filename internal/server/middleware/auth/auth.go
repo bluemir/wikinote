@@ -9,7 +9,11 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/internal/auth"
-	"github.com/bluemir/wikinote/internal/server/handler"
+	httpError "github.com/bluemir/wikinote/internal/server/errors"
+)
+
+var (
+	HTTPErrorHandler = httpError.HTTPErrorHandler
 )
 
 type Resource = auth.Resource
@@ -57,20 +61,20 @@ func Login(c *gin.Context) {
 	_, err := User(c)
 
 	if errors.Is(err, auth.ErrUnauthorized) {
-		handler.ErrorHandler(c, err)
+		HTTPErrorHandler(c, err)
 		return
 	}
 }
 func Me(c *gin.Context) {
 	user, err := User(c)
 	if errors.Is(err, auth.ErrUnauthorized) {
-		handler.ErrorHandler(c, err)
+		HTTPErrorHandler(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, user)
 }
 func Logout(c *gin.Context) {
-	handler.ErrorHandler(c, auth.ErrUnauthorized)
+	HTTPErrorHandler(c, auth.ErrUnauthorized)
 }
 
 type ResourceGetter func(c *gin.Context) (auth.Resource, error)
@@ -79,18 +83,18 @@ func Authz(getResource ResourceGetter, verb Verb) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user, err := User(c)
 		if err != nil && !errors.Is(err, auth.ErrUnauthorized) {
-			handler.ErrorHandler(c, err)
+			HTTPErrorHandler(c, err)
 			return
 		}
 
 		resource, err := getResource(c)
 		if err != nil {
-			handler.ErrorHandler(c, err)
+			HTTPErrorHandler(c, err)
 			return
 		}
 
 		if err := manager(c).IsAllow(resource, verb, user); err != nil {
-			handler.ErrorHandler(c, err)
+			HTTPErrorHandler(c, err)
 			return
 		}
 	}
@@ -102,20 +106,20 @@ func IssueToken(c *gin.Context) {
 	}{}
 
 	if err := c.ShouldBind(&req); err != nil {
-		handler.ErrorHandler(c, err)
+		HTTPErrorHandler(c, err)
 		return
 	}
 
 	user, err := manager(c).Default(req.Username, req.Password)
 	if err != nil {
-		handler.ErrorHandler(c, err)
+		HTTPErrorHandler(c, err)
 		return
 	}
 
 	t := time.Now().Add(6 * time.Hour)
 	token, err := manager(c).NewHTTPToken(user.Name, t)
 	if err != nil {
-		handler.ErrorHandler(c, err)
+		HTTPErrorHandler(c, err)
 		return
 	}
 
@@ -126,7 +130,7 @@ func IssueToken(c *gin.Context) {
 }
 func RevokeToken(c *gin.Context) {
 	if err := manager(c).RevokeHTTPToken(c.Request); err != nil {
-		handler.ErrorHandler(c, err)
+		HTTPErrorHandler(c, err)
 		return
 	}
 }
