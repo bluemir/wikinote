@@ -10,6 +10,7 @@
 - Wiki 검색
 - Plugin
 	- Viewer
+		- footer
 		- 댓글 Plugin(https://utteranc.es/)
 		- TAG
 		- Recently updated

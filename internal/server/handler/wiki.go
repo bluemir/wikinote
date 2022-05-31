@@ -53,8 +53,8 @@ func (handler *Handler) View(c *gin.Context) {
 			}
 
 			c.HTML(http.StatusOK, "/views/markdown.html", gin.H{
-				"data":       template.HTML(renderedData),
-				"footerData": footerData,
+				"content": template.HTML(renderedData),
+				"footers": footerData,
 			})
 			return
 		}

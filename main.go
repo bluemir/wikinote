@@ -11,6 +11,7 @@ import (
 	// plugins
 	_ "github.com/bluemir/wikinote/internal/plugins/__test__"
 	_ "github.com/bluemir/wikinote/internal/plugins/discus"
+	_ "github.com/bluemir/wikinote/internal/plugins/footer"
 	_ "github.com/bluemir/wikinote/internal/plugins/recently-changes"
 	_ "github.com/bluemir/wikinote/internal/plugins/utteranc.es"
 )

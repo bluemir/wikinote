@@ -8,3 +8,4 @@ import "./views/image.js";
 import "./views/video.js";
 import "./views/markdown.js";
 import "./views/profile.js";
+import "./plugin-footer.js";

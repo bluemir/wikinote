@@ -61,7 +61,7 @@ func New(wikipath string, users map[string]string) (*Backend, error) {
 	}
 	plugin, err := initPlugins(conf.Plugins, attr)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to init admin user")
+		return nil, errors.Wrap(err, "failed to init plugins")
 	}
 
 	backend := &Backend{

@@ -21,7 +21,7 @@ func Register(cmd *kingpin.CmdClause, conf *config.Config) {
 		logrus.Debugf("%#v", conf)
 		b, err := backend.New(conf.Backend.Wikipath, conf.Backend.AdminUsers)
 		if err != nil {
-			logrus.Fatal(err)
+			logrus.Fatalf("%+v", err)
 			return err
 		}
 		return server.Run(b, &conf.Server)
