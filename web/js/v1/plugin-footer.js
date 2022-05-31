@@ -8,9 +8,6 @@ var tmpl = (app) => html`
 		:host {
 			display: block;
 		}
-		img {
-			max-width: 100%;
-		}
 	</style>
 `;
 
