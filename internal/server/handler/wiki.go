@@ -94,7 +94,7 @@ func (handler *Handler) EditForm(c *gin.Context) {
 	case "text":
 		data, err := handler.backend.FileRead(c.Request.URL.Path)
 		c.HTML(http.StatusOK, "/editor.html", gin.H{
-			"data":  string(data),
+			"data":  template.HTML(data),
 			"path":  c.Request.URL.Path,
 			"isNew": err != nil,
 		})
