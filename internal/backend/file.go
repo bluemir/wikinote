@@ -1,8 +1,13 @@
 package backend
 
+import "io"
+
 func (backend *Backend) FileRead(path string) ([]byte, error) {
 	// TODO post hook?
 	return backend.files.Read(path)
+}
+func (backend *Backend) FileReadStream(path string) (io.ReadSeekCloser, error) {
+	return backend.files.ReadStream(path)
 }
 
 func (backend *Backend) FileWrite(path string, data []byte) error {

@@ -35,6 +35,6 @@
 - [ ] file upload with drag and drop
 - [x] Edit 에서 tab key 수정
 - [x] image viewer max width
-- [ ] video viewer
+- [x] video viewer
 - [x] Profile
 - [ ] Logout(hidden from menu, for debug)

@@ -89,7 +89,6 @@ var tmpl = (app) => html`
 		<button x-func="attr-save">Save Attribute</button>
 	</section>
 </section>
-
 `;
 
 class WikinoteEditor extends $.CustomElement {

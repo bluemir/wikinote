@@ -8,6 +8,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -57,10 +58,13 @@ func (handler *Handler) View(c *gin.Context) {
 			})
 			return
 		}
-		//case "video":
 	case "image":
 		//handler.backend.FileExist(
 		c.HTML(http.StatusOK, "/views/image.html", gin.H{
+			"path": c.Request.URL.Path,
+		})
+	case "video":
+		c.HTML(http.StatusOK, "/views/video.html", gin.H{
 			"path": c.Request.URL.Path,
 		})
 	default:
@@ -70,8 +74,9 @@ func (handler *Handler) View(c *gin.Context) {
 
 func (handler *Handler) Raw(c *gin.Context) {
 	logrus.Infof("[View] serve raw file: '%s'", c.Request.URL.Path)
+	// TODO serve partial content
 
-	buf, err := handler.backend.FileRead(c.Request.URL.Path)
+	rs, err := handler.backend.FileReadStream(c.Request.URL.Path)
 	if err != nil {
 		c.Status(http.StatusNotFound)
 		return
@@ -79,8 +84,8 @@ func (handler *Handler) Raw(c *gin.Context) {
 
 	// github.com/gabriel-vasile/mimetype
 	// mtype := mimetype.Detect(buf)
-
-	c.Data(http.StatusOK, http.DetectContentType(buf), buf)
+	http.ServeContent(c.Writer, c.Request, "", time.Time{}, rs)
+	//c.Data(http.StatusOK, http.DetectContentType(buf), buf)
 }
 func (handler *Handler) EditForm(c *gin.Context) {
 	category, _ := filetype(c.Request.URL.Path)
