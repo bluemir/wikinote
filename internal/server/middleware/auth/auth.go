@@ -14,6 +14,7 @@ import (
 
 var (
 	HTTPErrorHandler = httpError.HTTPErrorHandler
+	WithAuthHeader   = httpError.WithAuthHeader
 )
 
 type Resource = auth.Resource
@@ -58,10 +59,14 @@ func User(c *gin.Context) (*auth.User, error) {
 }
 
 func Login(c *gin.Context) {
-	_, err := User(c)
-
+	u, err := User(c)
 	if errors.Is(err, auth.ErrUnauthorized) {
-		HTTPErrorHandler(c, err)
+		HTTPErrorHandler(c, err, WithAuthHeader)
+		return
+	}
+
+	if u != nil && u.Name == c.Query("exclude") {
+		HTTPErrorHandler(c, auth.ErrUnauthorized, WithAuthHeader)
 		return
 	}
 }
@@ -83,7 +88,7 @@ func Authz(getResource ResourceGetter, verb Verb) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user, err := User(c)
 		if err != nil && !errors.Is(err, auth.ErrUnauthorized) {
-			HTTPErrorHandler(c, err)
+			HTTPErrorHandler(c, err, WithAuthHeader)
 			return
 		}
 
@@ -94,7 +99,7 @@ func Authz(getResource ResourceGetter, verb Verb) gin.HandlerFunc {
 		}
 
 		if err := manager(c).IsAllow(resource, verb, user); err != nil {
-			HTTPErrorHandler(c, err)
+			HTTPErrorHandler(c, err, WithAuthHeader)
 			return
 		}
 	}

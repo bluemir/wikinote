@@ -11,9 +11,10 @@
 - Plugin
 	- Viewer
 		- footer
-		- 댓글 Plugin(https://utteranc.es/)
+		- 댓글 Plugin(https://giscus.app/)
 		- TAG
 		- Recently updated
+		- git plugin
 - 권한 시스템
 	- 아무나 읽되, 쓰는 사람은 일부
 	- login
@@ -39,3 +40,5 @@
 - [x] video viewer
 - [x] Profile
 - [ ] Logout(hidden from menu, for debug)
+- [ ] Unauthroized & Forbidden page...
+- [ ] git plugin

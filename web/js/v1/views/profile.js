@@ -12,7 +12,7 @@ var tmpl = (app) => html`
 			<li>${role}</li>
 		`)}
 	</ul>
-	<button @click=${evt => app.logout(evt)}>Logout</button>
+	<button @click=${evt => app.logout(evt)}>Log in with other user</button>
 `;
 
 class WikinoteProfile extends $.CustomElement {
@@ -37,8 +37,9 @@ class WikinoteProfile extends $.CustomElement {
 	}
 
 	// event listener
-	logout(evt) {
-
+	async logout(evt) {
+		await $.request("GET", `/!/auth/login?exclude=${this.username}`);
+		location.reload();
 	}
 }
 customElements.define("wikinote-profile", WikinoteProfile);

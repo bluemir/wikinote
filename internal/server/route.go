@@ -9,6 +9,7 @@ import (
 
 	queryrouter "github.com/bluemir/wikinote/internal/query-router"
 	"github.com/bluemir/wikinote/internal/server/middleware/auth"
+	"github.com/bluemir/wikinote/internal/server/middleware/reqtype"
 	"github.com/bluemir/wikinote/internal/static"
 )
 
@@ -19,29 +20,29 @@ var (
 func (server *Server) RegisterRoute(app gin.IRouter) {
 	app.GET("/", server.redirectToFrontPage)
 
-	special := app.Group("/!")
+	special := app.Group("/!", reqtype.MarkHTML)
 	{
 		special.Group("/static", server.staticCache).StaticFS("/", static.Files.HTTPBox())
 
 		special.GET("/auth/login", auth.Login, server.redirectToFrontPage)
 		special.GET("/auth/logout", auth.Logout, server.redirectToFrontPage)
 		special.GET("/auth/profile", server.handler.Profile)
-		special.GET("/auth/me", auth.Me) // XXX it is API....
-
-		// TODO user manager
 
 		// Register
 		special.GET("/auth/register", server.handler.RegisterForm)
 		special.POST("/auth/register", server.handler.Register)
 
-		// auth
-		special.POST("/api/preview", server.handler.Preview) // render body
 		special.GET("/search", authz(Global, "search"), server.handler.Search)
 
 		// plugins
 		server.Backend.Plugin.RouteHook(special.Group("/plugins"))
-	}
 
+	}
+	api := special.Group("/api", reqtype.MarkAPI)
+	{
+		api.POST("/preview", server.handler.Preview) // render body
+		api.GET("/me", auth.Me)
+	}
 	{
 		// - GET            render file or render functional page
 		//   - edit      : show editor

@@ -166,13 +166,6 @@ class WikinoteHeader extends $.CustomElement {
 	}
 	async login(evt) {
 		evt.preventDefault();
-		const me = await api.me();
-
-		let res = await $.request("GET", "/!/auth/login", {
-			query: {
-				"exclude": me.name, //username
-			},
-		});
 	}
 }
 customElements.define("wikinote-header", WikinoteHeader);

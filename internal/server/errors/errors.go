@@ -13,12 +13,31 @@ import (
 	"github.com/bluemir/wikinote/internal/server/middleware/reqtype"
 )
 
-type HTTPErrorHandlerOption func(int, *HTTPErrorResponse, reqtype.ReqType) (int, *HTTPErrorResponse, reqtype.ReqType)
+type HTTPErrorHandlerOption func(ctx *HTTPErrorContext)
 
 func WithType(reqType reqtype.ReqType) HTTPErrorHandlerOption {
-	return func(code int, res *HTTPErrorResponse, t reqtype.ReqType) (int, *HTTPErrorResponse, reqtype.ReqType) {
-		return code, res, reqType
+	return func(ctx *HTTPErrorContext) {
+		ctx.Type = reqType
 	}
+}
+func WithHeader(key, value string) HTTPErrorHandlerOption {
+	return func(ctx *HTTPErrorContext) {
+		ctx.Headers.Add(key, value)
+	}
+}
+func WithAuthHeader(ctx *HTTPErrorContext) {
+	if errors.Is(ctx.Error, auth.ErrUnauthorized) {
+		ctx.Header(auth.HeaderWWWAuthenticate, "basic realm="+ctx.Request.URL.Host)
+	}
+}
+
+type HTTPErrorContext struct {
+	*gin.Context
+	Code     int
+	Error    error
+	Response *HTTPErrorResponse
+	Type     reqtype.ReqType
+	Headers  http.Header
 }
 
 func HTTPErrorHandler(c *gin.Context, err error, opts ...HTTPErrorHandlerOption) {
@@ -29,31 +48,29 @@ func HTTPErrorHandler(c *gin.Context, err error, opts ...HTTPErrorHandlerOption)
 		return // skip. already written
 	}
 
-	code := findErrorCode(err)
-	res := makeErrorResponse(err)
-	t := reqtype.FindRequestType(c)
+	ctx := &HTTPErrorContext{
+		Context:  c,
+		Error:    err,
+		Code:     findErrorCode(err),
+		Response: makeErrorResponse(err),
+		Type:     reqtype.FindRequestType(c),
+	}
 
 	for _, f := range opts {
-		code, res, t = f(code, res, t)
+		f(ctx)
 	}
 
-	logrus.Debug(code, res)
-
-	if code == http.StatusUnauthorized {
-		c.Header(auth.HeaderWWWAuthenticate, "basic realm="+c.Request.URL.Host)
-	}
-
-	switch t {
+	switch ctx.Type {
 	case reqtype.API:
-		c.JSON(code, res)
+		c.JSON(ctx.Code, ctx.Response)
 		return
 	case reqtype.HTML:
-		c.HTML(code, getErrorHTMLName(code), res)
+		c.HTML(ctx.Code, getErrorHTMLName(ctx.Code), ctx.Response)
 		return
 	case reqtype.Unknown:
-		c.String(code, res.String())
+		c.String(ctx.Code, ctx.Response.String())
 	default:
-		c.HTML(code, getErrorHTMLName(code), res)
+		c.HTML(ctx.Code, getErrorHTMLName(ctx.Code), ctx.Response)
 		return
 	}
 }

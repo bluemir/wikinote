@@ -64,6 +64,16 @@ export async function request(method, url, options) {
 		opts.query["_timestamp"] = Date.now();
 	}
 
+	// parse url
+	const u = new URL(url, location);
+	[...u.searchParams.entries()].reduce((obj, [key, value]) => {
+		obj[key] = value
+		return obj
+	}, opts.query);
+
+	u.search = "";
+	url = u.href
+
 	return new Promise(function(resolve, reject) {
 		var req = new XMLHttpRequest();
 

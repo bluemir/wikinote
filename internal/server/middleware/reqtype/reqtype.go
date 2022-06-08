@@ -33,6 +33,6 @@ func FindRequestType(c *gin.Context) ReqType {
 func MarkAPI(c *gin.Context) {
 	c.SetAccepted("application/json")
 }
-func MakrHTML(c *gin.Context) {
+func MarkHTML(c *gin.Context) {
 	c.SetAccepted("text/html")
 }
