@@ -2,6 +2,7 @@ import * as $ from "bm.js/bm.module.js";
 import {html, render} from 'lit-html';
 
 import "./header.js";
+import "./page.js";
 
 var tmpl = (app) => html`
 	<style>
@@ -29,26 +30,14 @@ var tmpl = (app) => html`
 		wikinote-header {
 			grid-area: "header";
 		}
-		.page {
-			overflow-y: scroll;
-
+		wikinote-page {
 			grid-area: "page";
-		}
-		article {
-			max-width: 1200px;
-			margin: auto;
-			margin-top: 0;
-			padding: 2rem;
-
-			background: var(--contents-bg-color);
 		}
 	</style>
 	<wikinote-header></wikinote-header>
-	<div class="page">
-		<article>
-			<slot></slot>
-		</article>
-	</div>
+	<wikinote-page>
+		<slot></slot>
+	</wikinote-page>
 `;
 
 class WikinoteLayout extends $.CustomElement {

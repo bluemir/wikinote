@@ -60,10 +60,10 @@ func Run(b *backend.Backend, conf *Config) error {
 	app.Use(sessions.Sessions("session", store))
 
 	// Renderer
-	if html, err := NewRenderer(); err != nil {
+	if r, err := NewRender(); err != nil {
 		return errors.WithStack(err)
 	} else {
-		app.SetHTMLTemplate(html)
+		app.HTMLRender = r
 	}
 
 	app.Use(authMiddleware.Middleware(server.Backend.Auth))

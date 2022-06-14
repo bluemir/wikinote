@@ -6,33 +6,70 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/gin-gonic/gin/render"
 	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/internal/static"
 )
 
-func NewRenderer() (*template.Template, error) {
-	tmpl := template.New("__root__")
-	tmpl.Funcs(template.FuncMap{
+func NewRender() (render.HTMLRender, error) {
+	fMap := template.FuncMap{
 		"join": strings.Join,
-	})
+	}
+	renderer := &HTMLRender{
+		templates: map[string]*template.Template{},
+	}
+	// layout
+	layout, err := template.New("__root__").Funcs(fMap).Parse(static.HTMLTemplates.MustString("layout.html"))
+	if err != nil {
+		return nil, err
+	}
 
-	static.HTMLTemplates.Walk("/", func(path string, info os.FileInfo, err error) error {
+	if err := static.HTMLTemplates.Walk("/", func(path string, info os.FileInfo, err error) error {
 		logrus.Tracef("find %s", path)
 		if info.IsDir() && info.Name()[0] == '.' && path != "/" {
 			return filepath.SkipDir
 		}
-		if info.IsDir() || info.Name()[0] == '.' || !strings.HasSuffix(path, ".html") {
+
+		switch { // skip condition
+		case info.IsDir():
+			return nil
+		case info.Name()[0] == '.':
+			return nil
+		case !strings.HasSuffix(path, ".html"):
+			return nil
+		case info.Name() == "layout.html":
 			return nil
 		}
+
 		logrus.Debugf("parse template: path: %s", path)
 
-		tmpl, err = tmpl.Parse(static.HTMLTemplates.MustString(path))
+		layout, err := layout.Clone()
 		if err != nil {
 			return err
 		}
-		return nil
-	})
+		tmpl, err := layout.Parse(static.HTMLTemplates.MustString(path))
+		if err != nil {
+			return err
+		}
 
-	return tmpl, nil
+		renderer.templates[path] = tmpl
+
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+	return renderer, nil
+}
+
+type HTMLRender struct {
+	templates map[string]*template.Template
+}
+
+func (r *HTMLRender) Instance(name string, data interface{}) render.Render {
+	return render.HTML{
+		Template: r.templates[name],
+		Name:     "__root__",
+		Data:     data,
+	}
 }

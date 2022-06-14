@@ -24,6 +24,7 @@ var tmpl = (app) => html`
 		/* FIXME */
 		max-width: 1200px;
 		margin: auto;
+		padding: 0 2rem;
 	}
 	h1 {
 		font-size: 2rem;

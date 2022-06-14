@@ -1,18 +1,4 @@
-{{ define "/profile.html" }}
-<!DOCTYPE html>
-<html>
-	<head>
-		<meta charset="utf-8">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<style>@import "/!/static/css/root.css";</style>
-	</head>
-	<body>
-		<wikinote-layout>
-			<wikinote-profile user="{{ .user.Name }}" roles="{{ join .user.Roles "," }}">
-			</wikinote-profile>
-		</wikinote-layout>
-		<script type="module" src="/!/static/js/v1/index.js"></script>
-	</body>
-</html>
+{{ define "contents" }}
+<wikinote-profile user="{{ .user.Name }}" roles="{{ join .user.Roles "," }}">
+</wikinote-profile>
 {{ end }}
