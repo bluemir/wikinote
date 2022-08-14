@@ -1,5 +1,5 @@
 ARG VERSION=dev
-FROM fedora:35 as build-env
+FROM fedora:36 as build-env
 
 RUN echo "fastestmirror=1" >> /etc/dnf/dnf.conf
 RUN dnf install -y \
@@ -41,7 +41,7 @@ RUN make build/wikinote
 
 ################################################################################
 # running image
-FROM fedora:35
+FROM fedora:36
 
 COPY --from=build-env /src/build/wikinote /bin/wikinote
 
