@@ -36,26 +36,6 @@ build/static/js/%: $(JS_SOURCES) build/yarn-updated
 	#--external:/config.js \
 	#--minify \
 
-## rollup & js
-## yarn add --dev rollup '@rollup/plugin-node-resolve'
-#STATICS := $(filter-out build/static/js/%.js,$(STATICS)) # remove not entrypoint
-#STATICS += build/static/js/index.js                      # entrypoint
-#build/static/js/%: $(JS_SOURCES) build/yarn-updated
-#	@$(MAKE) build/tools/npx
-#	@mkdir -p $(dir $@)
-#	npx rollup $(@:build/static/%=web/%) --file $@ --format es -m -p '@rollup/plugin-node-resolve'
-
-## less
-## yarn add --dev less
-#LESS_SOURCES  = $(shell find web/less           -type f -name '*.less' -print)
-#STATICS := $(filter-out build/static/css/%,$(STATICS)) # remove default css files
-#STATICS += $(LESS_SOURCES:web/less/%=build/static/css/%)
-#build/static/css/%: web/less/% build/yarn-updated
-#	@$(MAKE) build/tools/npx
-#	@mkdir -p $(dir $@)
-#	npx lessc $< $@
-#.watched_sources: $(LESS_SOURCES)
-
 .PHONY: build-web
 build-web: $(STATICS) ## Build web-files. (bundle, minify, transpile, etc.)
 

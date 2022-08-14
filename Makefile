@@ -9,7 +9,7 @@ export GO111MODULE=on
 export PATH:=${PATH}:./build/tools/
 
 # go build args
-OPTIONAL_BUILD_ARGS :=
+OPTIONAL_BUILD_ARGS?=
 
 default: build
 

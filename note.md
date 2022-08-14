@@ -31,6 +31,7 @@
 - [ ] UI 구조개선
 	- CustomElement(not React)
 	- muti page application
+		- non-client routing
 - [x] 파일 업로드
 - [x] image viewer
 - [x] image uploader
@@ -40,5 +41,12 @@
 - [x] video viewer
 - [x] Profile
 - [ ] Logout(hidden from menu, for debug)
-- [ ] Unauthroized & Forbidden page...
+- [x] Unauthroized page
+- [ ] Register Page
+- [ ] Forbidden page...
 - [ ] git plugin
+- [ ] html templates 의 not found Error handling
+- [ ] http2
+- [ ] auto TLS
+- [ ] cli options for http/https
+	- validation

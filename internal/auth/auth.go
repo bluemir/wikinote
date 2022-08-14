@@ -7,12 +7,13 @@ import (
 )
 
 type Manager struct {
-	db    *gorm.DB
-	salt  string
-	roles map[string]Role
+	db          *gorm.DB
+	salt        string
+	roles       map[string]Role
+	defaultRole string
 }
 
-func New(db *gorm.DB, salt string, roles []Role) (*Manager, error) {
+func New(db *gorm.DB, salt string, roles []Role, defaultRole string) (*Manager, error) {
 	if err := db.AutoMigrate(
 		&User{},
 		&Token{},

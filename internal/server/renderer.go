@@ -67,6 +67,7 @@ type HTMLRender struct {
 }
 
 func (r *HTMLRender) Instance(name string, data interface{}) render.Render {
+
 	return render.HTML{
 		Template: r.templates[name],
 		Name:     "__root__",

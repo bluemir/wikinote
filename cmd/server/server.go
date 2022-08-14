@@ -27,3 +27,8 @@ func Register(cmd *kingpin.CmdClause, conf *config.Config) {
 		return server.Run(b, &conf.Server)
 	})
 }
+
+// - http
+//     - bind
+// - https
+//     - domain

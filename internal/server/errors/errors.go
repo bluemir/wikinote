@@ -60,6 +60,8 @@ func HTTPErrorHandler(c *gin.Context, err error, opts ...HTTPErrorHandlerOption)
 		f(ctx)
 	}
 
+	logrus.Debugf("%+v", ctx)
+
 	switch ctx.Type {
 	case reqtype.API:
 		c.JSON(ctx.Code, ctx.Response)
@@ -67,8 +69,8 @@ func HTTPErrorHandler(c *gin.Context, err error, opts ...HTTPErrorHandlerOption)
 	case reqtype.HTML:
 		c.HTML(ctx.Code, getErrorHTMLName(ctx.Code), ctx.Response)
 		return
-	case reqtype.Unknown:
-		c.String(ctx.Code, ctx.Response.String())
+	//case reqtype.Unknown:
+	//	c.String(ctx.Code, ctx.Response.String())
 	default:
 		c.HTML(ctx.Code, getErrorHTMLName(ctx.Code), ctx.Response)
 		return

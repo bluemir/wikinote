@@ -38,8 +38,8 @@ func initDB(wikipath string) (*gorm.DB, error) {
 func initFileAttr(db *gorm.DB) (*attr.Store, error) {
 	return attr.New(db)
 }
-func initAuth(db *gorm.DB, salt string, roles []auth.Role) (*auth.Manager, error) {
-	return auth.New(db, salt, roles)
+func initAuth(db *gorm.DB, salt string, roles []auth.Role, defaultRole string) (*auth.Manager, error) {
+	return auth.New(db, salt, roles, defaultRole)
 }
 
 func initAdminUser(auth *auth.Manager, users map[string]string) error {
