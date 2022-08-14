@@ -28,6 +28,7 @@ func filetype(path string) (string, string) {
 func (handler *Handler) View(c *gin.Context) {
 	logrus.Trace("view handler")
 	category, subtype := filetype(c.Request.URL.Path)
+	logrus.Tracef("category: %s, subtype: %s", category, subtype)
 
 	switch category {
 	case "text":

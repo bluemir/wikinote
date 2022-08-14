@@ -46,4 +46,3 @@ FROM fedora:36
 COPY --from=build-env /src/build/wikinote /bin/wikinote
 
 CMD wikinote server
-

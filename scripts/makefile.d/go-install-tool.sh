@@ -7,5 +7,6 @@ cd $TMP_DIR
 
 go mod init temp
 go get $1
+go install $1
 
 rm -rf $TMP_DIR

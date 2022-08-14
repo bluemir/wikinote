@@ -6,6 +6,7 @@ import (
 	"github.com/gin-contrib/location"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
+	"github.com/gin-gonic/autotls"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -16,8 +17,10 @@ import (
 )
 
 type Config struct {
-	Bind      string
-	FrontPage string
+	Bind        string
+	FrontPage   string
+	EnableHttps bool
+	HttpsDomain string
 }
 
 func NewConfig() *Config {
@@ -72,8 +75,12 @@ func Run(b *backend.Backend, conf *Config) error {
 	// Register Routing
 	server.RegisterRoute(app)
 
-	logrus.Infof("Run Server on %s", conf.Bind)
-	return app.Run(conf.Bind)
+	if conf.EnableHttps {
+		return autotls.Run(app, conf.HttpsDomain)
+	} else {
+		logrus.Infof("Run Server on %s", conf.Bind)
+		return app.Run(conf.Bind)
+	}
 }
 func NotFound(c *gin.Context) {
 	c.String(http.StatusNotFound, "Not Found")

@@ -47,6 +47,8 @@
 - [ ] git plugin
 - [ ] html templates 의 not found Error handling
 - [ ] http2
-- [ ] auto TLS
-- [ ] cli options for http/https
+- [x] auto TLS
+- [x] cli options for http/https
 	- validation
+- [ ] change embed
+
