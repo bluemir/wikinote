@@ -23,7 +23,17 @@ func parseMIME(mime string) (string, string) {
 }
 func filetype(path string) (string, string) {
 	ctype := mime.TypeByExtension(filepath.Ext(path))
-	return parseMIME(ctype)
+
+	if ctype != "" {
+		return parseMIME(ctype)
+	}
+	// failback
+	switch filepath.Ext(path) {
+	case ".md":
+		return "text", "markdown"
+	default:
+		return "text", "text"
+	}
 }
 func (handler *Handler) View(c *gin.Context) {
 	logrus.Trace("view handler")
@@ -69,7 +79,9 @@ func (handler *Handler) View(c *gin.Context) {
 			"path": c.Request.URL.Path,
 		})
 	default:
-		c.Redirect(http.StatusTemporaryRedirect, c.Request.URL.Path+".md")
+		if !strings.HasSuffix(c.Request.URL.Path, ".md") {
+			c.Redirect(http.StatusTemporaryRedirect, c.Request.URL.Path+".md")
+		}
 	}
 }
 
