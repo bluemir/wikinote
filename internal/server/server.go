@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/gin-contrib/location"
 	"github.com/gin-contrib/sessions"
@@ -10,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/crypto/acme/autocert"
 
 	"github.com/bluemir/wikinote/internal/backend"
 	"github.com/bluemir/wikinote/internal/server/handler"
@@ -17,10 +19,11 @@ import (
 )
 
 type Config struct {
-	Bind        string
-	FrontPage   string
-	EnableHttps bool
-	HttpsDomain string
+	Bind         string
+	FrontPage    string
+	EnableHttps  bool
+	HttpsDomain  string
+	AutoTLSCache string
 }
 
 func NewConfig() *Config {
@@ -75,8 +78,19 @@ func Run(b *backend.Backend, conf *Config) error {
 	// Register Routing
 	server.RegisterRoute(app)
 
+	cacheDir := conf.AutoTLSCache
+	if cacheDir == "" {
+		cacheDir = b.ConfigPath(".cert-cache")
+	}
+	os.MkdirAll(cacheDir, 0700)
+
 	if conf.EnableHttps {
-		return autotls.Run(app, conf.HttpsDomain)
+		logrus.Infof("Run Server with AutoTLS")
+		return autotls.RunWithManager(app, &autocert.Manager{
+			Prompt:     autocert.AcceptTOS,
+			HostPolicy: autocert.HostWhitelist(conf.HttpsDomain),
+			Cache:      autocert.DirCache(cacheDir),
+		})
 	} else {
 		logrus.Infof("Run Server on %s", conf.Bind)
 		return app.Run(conf.Bind)

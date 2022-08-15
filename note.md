@@ -51,4 +51,6 @@
 - [x] cli options for http/https
 	- validation
 - [ ] change embed
+- [ ] http redirect to https
+- [x] TLS cache
 

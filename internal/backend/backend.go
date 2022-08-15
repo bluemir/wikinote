@@ -1,6 +1,8 @@
 package backend
 
 import (
+	"path/filepath"
+
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
@@ -19,8 +21,9 @@ type Config struct {
 	DefaultRole string                 `yaml:"default-role"`
 }
 type Backend struct {
-	Config *Config
-	Auth   *auth.Manager
+	wikipath string
+	Config   *Config
+	Auth     *auth.Manager
 
 	db     *gorm.DB
 	files  *files.FileStore
@@ -66,14 +69,18 @@ func New(wikipath string, users map[string]string) (*Backend, error) {
 	}
 
 	backend := &Backend{
-		Config: conf,
-		db:     db,
-		attr:   attr,
-		Auth:   auth,
-		Plugin: plugin,
-		files:  store,
+		wikipath: wikipath,
+		Config:   conf,
+		db:       db,
+		attr:     attr,
+		Auth:     auth,
+		Plugin:   plugin,
+		files:    store,
 	}
 	logrus.Trace("backend initailized")
 
 	return backend, nil
+}
+func (b *Backend) ConfigPath(path string) string {
+	return filepath.Join(b.wikipath, path)
 }

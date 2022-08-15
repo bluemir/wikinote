@@ -21,6 +21,8 @@ func Register(cmd *kingpin.CmdClause, conf *config.Config) {
 		BoolVar(&conf.Server.EnableHttps)
 	cmd.Flag("domain", "autoTLS domain").
 		StringVar(&conf.Server.HttpsDomain)
+	cmd.Flag("autotls-cache", "autotls cache").
+		StringVar(&conf.Server.AutoTLSCache)
 
 	cmd.Action(func(*kingpin.ParseContext) error {
 		logrus.Debugf("%#v", conf)
