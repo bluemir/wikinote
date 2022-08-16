@@ -32,7 +32,7 @@ func filetype(path string) (string, string) {
 	case ".md":
 		return "text", "markdown"
 	default:
-		return "text", "text"
+		return "", ""
 	}
 }
 func (handler *Handler) View(c *gin.Context) {
