@@ -82,5 +82,5 @@ func New(wikipath string, users map[string]string) (*Backend, error) {
 	return backend, nil
 }
 func (b *Backend) ConfigPath(path string) string {
-	return filepath.Join(b.wikipath, path)
+	return filepath.Join(b.wikipath, ".app", path)
 }

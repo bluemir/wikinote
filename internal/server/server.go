@@ -80,7 +80,7 @@ func Run(b *backend.Backend, conf *Config) error {
 
 	cacheDir := conf.AutoTLSCache
 	if cacheDir == "" {
-		cacheDir = b.ConfigPath(".cert-cache")
+		cacheDir = b.ConfigPath("cert-cache")
 	}
 	os.MkdirAll(cacheDir, 0700)
 
