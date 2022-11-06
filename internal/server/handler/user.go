@@ -40,7 +40,6 @@ func (handler *Handler) Register(c *gin.Context) {
 		Labels: auth.Labels{
 			"wikinote.io/email": req.Email,
 		},
-		Groups: handler.backend.Config.Group.Default,
 	})
 	if err != nil {
 		c.HTML(http.StatusInternalServerError, "/errors/internal-server-error.html", gin.H{

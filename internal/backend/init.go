@@ -39,7 +39,13 @@ func initFileAttr(db *gorm.DB) (*attr.Store, error) {
 	return attr.New(db)
 }
 func initAuth(db *gorm.DB, salt string, conf *auth.Config) (*auth.Manager, error) {
-	// wikinote internal role: _root, _guest it couldnot change
+	// wikinote internal role: admin, it could not change
+	conf.Roles["admin"] = auth.Role{
+		Rules: []auth.Rule{
+			{},
+		},
+	}
+
 	return auth.New(db, salt, conf)
 }
 
@@ -57,7 +63,7 @@ func initAdminUser(authm *auth.Manager, users map[string]string) error {
 		if !ok {
 			err := authm.CreateUser(&auth.User{
 				Name:   name,
-				Groups: []string{"admin"},
+				Groups: map[string]struct{}{"admin": {}},
 			})
 			if err != nil {
 				return err

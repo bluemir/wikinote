@@ -1,28 +1,33 @@
 package auth
 
 /*
-
+group:
+  unauthoized: guest
+  newcomer:
+  - viewer
 roles:
-- name: guest
-  rules:
-  - resources:
-      kind: md
-      draft: !true
-    verbs:
-    - read
-  - resources:
-      kind: history
-    verbs:
-    - read
-  - verbs:
-    - search
-- name: admin
-  rules:
-  - verbs:
-    - create
-	- read
-	- update
-	- delete
-	- search
-
+  admin:
+    rules:
+    - verbs: # empty means allow all
+  editer:
+    rules:
+	- verbs:
+	  - read
+	- verbs:
+	  - write
+	  resources:
+	  - editable: true
+  viewer:
+    rules:
+    - verbs:
+      - read
+      resources:
+      - key: value
+        key2: ^regexp$
+# group automatically bind role having same name
+binding:
+  "group/guest":
+  - viewer
+  "user/root":
+  - admin
 */

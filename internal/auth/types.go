@@ -13,7 +13,6 @@ type Token struct {
 	RevokeKey string
 }
 type Role struct {
-	Name  string `yaml:"name"`
 	Rules []Rule `yaml:"rules"`
 }
 type Rule struct {

@@ -14,6 +14,12 @@ func (m *Manager) CreateUser(user *User) error {
 	// overwrite salt
 	user.Salt = xid.New().String()
 
+	if len(user.Groups) == 0 {
+		for _, group := range m.Group.Newcomer {
+			user.Groups[group] = struct{}{}
+		}
+	}
+
 	if err := m.db.Create(user).Error; err != nil {
 		return errors.Wrapf(err, "User already exist")
 	}
@@ -40,23 +46,14 @@ func (m *Manager) UpdateUser(user *User) error {
 type User struct {
 	ID     uint   `gorm:"primary_key" json:"-"`
 	Name   string `gorm:"unique" json:"name"`
-	Groups List   `sql:"type:json" json:"groups"`
+	Groups Set    `sql:"type:json" json:"groups"`
 	Labels Labels `sql:"type:json" json:"labels"`
 	Salt   string `json:"-"`
 }
 
 func (user *User) AddGroup(group string) {
-	for _, g := range user.Groups {
-		if g == group {
-			return
-		}
-	}
-	user.Groups = append(user.Groups, group)
+	user.Groups[group] = struct{}{}
 }
 func (user *User) RemoveGroup(group string) {
-	for i, g := range user.Groups {
-		if g == group {
-			user.Groups = append(user.Groups[:i], user.Groups[i+1:]...)
-		}
-	}
+	delete(user.Groups, group)
 }

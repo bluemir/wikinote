@@ -7,14 +7,16 @@ import (
 )
 
 type Manager struct {
+	Config
 	db   *gorm.DB
 	salt string
-
-	roles   map[string]Role
-	binding map[string][]string
 }
 type Config struct {
-	Roles   []Role
+	Group struct {
+		Unauthorized string
+		Newcomer     []string
+	}
+	Roles   map[string]Role
 	Binding map[string][]string
 }
 
@@ -26,22 +28,16 @@ func New(db *gorm.DB, salt string, config *Config) (*Manager, error) {
 		return nil, err
 	}
 
-	result := map[string]Role{}
-	for _, role := range config.Roles {
-		result[role.Name] = role
-	}
-
 	// dump
-	buf, err := yaml.Marshal(result)
+	buf, err := yaml.Marshal(config)
 	if err != nil {
 		return nil, err
 	}
 	logrus.Tracef("roles: \n%s", string(buf))
 
 	return &Manager{
-		db:      db,
-		salt:    salt,
-		roles:   result,
-		binding: config.Binding,
+		Config: *config,
+		db:     db,
+		salt:   salt,
 	}, nil
 }

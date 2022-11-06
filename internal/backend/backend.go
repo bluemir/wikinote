@@ -18,9 +18,6 @@ type Config struct {
 	Salt    string                 `yaml:"salt"`
 	Plugins []plugins.PluginConfig `yaml:"plugins"`
 	Auth    auth.Config            `yaml:"auth"`
-	Group   struct {
-		Default []string
-	}
 }
 type Backend struct {
 	wikipath string
