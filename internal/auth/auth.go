@@ -7,20 +7,15 @@ import (
 )
 
 type Manager struct {
-	db          *gorm.DB
-	salt        string
-	roles       map[string]Role
-	defaultRole string
+	db   *gorm.DB
+	salt string
+
+	roles   map[string]Role
+	binding map[string][]string
 }
 type Config struct {
-	Default struct {
-		Group string
-	}
 	Roles   []Role
-	Binding []struct {
-		Subject string
-		Role    string
-	}
+	Binding map[string][]string
 }
 
 func New(db *gorm.DB, salt string, config *Config) (*Manager, error) {
@@ -29,10 +24,6 @@ func New(db *gorm.DB, salt string, config *Config) (*Manager, error) {
 		&Token{},
 	); err != nil {
 		return nil, err
-	}
-
-	if len(config.Roles) == 0 {
-		logrus.Warn("config dosen't have role. using defualt role.")
 	}
 
 	result := map[string]Role{}
@@ -48,8 +39,9 @@ func New(db *gorm.DB, salt string, config *Config) (*Manager, error) {
 	logrus.Tracef("roles: \n%s", string(buf))
 
 	return &Manager{
-		db:    db,
-		salt:  salt,
-		roles: result,
+		db:      db,
+		salt:    salt,
+		roles:   result,
+		binding: config.Binding,
 	}, nil
 }

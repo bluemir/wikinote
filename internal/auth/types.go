@@ -2,15 +2,6 @@ package auth
 
 import "regexp"
 
-type User struct {
-	ID     uint   `gorm:"primary_key" json:"-"`
-	Name   string `gorm:"unique" json:"name"`
-	Roles  List   `sql:"type:json" json:"roles"`
-	Groups List   `sql:"type:json" json:"groups"`
-	Labels Labels `sql:"type:json" json:"labels"`
-	Salt   string `json:"-"`
-}
-
 type Group struct {
 	Name string
 }

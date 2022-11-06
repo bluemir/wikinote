@@ -43,35 +43,36 @@ func initAuth(db *gorm.DB, salt string, conf *auth.Config) (*auth.Manager, error
 	return auth.New(db, salt, conf)
 }
 
-func initAdminUser(auth *auth.Manager, users map[string]string) error {
+func initAdminUser(authm *auth.Manager, users map[string]string) error {
 	for name, key := range users {
 		if key == "" {
 			key = xid.New().String()
 			logrus.Warnf("generate key: '%s' '%s'", name, key)
 		}
 		// ensure user
-		user, ok, err := auth.GetUser(name)
+		user, ok, err := authm.GetUser(name)
 		if err != nil {
 			return err
 		}
 		if !ok {
-			err := auth.CreateUser(name, map[string]string{
-				"role/admin": "true",
+			err := authm.CreateUser(&auth.User{
+				Name:   name,
+				Groups: []string{"admin"},
 			})
 			if err != nil {
 				return err
 			}
 		} else {
-			user.Labels["role/admin"] = "true"
-			if err := auth.UpdateUser(user); err != nil {
+			user.AddGroup("admin")
+			if err := authm.UpdateUser(user); err != nil {
 				return err
 			}
 		}
 
-		if err := auth.RevokeTokenAll(name); err != nil {
+		if err := authm.RevokeTokenAll(name); err != nil {
 			return err
 		}
-		if _, err := auth.IssueToken(name, key, nil); err != nil {
+		if _, err := authm.IssueToken(name, key, nil); err != nil {
 			return err
 		}
 	}

@@ -13,7 +13,9 @@ func (manager *Manager) IsAllow(resource Resource, verb Verb, user *User) error 
 	if err != nil {
 		return err
 	}
-	logrus.Tracef("%+v", roles)
+
+	logrus.Tracef("binding roles: %#v", roles)
+
 	for _, role := range roles {
 		if role.IsAllow(resource, verb) {
 			return nil
@@ -31,11 +33,19 @@ func (manager *Manager) getBindingRoles(user *User) ([]Role, error) {
 		return []Role{manager.roles["guest"]}, nil
 	}
 
-	roles := user.Roles
+	roles := manager.binding["user/"+user.Name]
+	for _, group := range user.Groups {
+		roles = append(roles, manager.binding["group/"+group]...)
+	}
+	roles = unique(roles)
+
+	logrus.Tracef("roles: %#v", roles)
 
 	result := []Role{}
 	for _, name := range roles {
-		result = append(result, manager.roles[name])
+		if role, ok := manager.roles[name]; ok {
+			result = append(result, role)
+		}
 	}
 
 	return result, nil

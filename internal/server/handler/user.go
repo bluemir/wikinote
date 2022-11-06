@@ -35,8 +35,12 @@ func (handler *Handler) Register(c *gin.Context) {
 		return
 	}
 
-	err := handler.backend.Auth.CreateUser(req.Name, auth.Labels{
-		"wikinote.io/email": req.Email,
+	err := handler.backend.Auth.CreateUser(&auth.User{
+		Name: req.Name,
+		Labels: auth.Labels{
+			"wikinote.io/email": req.Email,
+		},
+		Groups: handler.backend.Config.Group.Default,
 	})
 	if err != nil {
 		c.HTML(http.StatusInternalServerError, "/errors/internal-server-error.html", gin.H{

@@ -29,3 +29,14 @@ const (
 func HttpRealm(relam string) string {
 	return `Basic realm="` + relam + `"`
 }
+func unique(strs []string) []string {
+	set := map[string]struct{}{}
+	for _, str := range strs {
+		set[str] = struct{}{}
+	}
+	ret := []string{}
+	for str := range set {
+		ret = append(ret, str)
+	}
+	return ret
+}

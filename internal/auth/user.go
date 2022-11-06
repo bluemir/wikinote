@@ -6,14 +6,15 @@ import (
 	"gorm.io/gorm"
 )
 
-func (m *Manager) CreateUser(username string, Labels map[string]string) error {
-	salt := xid.New().String()
+func (m *Manager) CreateUser(user *User) error {
+	if user.ID != 0 {
+		return errors.Errorf("user ID already exist")
+	}
 
-	if err := m.db.Create(&User{
-		Name:   username,
-		Labels: Labels,
-		Salt:   salt,
-	}).Error; err != nil {
+	// overwrite salt
+	user.Salt = xid.New().String()
+
+	if err := m.db.Create(user).Error; err != nil {
 		return errors.Wrapf(err, "User already exist")
 	}
 
@@ -34,4 +35,28 @@ func (m *Manager) UpdateUser(user *User) error {
 		return errors.Errorf("user ID not found")
 	}
 	return m.db.Save(user).Error
+}
+
+type User struct {
+	ID     uint   `gorm:"primary_key" json:"-"`
+	Name   string `gorm:"unique" json:"name"`
+	Groups List   `sql:"type:json" json:"groups"`
+	Labels Labels `sql:"type:json" json:"labels"`
+	Salt   string `json:"-"`
+}
+
+func (user *User) AddGroup(group string) {
+	for _, g := range user.Groups {
+		if g == group {
+			return
+		}
+	}
+	user.Groups = append(user.Groups, group)
+}
+func (user *User) RemoveGroup(group string) {
+	for i, g := range user.Groups {
+		if g == group {
+			user.Groups = append(user.Groups[:i], user.Groups[i+1:]...)
+		}
+	}
 }
