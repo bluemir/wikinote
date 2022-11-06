@@ -1,28 +1,18 @@
 package auth
 
-import "strings"
+import "regexp"
 
 type User struct {
 	ID     uint   `gorm:"primary_key" json:"-"`
 	Name   string `gorm:"unique" json:"name"`
+	Roles  List   `sql:"type:json" json:"roles"`
+	Groups List   `sql:"type:json" json:"groups"`
 	Labels Labels `sql:"type:json" json:"labels"`
 	Salt   string `json:"-"`
 }
 
-func (user User) Roles() []string {
-	result := []string{}
-	for k := range user.Labels {
-		if strings.HasPrefix(k, "role/") {
-			result = append(result, strings.TrimPrefix(k, "role/"))
-		}
-	}
-	return result
-}
-func (user *User) AddRole(role string) {
-	user.Labels["role/"+role] = "true"
-}
-func (user *User) RemoveRole(role string) {
-	delete(user.Labels, "role/"+role)
+type Group struct {
+	Name string
 }
 
 type Token struct {
@@ -36,9 +26,8 @@ type Role struct {
 	Rules []Rule `yaml:"rules"`
 }
 type Rule struct {
-	Resource ResourceExprs `yaml:"resource"`
-	Verbs    []Verb        `yaml:"verbs"`
-	Expr     RuleExpr      `yaml:"expr"`
+	Verbs     []Verb          `yaml:"verbs"`
+	Resources []ResourceMatch `yaml:"resources"`
 }
 
 type Resource interface {
@@ -54,4 +43,31 @@ func (kvs KeyValues) Get(key string) string {
 }
 func (kvs KeyValues) KeyValues() KeyValues {
 	return kvs
+}
+
+type ResourceMatch map[string]*Regexp
+
+type Regexp struct {
+	*regexp.Regexp
+}
+
+// UnmarshalText unmarshals json into a regexp.Regexp
+func (r *Regexp) UnmarshalText(b []byte) error {
+	regex, err := regexp.Compile(string(b))
+	if err != nil {
+		return err
+	}
+
+	r.Regexp = regex
+
+	return nil
+}
+
+// MarshalText marshals regexp.Regexp as string
+func (r *Regexp) MarshalText() ([]byte, error) {
+	if r.Regexp != nil {
+		return []byte(r.Regexp.String()), nil
+	}
+
+	return nil, nil
 }

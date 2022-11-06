@@ -12,8 +12,18 @@ type Manager struct {
 	roles       map[string]Role
 	defaultRole string
 }
+type Config struct {
+	Default struct {
+		Group string
+	}
+	Roles   []Role
+	Binding []struct {
+		Subject string
+		Role    string
+	}
+}
 
-func New(db *gorm.DB, salt string, roles []Role, defaultRole string) (*Manager, error) {
+func New(db *gorm.DB, salt string, config *Config) (*Manager, error) {
 	if err := db.AutoMigrate(
 		&User{},
 		&Token{},
@@ -21,12 +31,12 @@ func New(db *gorm.DB, salt string, roles []Role, defaultRole string) (*Manager, 
 		return nil, err
 	}
 
-	if len(roles) == 0 {
+	if len(config.Roles) == 0 {
 		logrus.Warn("config dosen't have role. using defualt role.")
 	}
 
 	result := map[string]Role{}
-	for _, role := range roles {
+	for _, role := range config.Roles {
 		result[role.Name] = role
 	}
 

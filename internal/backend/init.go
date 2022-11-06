@@ -38,8 +38,9 @@ func initDB(wikipath string) (*gorm.DB, error) {
 func initFileAttr(db *gorm.DB) (*attr.Store, error) {
 	return attr.New(db)
 }
-func initAuth(db *gorm.DB, salt string, roles []auth.Role, defaultRole string) (*auth.Manager, error) {
-	return auth.New(db, salt, roles, defaultRole)
+func initAuth(db *gorm.DB, salt string, conf *auth.Config) (*auth.Manager, error) {
+	// wikinote internal role: _root, _guest it couldnot change
+	return auth.New(db, salt, conf)
 }
 
 func initAdminUser(auth *auth.Manager, users map[string]string) error {

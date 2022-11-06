@@ -72,6 +72,7 @@ func HTTPErrorHandler(c *gin.Context, err error, opts ...HTTPErrorHandlerOption)
 	//case reqtype.Unknown:
 	//	c.String(ctx.Code, ctx.Response.String())
 	default:
+		logrus.Trace(getErrorHTMLName(ctx.Code))
 		c.HTML(ctx.Code, getErrorHTMLName(ctx.Code), ctx.Response)
 		return
 	}
@@ -82,6 +83,8 @@ func findErrorCode(err error) int {
 		return http.StatusUnauthorized
 	case errors.Is(err, gorm.ErrRecordNotFound):
 		return http.StatusNotFound
+	case err == auth.ErrForbidden:
+		return http.StatusForbidden
 	default:
 		return http.StatusInternalServerError
 	}
@@ -92,8 +95,10 @@ func getErrorHTMLName(code int) string {
 		return "/errors/unauthorized.html"
 	case http.StatusNotFound:
 		return "/errors/not-found.html"
+	case http.StatusForbidden:
+		return "/errors/forbidden.html"
 	default:
-		return "/errors/internal-sever-error.html"
+		return "/errors/internal-server-error.html"
 	}
 }
 

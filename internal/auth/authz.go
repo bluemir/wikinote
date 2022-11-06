@@ -31,10 +31,9 @@ func (manager *Manager) getBindingRoles(user *User) ([]Role, error) {
 		return []Role{manager.roles["guest"]}, nil
 	}
 
-	roles := user.Roles()
+	roles := user.Roles
 
 	result := []Role{}
-
 	for _, name := range roles {
 		result = append(result, manager.roles[name])
 	}

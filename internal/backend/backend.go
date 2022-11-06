@@ -15,10 +15,9 @@ import (
 )
 
 type Config struct {
-	Salt        string                 `yaml:"salt"`
-	Plugins     []plugins.PluginConfig `yaml:"plugins"`
-	Roles       []auth.Role            `yaml:"roles"`
-	DefaultRole string                 `yaml:"default-role"`
+	Salt    string                 `yaml:"salt"`
+	Plugins []plugins.PluginConfig `yaml:"plugins"`
+	Auth    auth.Config            `yaml:"auth"`
 }
 type Backend struct {
 	wikipath string
@@ -51,7 +50,7 @@ func New(wikipath string, users map[string]string) (*Backend, error) {
 		return nil, errors.Wrap(err, "failed to init file attribute module")
 	}
 
-	auth, err := initAuth(db, conf.Salt, conf.Roles, conf.DefaultRole)
+	auth, err := initAuth(db, conf.Salt, &conf.Auth)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to init auth module")
 	}
