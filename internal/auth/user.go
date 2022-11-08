@@ -15,6 +15,7 @@ func (m *Manager) CreateUser(user *User) error {
 	user.Salt = xid.New().String()
 
 	if len(user.Groups) == 0 {
+		user.Groups = map[string]struct{}{}
 		for _, group := range m.Group.Newcomer {
 			user.Groups[group] = struct{}{}
 		}

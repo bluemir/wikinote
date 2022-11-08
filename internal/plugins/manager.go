@@ -3,6 +3,7 @@ package plugins
 import (
 	"html/template"
 
+	"github.com/bluemir/wikinote/internal/backend/metadata"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -14,7 +15,7 @@ type PluginConfig struct {
 	Options interface{}
 }
 
-func New(configs []PluginConfig, fileAttrStore *Store) (*Manager, error) {
+func New(configs []PluginConfig, store metadata.Store) (*Manager, error) {
 	manager := &Manager{Route: map[string]PluginRoute{}}
 	for _, conf := range configs {
 		logrus.Infof("Initialize plugin: %s", conf.Name)
@@ -36,7 +37,7 @@ func New(configs []PluginConfig, fileAttrStore *Store) (*Manager, error) {
 		}
 
 		logrus.Infof("%#v", p.Options)
-		plugin, err := p.Init(p.Options, fileAttrStore)
+		plugin, err := p.Init(p.Options, store)
 		if err != nil {
 			return nil, err
 		}
@@ -67,21 +68,25 @@ func (m *Manager) TriggerFileReadHook(path string, data []byte) ([]byte, error) 
 	return data, nil
 }
 func (m *Manager) TriggerFileWriteHook(path string, data []byte) ([]byte, error) {
-	var err error
 	for _, hook := range m.WriteHook {
-		data, err = hook.FileWriteHook(path, data)
+		newData, err := hook.FileWriteHook(path, data)
 		if err != nil {
-			return data, err
+			// just log it and skip this hook
+			// TODO report to event store and show it to admin?
+			logrus.Error(err)
 		}
+		data = newData
 	}
 	return data, nil
 }
-func (m *Manager) WikiFooter(path string) ([]template.HTML, error) {
+func (m *Manager) GetWikiFooter(path string) ([]template.HTML, error) {
 	result := []template.HTML{}
 	for _, hook := range m.Footer {
 		data, err := hook.Footer(path)
 		if err != nil {
-			return result, err
+			logrus.Error(err)
+			result = append(result, template.HTML("error in plugin: "+err.Error()))
+			//return result, err
 		}
 		result = append(result, template.HTML(data))
 	}

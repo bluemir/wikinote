@@ -3,8 +3,10 @@ package handler
 import (
 	"net/http"
 
-	"github.com/bluemir/wikinote/internal/auth"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
+
+	"github.com/bluemir/wikinote/internal/auth"
 )
 
 func (handler *Handler) RegisterForm(c *gin.Context) {
@@ -13,7 +15,7 @@ func (handler *Handler) RegisterForm(c *gin.Context) {
 
 func (handler *Handler) Register(c *gin.Context) {
 	req := &struct {
-		Name     string `form:"name"`
+		Username string `form:"username"`
 		Password string `form:"password"`
 		Email    string `form:"email"`
 		Confirm  string `form:"confirm"`
@@ -36,7 +38,7 @@ func (handler *Handler) Register(c *gin.Context) {
 	}
 
 	err := handler.backend.Auth.CreateUser(&auth.User{
-		Name: req.Name,
+		Name: req.Username,
 		Labels: auth.Labels{
 			"wikinote.io/email": req.Email,
 		},
@@ -45,12 +47,14 @@ func (handler *Handler) Register(c *gin.Context) {
 		c.HTML(http.StatusInternalServerError, "/errors/internal-server-error.html", gin.H{
 			"retryURL": "/!/auth/register",
 			"message":  "fail to register new user try again",
+			"error":    err.Error(),
 		})
+		logrus.Error(err)
 		c.Abort()
 		return
 	}
 
-	_, err = handler.backend.Auth.IssueToken(req.Name, req.Password, nil)
+	_, err = handler.backend.Auth.IssueToken(req.Username, req.Password, nil)
 	if err != nil {
 		c.HTML(http.StatusInternalServerError, "errors/internal-server-error.html", gin.H{
 			"retryURL": "/!/auth/register",

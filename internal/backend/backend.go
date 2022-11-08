@@ -9,25 +9,27 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/bluemir/wikinote/internal/auth"
-	"github.com/bluemir/wikinote/internal/backend/attr"
 	"github.com/bluemir/wikinote/internal/backend/files"
+	"github.com/bluemir/wikinote/internal/backend/metadata"
 	"github.com/bluemir/wikinote/internal/plugins"
 )
 
 type Config struct {
-	Salt    string                 `yaml:"salt"`
-	Plugins []plugins.PluginConfig `yaml:"plugins"`
-	Auth    auth.Config            `yaml:"auth"`
+	Salt     string                 `yaml:"salt"`
+	Plugins  []plugins.PluginConfig `yaml:"plugins"`
+	Auth     auth.Config            `yaml:"auth"`
+	Metadata metadata.Config        `yaml:"metadata"`
 }
 type Backend struct {
 	wikipath string
 	Config   *Config
-	Auth     *auth.Manager
 
-	db     *gorm.DB
-	files  *files.FileStore
-	attr   *attr.Store
-	Plugin *plugins.Manager
+	Auth     *auth.Manager
+	Metadata metadata.Store
+	Plugin   *plugins.Manager
+	files    *files.FileStore
+
+	db *gorm.DB
 }
 
 func New(wikipath string, users map[string]string) (*Backend, error) {
@@ -45,9 +47,12 @@ func New(wikipath string, users map[string]string) (*Backend, error) {
 		return nil, err
 	}
 
-	attr, err := initFileAttr(db)
+	if conf.Metadata.File != nil && conf.Metadata.File.Path == "" {
+		conf.Metadata.File.Path = wikipath
+	}
+	mdstore, err := metadata.New(&conf.Metadata)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to init file attribute module")
+		return nil, errors.Wrap(err, "failed to init metadata module")
 	}
 
 	auth, err := initAuth(db, conf.Salt, &conf.Auth)
@@ -62,7 +67,7 @@ func New(wikipath string, users map[string]string) (*Backend, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to init file store")
 	}
-	plugin, err := initPlugins(conf.Plugins, attr)
+	plugin, err := plugins.New(conf.Plugins, mdstore)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to init plugins")
 	}
@@ -71,7 +76,7 @@ func New(wikipath string, users map[string]string) (*Backend, error) {
 		wikipath: wikipath,
 		Config:   conf,
 		db:       db,
-		attr:     attr,
+		Metadata: mdstore,
 		Auth:     auth,
 		Plugin:   plugin,
 		files:    store,

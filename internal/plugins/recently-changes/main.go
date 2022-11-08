@@ -1,6 +1,7 @@
 package recent
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -9,11 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 
+	"github.com/bluemir/wikinote/internal/backend/metadata"
 	"github.com/bluemir/wikinote/internal/plugins"
-)
-
-const (
-	KeyLastModified = "wikinote.bluemir.me/last-modified"
 )
 
 type Options struct {
@@ -21,13 +19,17 @@ type Options struct {
 }
 type Recents struct {
 	opt   *Options
-	store *plugins.Store
+	store metadata.Store
+}
+type Data struct {
+	Path string
+	Time time.Time
 }
 
 func init() {
-	plugins.Register("recent-changes", New, &Options{Limit: 10})
+	plugins.Register("recently-changes", New, &Options{Limit: 10})
 }
-func New(o interface{}, store *plugins.Store) (plugins.Plugin, error) {
+func New(o interface{}, store metadata.Store) (plugins.Plugin, error) {
 	opt, ok := o.(*Options)
 	if !ok {
 		return nil, errors.Errorf("option not matched")
@@ -37,56 +39,40 @@ func New(o interface{}, store *plugins.Store) (plugins.Plugin, error) {
 }
 
 func (r *Recents) FileWriteHook(path string, data []byte) ([]byte, error) {
-	// register lastModified
-	if err := r.store.Save(&plugins.FileAttr{
-		Path:  path,
-		Key:   KeyLastModified,
-		Value: time.Now().UTC().Format(time.RFC3339),
-	}); err != nil {
+	list, err := r.read()
+	if err != nil {
+		return data, nil
+	}
+
+	if len(list) >= r.opt.Limit {
+		list = append(list[1:], Data{
+			Path: path,
+			Time: time.Now(),
+		})
+	} else {
+		list = append(list, Data{
+			Path: path,
+			Time: time.Now(),
+		})
+	}
+
+	if err := r.write(list); err != nil {
 		return data, err
 	}
 
 	return data, nil
 }
-func (r *Recents) Footer(path string) ([]byte, error) {
-	attr, err := r.store.Take(&plugins.FileAttr{
-		Path: path,
-		Key:  KeyLastModified,
-	})
-	if err != nil {
-		if plugins.IsNotFound(err) {
-			return []byte(""), nil
-		}
-		return []byte{}, err
-	}
-	t, err := time.Parse(time.RFC3339, attr.Value)
-	if err != nil {
-		return []byte{}, err
-	}
 
-	return []byte("last update: " + t.Local().Format(time.RFC3339)), nil
-}
 func (r *Recents) Route(app gin.IRouter) error {
 	app.GET("/", func(c *gin.Context) {
-		attrs, err := r.store.Search(&plugins.FileAttr{
-			Key: KeyLastModified,
-		}, &plugins.ListOption{
-			Order: "value desc",
-			Limit: 10,
-		})
-
+		list, err := r.read()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, err.Error())
 		}
 
 		result := ""
-		for _, attr := range attrs {
-
-			t, err := time.Parse(time.RFC3339, attr.Value)
-			if err != nil {
-				t = time.Now()
-			}
-			result += fmt.Sprintf(`<p><a href="%s">%s</a> %s</p>`, attr.Path, attr.Path, t.Local().Format(time.RFC3339))
+		for _, d := range list {
+			result += fmt.Sprintf(`<p><a href="%s">%s</a> %s</p>`, d.Path, d.Path, d.Time.Local().Format(time.RFC3339))
 		}
 
 		c.HTML(http.StatusOK, "/view/markdown.html", gin.H{
@@ -95,4 +81,22 @@ func (r *Recents) Route(app gin.IRouter) error {
 	})
 
 	return nil
+}
+func (r *Recents) read() ([]Data, error) {
+	str, err := r.store.Take(".plugins", "recently-changed")
+	if err != nil {
+		return nil, err
+	}
+	list := []Data{}
+	if err := json.Unmarshal([]byte(str), &list); err != nil {
+		return nil, err
+	}
+	return list, nil
+}
+func (r *Recents) write(list []Data) error {
+	buf, err := json.Marshal(list)
+	if err != nil {
+		return err
+	}
+	return r.store.Save(".plugins", "recently-changed", string(buf))
 }

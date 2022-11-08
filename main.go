@@ -12,6 +12,7 @@ import (
 	_ "github.com/bluemir/wikinote/internal/plugins/__test__"
 	_ "github.com/bluemir/wikinote/internal/plugins/footer"
 	_ "github.com/bluemir/wikinote/internal/plugins/giscus"
+	_ "github.com/bluemir/wikinote/internal/plugins/last-modified"
 	_ "github.com/bluemir/wikinote/internal/plugins/recently-changes"
 )
 

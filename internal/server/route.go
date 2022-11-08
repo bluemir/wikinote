@@ -58,8 +58,6 @@ func (server *Server) RegisterRoute(app gin.IRouter) {
 		pages.GET("raw", authz(Page, "read"), server.handler.Raw)
 		pages.GET("delete", authz(Page, "delete"), server.handler.DeleteForm)
 		pages.GET("upload", authz(Page, "update"), server.handler.UploadForm)
-		pages.GET("attribute", authz(PageAttr, "read"), server.handler.AttributeGet)
-		pages.PUT("attribute", authz(PageAttr, "update"), server.handler.AttributeUpdate)
 		pages.GET("*", authz(Page, "read"), server.handler.View)
 		pages.POST("*", authz(Page, "update"), server.handler.UpdateWithForm)
 		pages.PUT("*", authz(Page, "update"), server.handler.Update)

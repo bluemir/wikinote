@@ -11,9 +11,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/bluemir/wikinote/internal/auth"
-	"github.com/bluemir/wikinote/internal/backend/attr"
 	"github.com/bluemir/wikinote/internal/backend/files"
-	"github.com/bluemir/wikinote/internal/plugins"
 )
 
 func initDB(wikipath string) (*gorm.DB, error) {
@@ -35,9 +33,6 @@ func initDB(wikipath string) (*gorm.DB, error) {
 	return db, nil
 }
 
-func initFileAttr(db *gorm.DB) (*attr.Store, error) {
-	return attr.New(db)
-}
 func initAuth(db *gorm.DB, salt string, conf *auth.Config) (*auth.Manager, error) {
 	// wikinote internal role: admin, it could not change
 	conf.Roles["admin"] = auth.Role{
@@ -84,9 +79,7 @@ func initAdminUser(authm *auth.Manager, users map[string]string) error {
 	}
 	return nil
 }
-func initPlugins(configs []plugins.PluginConfig, attr *attr.Store) (*plugins.Manager, error) {
-	return plugins.New(configs, attr)
-}
+
 func initFileStore(wikipath string) (*files.FileStore, error) {
 	return files.New(wikipath)
 }

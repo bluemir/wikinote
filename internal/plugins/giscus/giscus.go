@@ -6,6 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/bluemir/wikinote/internal/backend/metadata"
 	"github.com/bluemir/wikinote/internal/plugins"
 )
 
@@ -30,7 +31,7 @@ func init() {
 	plugins.Register("giscus", New, &Options{})
 }
 
-func New(o interface{}, store *plugins.Store) (plugins.Plugin, error) {
+func New(o interface{}, store metadata.Store) (plugins.Plugin, error) {
 	opt, ok := o.(*Options)
 	if !ok {
 		return nil, errors.Errorf("option not matched")

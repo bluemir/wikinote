@@ -1,6 +1,10 @@
 package plugins
 
-type PluginInit func(opt interface{}, store *Store) (Plugin, error)
+import (
+	"github.com/bluemir/wikinote/internal/backend/metadata"
+)
+
+type PluginInit func(opt interface{}, store metadata.Store) (Plugin, error)
 
 type PluginInitDriver struct {
 	Init    PluginInit

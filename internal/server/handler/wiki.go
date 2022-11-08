@@ -56,7 +56,7 @@ func (handler *Handler) View(c *gin.Context) {
 				return
 			}
 
-			footerData, err := handler.backend.Plugin.WikiFooter(c.Request.URL.Path)
+			footerData, err := handler.backend.Plugin.GetWikiFooter(c.Request.URL.Path)
 			if err != nil {
 				logrus.Warn(err)
 				c.HTML(http.StatusInternalServerError, "/errors/internal-server-error.html", gin.H{})

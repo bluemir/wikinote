@@ -26,10 +26,10 @@ var tmpl = (app) => html`
 				<input name="password" type="password" placeholder="password"/>
 			</dd>
 			<dt>
-				<label for="password">Password</label>
+				<label for="confirm">Password Confirm</label>
 			</dt>
 			<dd>
-				<input name="password" type="password" placeholder="password"/>
+				<input name="confirm" type="password" placeholder="password confirm"/>
 			</dd>
 
 		</dl>
