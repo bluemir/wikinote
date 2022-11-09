@@ -2,44 +2,53 @@ package backend
 
 import (
 	"io/ioutil"
+	"os"
 	"path/filepath"
 
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	yaml "gopkg.in/yaml.v3"
 )
 
 var defaultConfig = `
-front-page: front-page.md
+auth:
+  group:
+    unauthoized: guest
+    newcomer:
+    - viewer
+  binding:
+    "group/guest":
+    - viewer
+metadata:
+  file:
+    ext: .metadata
 plugins:
-- name: __test__
+- name: footer
   options:
-    testmap:
-      v1: "foo"
-      v2: "bar"
-roles:
-- name: default
-  rules:
-  - verbs:
-    - read
-    resource:
-      kind: "%image,wiki"
+    text: |
+      powered by wikinote
 `
 
 func loadConfigFile(wikipath string) (*Config, error) {
 	configPath := filepath.Join(wikipath, ".app/config.yaml")
 	conf := Config{}
-	if err := yaml.Unmarshal([]byte(defaultConfig), &conf); err != nil {
-		return nil, err
-	}
 
 	buf, err := ioutil.ReadFile(configPath)
 	if err != nil {
-		logrus.Warn("config.yaml not exist.", err)
-		return &conf, nil
+		switch {
+		case errors.Is(err, os.ErrNotExist):
+			logrus.Warn("config.yaml not exist.", err)
+			if err := ioutil.WriteFile(configPath, []byte(defaultConfig), 0644); err != nil {
+				return nil, err
+			}
+			buf = []byte(defaultConfig)
+		default:
+			return nil, err
+		}
 	}
 
 	if err = yaml.Unmarshal(buf, &conf); err != nil {
-		logrus.Warn("config.yaml not parsed.", err)
+		logrus.Warn("config.yaml is not valid: ", err)
 	}
 
 	return &conf, nil
