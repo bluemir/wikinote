@@ -15,23 +15,16 @@ type Config struct {
 	ObjectStorage *struct {
 		Prefix string
 	}
-	Gorm *struct {
-		DBPath string
-	}
+	Gorm *GormStoreConfig
 }
 
 func New(conf *Config) (Store, error) {
 	//validation
-	switch count(
+	if count(
 		conf.File != nil,
 		conf.ObjectStorage != nil,
 		conf.Gorm != nil,
-	) {
-	case 0:
-		return nil, errors.New("there is no option")
-	case 1:
-		break
-	default:
+	) > 1 {
 		return nil, errors.New("multiple option exist")
 	}
 
@@ -44,10 +37,13 @@ func New(conf *Config) (Store, error) {
 	case conf.ObjectStorage != nil:
 		return &ObjectStorageStore{}, nil
 	case conf.Gorm != nil:
-		return &GormStore{}, nil
+		if err := conf.Gorm.DB.AutoMigrate(&GormEntry{}); err != nil {
+			return nil, err
+		}
+		return &GormStore{conf.Gorm.DB}, nil
+	default:
+		return nil, errors.New("there is no option")
 	}
-
-	return nil, nil
 }
 
 func count(bs ...bool) int {

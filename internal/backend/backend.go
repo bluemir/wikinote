@@ -50,6 +50,9 @@ func New(wikipath string, users map[string]string) (*Backend, error) {
 	if conf.Metadata.File != nil && conf.Metadata.File.Path == "" {
 		conf.Metadata.File.Path = wikipath
 	}
+	if conf.Metadata.Gorm != nil {
+		conf.Metadata.Gorm.DB = db
+	}
 	mdstore, err := metadata.New(&conf.Metadata)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to init metadata module")
