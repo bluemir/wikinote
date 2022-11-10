@@ -89,7 +89,7 @@ export async function request(method, url, options) {
 					result.json = JSON.parse(result.text);
 				}
 
-				if (req.status >= 200, req.status < 300){
+				if (req.status >= 200 && req.status < 300){
 					resolve(result)
 				} else {
 					reject(result);
@@ -103,25 +103,18 @@ export async function request(method, url, options) {
 			// so forced set header
 			req.open(method, resolveParam(url, opts.params) + queryString(opts.query), true, opts.auth.user, opts.auth.password);
 			req.setRequestHeader("Authorization", "Basic " + btoa(opts.auth.user+":"+opts.auth.password));
-			console.log(req)
 		} else {
 			req.open(method, resolveParam(url, opts.params) + queryString(opts.query), true);
 		}
 
-		Object.keys(opts.header || {}).forEach(function(name){
-			req.setRequestHeader(name, opts.header[name]);
+		Object.keys(opts.headers || {}).forEach(function(name){
+			req.setRequestHeader(name, opts.headers[name]);
 		});
 
 		switch (typeof opts.body) {
 			case "object":
 				if (opts.body instanceof FormData) {
 					req.send(opts.body);
-				} else if(opts.body instanceof File) {
-					let file = opts.body;
-					if (file.type != "") {
-						req.setRequestHeader("Content-Type", file.type)
-					}
-					req.send(file);
 				} else {
 					req.setRequestHeader("Content-Type", "application/json")
 					req.send(JSON.stringify(opts.body))
@@ -172,7 +165,37 @@ export function form(form) {
 		return obj;
 	}, {});
 }
-export  function animateFrame(callback, {fps = 30} = {}) {
+
+// for await ( let dt of $.frames()){ /* do something */ }
+export function frames({fps = 30} = {}) {
+	var stop = false;
+	var fpsInterval = 1000 / fps;
+	var then = Date.now();
+
+	async function* f() {
+		while(true) {
+			yield new Promise((resolve, reject) => {
+				const animate = () => {
+					var now = Date.now();
+					var elapsed = now - then;
+
+					if (elapsed > fpsInterval) {
+						then = now - (elapsed%fpsInterval);
+
+						resolve(elapsed - (elapsed%fpsInterval))
+					} else {
+						// wait next frame
+						requestAnimationFrame(animate)
+					}
+				}
+				requestAnimationFrame(animate)
+			});
+		}
+	}
+	return f();
+}
+
+export function animateFrame(callback, {fps = 30} = {}) {
 	var stop = false;
 	var fpsInterval = 1000 / fps;
 	var then = Date.now();
@@ -287,6 +310,50 @@ Object.keyValues= function(obj, f) {
 		return {key, value};
 	});
 }
+Object.map = function(obj, f) {
+	return Object.entries(obj).map(([key, value]) => f({key,value})).reduce((obj, {key,value}={}) => (key?{ ...obj, [key]: value}:obj), {});
+}
+Object.same = function(x, y) {
+	if (x === null || x === undefined || y === null || y === undefined) {
+		return x === y;
+	}
+	if (x.constructor !== y.constructor) {
+		return false;
+	}
+	if (x instanceof RegExp || x instanceof Function) {
+		return x === y;
+	}
+	if (x === y || x.valueOf() === y.valueOf()) {
+		return true;
+	}
+	if (Array.isArray(x) && x.length !== y.length) {
+		return false;
+	}
+
+	// if they are dates, they must had equal valueOf
+	if (x instanceof Date) {
+		return false;
+	}
+
+	if (!(x instanceof Object)) {
+		return false;
+	}
+	if (!(y instanceof Object)) {
+		return false;
+	}
+	let xk = Object.keys(x);
+	let yk = Object.keys(y);
+
+	if (xk.length != yk.length) {
+		return false
+	}
+	if (!xk.every(i => yk.indexOf(i) !== -1)) {
+		return false
+	}
+
+	// recursive object equality check
+	return xk.every(i => Object.same(x[i], y[i]))
+}
 
 const sig = "__bm.js_inserted__"
 function extend(TargetClass, proto){
@@ -335,12 +402,10 @@ extend(Element, {
 extend(EventTarget, {
 	on: function(name, handler, opt) {
 		this.addEventListener(name, handler, opt);
-
 		return this;
 	},
 	off: function(name, handler, opt) {
 		this.removeEventListener(name, handler, opt)
-
 		return this;
 	},
 	fireEvent: function(name, detail) {
@@ -351,26 +416,36 @@ extend(EventTarget, {
 });
 
 extend(NodeList, {
-	"map":    Array.prototype.map,
-	"filter": Array.prototype.filter,
+	map:    Array.prototype.map,
+	filter: Array.prototype.filter,
 	//"forEach": Array.prototype.forEach,
 });
 extend(HTMLCollection, {
-	"map":     Array.prototype.map,
-	"filter":  Array.prototype.filter,
-	"forEach": Array.prototype.forEach,
+	map:     Array.prototype.map,
+	filter:  Array.prototype.filter,
+	forEach: Array.prototype.forEach,
 });
 
 extend(Array, {
-	"unique": function() {
-		return [... new Set(this)];
+	unique: function(isSame) {
+		if (!isSame) {
+			return [... new Set(this)];
+		}
+		return this.filter((v, i)  => this.first(v, isSame) == i);
 	},
-	"promise": function() {
+	promise: function() {
 		var arr = this;
 		return {
 			all:  () => Promise.all(arr),
 			any:  () => Promise.any(arr),
 			race: () => Promise.race(arr),
+		}
+	},
+	first: function(v, isSame = ((a,b)=>a==b)) {
+		for (let i = 0; i < this.length; i ++){
+			if(isSame(this[i], v)) {
+				return i;
+			}
 		}
 	},
 });
@@ -417,51 +492,12 @@ export class CustomElement extends HTMLElement {
 		}
 		return this["--handler"][name];
 	}
-	static define(name) {
-		if (!name) {
-			name = transformCamelcaseToElementName(this.name)
-		}
-		// TODO validation check
-		// TODO conflict check
-		console.debug("regitster element", name);
-		customElements.define(name, this);
-	}
 	render() {
 		if(config.plugin.lithtml) {
 			config.plugin.lithtml.render(this.constructor.T(this), this.shadow)
 		}
 		// TODO other template engine
 	}
-}
-function transformCamelcaseToElementName(name) {
-	let t = "";
-	let tokens = [];
-	for (let i = 0; i < name.length; i ++){
-		let c = name[i];
-
-		if (/[A-Z]/.test(c)) {
-			if (/^[A-Z]+$/.test(t)) {
-				t += c;
-			} else {
-				tokens.push(t);
-				t = c;
-			}
-		} else if(/[_]/.test(c)) {
-			tokens.push(t);
-			t = "";
-		} else {
-			if (/^[A-Z]+$/.test(t)) {
-				// pick last
-				tokens.push(t.substring(0, t.length-1));
-				t = t[t.length-1]+c;
-			} else {
-				t += c;
-			}
-		}
-	}
-	tokens.push(t);
-
-	return tokens.filter(t => t.length > 0).map(t => t.toLowerCase()).join("-");
 }
 
 export class AwaitEventTarget {
@@ -505,6 +541,7 @@ export class AwaitEventTarget {
 		return this.dispatchEvent(evt);
 	}
 }
+
 export class AwaitQueue {
 	constructor() {
 		this.queue = [];
@@ -518,27 +555,54 @@ export class AwaitQueue {
 				}
 			}
 			return {
-				value: new Promise((resolve) => {
-					this.resolve = resolve.bind(this);
+				value: () => new Promise((resolve) => {
+					this.resolve = resolve;
 				}),
 			};
 		}
 		return { next }
 	}
 	add(f) {
+		if (!(f instanceof Function)) {
+			throw Error("must put function");
+		}
 		if(this.resolve) {
-			this.resolve(f);
+			this.resolve(f());
 			this.resolve = null;
 			return
 		}
 		this.queue.push(f)
+	}
+	remove(f) {
+		this.queue = this.queue.filter(job => job != f);
 	}
 	get length() {
 		return this.queue.length;
 	}
 }
 
-// for test
-export var __test__ = {
-	transformCamelcaseToElementName,
+export function logger(opt){
+	return new Logger(opt);
+}
+class Logger {
+	constructor({show, name} = {}) {
+		this.show = show;
+		this.name = name;
+	}
+	debug(message) {
+		if(this.show) return;
+		console.debug.apply(console, arguments);
+	}
+	info(message) {
+		if(this.show) return;
+		console.info.apply(console, arguments);
+	}
+	warn(message) {
+		if(this.show) return;
+		console.warn.apply(console, arguments);
+	}
+	error(message) {
+		if(this.show) return;
+		console.error.apply(console, arguments);
+	}
 }
