@@ -54,7 +54,6 @@ build/yarn-updated: package.json
 .watched_sources: package.json
 build/docker-image: package.json
 
-
 build-tools: build/tools/npm build/tools/yarn build/tools/npx
 build/tools/npm:
 	@which $(notdir $@)

@@ -12,8 +12,8 @@ type GormStore struct {
 }
 
 type GormEntry struct {
-	Path  string
-	Key   string
+	Path  string `gorm:"primary_key"`
+	Key   string `gorm:"primary_key"`
 	Value string
 }
 

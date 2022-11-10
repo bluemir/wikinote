@@ -1,10 +1,13 @@
+{{ define "head" }}
+		<style>@import "/!/static/css/markdown.css";</style>
+{{ end }}
 {{ define "contents" }}
 <wikinote-viewer-markdown>
 	{{ .content }}
 </wikinote-viewer-markdown>
 <wikinote-plugin-footer>
 	{{ range .footers }}
-	{{.}}
+	<p>{{.}}</p>
 	{{ end }}
 </wikinote-plugin-footer>
 {{ end }}
