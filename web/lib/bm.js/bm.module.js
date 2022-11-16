@@ -3,18 +3,9 @@
 //
 // Usage
 // import * as $ from "bm.module.js";
-
 export var config = {
 	hook: {
 		preRequest: function(method, url, opt) { return opt }
-	},
-	plugin: {
-		/*
-		import {config} from "../lib/bm.js/bm.module.js";
-		import * as lithtml from 'lit-html';
-
-		config.plugin.lithtml = lithtml;
-		*/
 	},
 }
 
@@ -452,10 +443,13 @@ extend(Array, {
 
 
 export class CustomElement extends HTMLElement {
-	constructor() {
+	constructor({enableShadow = true} = {}) {
 		super();
 
-		this["--shadow"]  = this.attachShadow({mode: 'open'})
+		if (enableShadow) {
+			//this["--shadow"] = this.attachShadow({mode: 'open'})
+			this.attachShadow({mode: 'open'})
+		}
 		this["--handler"] = {}
 	}
 	// syntactic sugar
@@ -470,7 +464,7 @@ export class CustomElement extends HTMLElement {
 			old: oldValue,
 			new: newValue,
 		});
-		this.onAttributeChanged && this.onAttributeChanged();
+		this.onAttributeChanged && this.onAttributeChanged(name, oldValue, newValue);
 	}
 	connectedCallback()  {
 		this.fireEvent("connected")
@@ -481,7 +475,8 @@ export class CustomElement extends HTMLElement {
 		this.onDisconnected && this.onDisconnected();
 	}
 	get shadow() {
-		return this["--shadow"];
+		return this.shadowRoot;
+		//return this["--shadow"];
 	}
 	handler(h) {
 		var name = h instanceof Function ? h.name : h;
@@ -491,12 +486,6 @@ export class CustomElement extends HTMLElement {
 			this["--handler"][name] = evt => f.call(this, evt.detail);
 		}
 		return this["--handler"][name];
-	}
-	render() {
-		if(config.plugin.lithtml) {
-			config.plugin.lithtml.render(this.constructor.T(this), this.shadow)
-		}
-		// TODO other template engine
 	}
 }
 

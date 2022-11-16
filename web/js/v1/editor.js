@@ -7,6 +7,7 @@ import {Shortcut} from "shortcut.js";
 var tmpl = (app) => html`
 <style>
 	@import url("/!/static/css/color.css");
+	@import url("/!/static/css/markdown.css");
 
 	:host {
 		display: block;
@@ -73,7 +74,7 @@ var tmpl = (app) => html`
 	<menu class="tabs-header">
 		<a class="btn" href="#editor"    tab="editor"    @click="${evt => app.showEditor()}" >Edit</a>
 		<a class="btn" href="#preview"   tab="preview"   @click="${evt => app.showPreview()}">Preview</a>
-		<a class="btn" href="#attribute" tab="attribute">Attribute</a>
+		<!--a class="btn" href="#attribute" tab="attribute">Attribute</a-->
 	</menu>
 	<section class="panel editor">
 		<form method="POST" action="${location.pathname}">
@@ -81,7 +82,9 @@ var tmpl = (app) => html`
 			<input type="submit" value="Save"/>
 		</form>
 	</section>
-	<section class="panel preview wiki-contents">
+	<section class="panel preview">
+		<wikinote-viewer-markdown>
+		</wikinote-viewer-markdown>
 	</section>
 	<section class="panel attribute">
 		<script type="module" src="/!/static/js/kv-editor.js"></script>
@@ -97,14 +100,11 @@ class WikinoteEditor extends $.CustomElement {
 	}
 
 	onConnected() {
-		console.log("connected")
 		this.render();
 
 		var sc = new Shortcut($.get("body"));
-		sc.add("ctrl+space",  e => this.previewToggle());
-		sc.add("alt + space", e => this.previewToggle());
-		sc.add("alt + .",     e => this.previewToggle());
-		sc.add("alt + a",     e => this.attribute());
+		sc.add("ctrl+shift+.", e => this.nextTab());
+		sc.add("ctrl+shift+,", e => this.prevTab());
 
 		var editorShotcut = new Shortcut($.get(this.shadow, "form"));
 
@@ -140,7 +140,7 @@ class WikinoteEditor extends $.CustomElement {
 			body: str
 		})
 
-		var $preview = $.get(this.shadow, ".panel.preview");
+		var $preview = $.get(this.shadow, ".panel.preview wikinote-viewer-markdown");
 
 		if ( res.statusCode>=200 && res.statusCode< 300) {
 			$preview.innerHTML = res.text;
@@ -153,13 +153,6 @@ class WikinoteEditor extends $.CustomElement {
 	showEditor() {
 		this.state = "editor";
 		$.get(this.shadow, ".editor textarea").focus();
-	}
-	previewToggle() {
-		if (this.state == "preview") {
-			this.showEditor();
-		} else {
-			this.showPreview();
-		}
 	}
 
 	// attribute

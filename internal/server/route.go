@@ -24,8 +24,7 @@ func (server *Server) RegisterRoute(app gin.IRouter) {
 	{
 		special.Group("/static", server.staticCache).StaticFS("/", static.Files.HTTPBox())
 
-		special.GET("/auth/login", auth.Login, server.redirectToFrontPage)
-		special.GET("/auth/logout", auth.Logout, server.redirectToFrontPage)
+		special.GET("/auth/login", auth.Login)
 		special.GET("/auth/profile", server.handler.Profile)
 
 		// Register

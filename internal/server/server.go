@@ -5,8 +5,6 @@ import (
 	"os"
 
 	"github.com/gin-contrib/location"
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/autotls"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
@@ -57,13 +55,19 @@ func Run(b *backend.Backend, conf *Config) error {
 	app.Use(gin.LoggerWithWriter(writer))
 
 	// Recovery
-	app.Use(gin.Recovery())
+	//app.Use(gin.Recovery())
+	app.Use(gin.CustomRecovery(func(c *gin.Context, recovered interface{}) {
+		if err, ok := recovered.(string); ok {
+			c.String(http.StatusInternalServerError, err)
+		}
+		c.AbortWithStatus(http.StatusInternalServerError)
+	}))
 
 	app.Use(location.Default(), fixURL)
 
 	// Session
-	store := cookie.NewStore([]byte("__wikinote__"))
-	app.Use(sessions.Sessions("session", store))
+	//store := cookie.NewStore([]byte("__wikinote__"))
+	//app.Use(sessions.Sessions("session", store))
 
 	// Renderer
 	if r, err := NewRender(); err != nil {

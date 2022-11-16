@@ -65,10 +65,20 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	if u != nil && u.Name == c.Query("exclude") {
-		HTTPErrorHandler(c, auth.ErrUnauthorized, WithAuthHeader)
-		return
+	if u != nil {
+		if c.Query("exclude") == "" {
+			// logined, but first try.
+			c.Redirect(http.StatusTemporaryRedirect, "/!/auth/login?exclude="+u.Name)
+			return
+		}
+
+		if u != nil && u.Name == c.Query("exclude") {
+			// logined, but try to login same id
+			HTTPErrorHandler(c, auth.ErrUnauthorized, WithAuthHeader)
+			return
+		}
 	}
+	c.Redirect(http.StatusTemporaryRedirect, "/")
 }
 func Me(c *gin.Context) {
 	user, err := User(c)
@@ -77,9 +87,6 @@ func Me(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, user)
-}
-func Logout(c *gin.Context) {
-	HTTPErrorHandler(c, auth.ErrUnauthorized)
 }
 
 type ResourceGetter func(c *gin.Context) (auth.Resource, error)

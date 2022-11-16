@@ -130,7 +130,7 @@ var tmpl = (app) => html`
 					<li><a href="?delete">Delete</a></li>
 					<hr>
 					<!-- TODO make split -->
-					<li><a href="/!/auth/login" @click=${evt => app.login(evt)} >Login</a></li>
+					<li><a href="/!/auth/login">Login</a></li>
 					<li><a href="/!/auth/profile">Profile</a></li>
 					<li><a href="/!/auth/register">Sign Up</a></li>
 				</ul>

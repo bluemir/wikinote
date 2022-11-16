@@ -63,7 +63,7 @@ func (handler *Handler) View(c *gin.Context) {
 				return
 			}
 
-			c.HTML(http.StatusOK, "/views/markdown.html", gin.H{
+			c.HTML(http.StatusOK, PageMarkdown, gin.H{
 				"content": template.HTML(renderedData),
 				"footers": footerData,
 			})
@@ -71,11 +71,11 @@ func (handler *Handler) View(c *gin.Context) {
 		}
 	case "image":
 		//handler.backend.FileExist(
-		c.HTML(http.StatusOK, "/views/image.html", gin.H{
+		c.HTML(http.StatusOK, PageImage, gin.H{
 			"path": c.Request.URL.Path,
 		})
 	case "video":
-		c.HTML(http.StatusOK, "/views/video.html", gin.H{
+		c.HTML(http.StatusOK, PageVideo, gin.H{
 			"path": c.Request.URL.Path,
 		})
 	default:
@@ -124,12 +124,12 @@ func (handler *Handler) UpdateWithForm(c *gin.Context) {
 	}{}
 
 	if err := c.ShouldBind(req); err != nil {
-		c.HTML(http.StatusBadRequest, "/errors/internal-error.html", gin.H{})
+		c.HTML(http.StatusBadRequest, PageErrBadRequest, gin.H{})
 		return
 	}
 
 	if err := handler.backend.FileWrite(p, []byte(req.Data)); err != nil {
-		c.HTML(http.StatusInternalServerError, "/errors/not-found.html", gin.H{})
+		c.HTML(http.StatusInternalServerError, PageErrInternalServerError, gin.H{})
 		c.Abort()
 		return
 	}
@@ -142,9 +142,8 @@ func (handler *Handler) Update(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	logrus.Tracef("%x", data[:8])
 	if err := handler.backend.FileWrite(p, data); err != nil {
-		c.HTML(http.StatusInternalServerError, "/errors/not-found.html", gin.H{})
+		c.HTML(http.StatusInternalServerError, PageErrInternalServerError, gin.H{})
 		c.Abort()
 		return
 	}
@@ -163,13 +162,13 @@ func (handler *Handler) UploadForm(c *gin.Context) {
 }
 func (handler *Handler) Delete(c *gin.Context) {
 	if c.GetHeader("X-Confirm") != path.Base(c.Request.URL.Path) {
-		c.HTML(http.StatusBadRequest, "/errors/bad-request.html", gin.H{})
+		c.HTML(http.StatusBadRequest, PageErrBadRequest, gin.H{})
 		return
 	}
 
 	err := handler.backend.FileDelete(c.Request.URL.Path)
 	if err != nil {
-		c.HTML(http.StatusInternalServerError, "/errors/internal-sever-error.html", gin.H{})
+		c.HTML(http.StatusInternalServerError, PageErrInternalServerError, gin.H{})
 		return
 	}
 	c.Status(http.StatusNoContent)

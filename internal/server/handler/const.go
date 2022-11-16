@@ -1,12 +1,14 @@
 package handler
 
 const (
-	PageBadRequest          = "/errors/bad-request.html"
-	PageInternalServerError = "/errors/internal-server-error.html"
-	PageNotFound            = "/errors/not-found.html"
-	PageForbidden           = "/errors/forbidden.html"
-	PageMarkdown            = "/views/markdown.html"
-	PageEditor              = "/editor.html"
-	PageDelete              = "/delete.html"
-	PageWelcome             = "/welcome.html"
+	PageMarkdown               = "/viewers/markdown.html"
+	PageImage                  = "/viewers/image.html"
+	PageVideo                  = "/viewers/video.html"
+	PageEditor                 = "/editor.html"
+	PageDelete                 = "/delete.html"
+	PageWelcome                = "/welcome.html"
+	PageErrBadRequest          = "/errors/bad-request.html"
+	PageErrForbidden           = "/errors/forbidden.html"
+	PageErrNotFound            = "/errors/not-found.html"
+	PageErrInternalServerError = "/errors/internal-server-error.html"
 )
