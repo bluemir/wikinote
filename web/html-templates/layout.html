@@ -9,11 +9,11 @@
 		<title>{{ block "title" . }}Wikinote{{ end }}</title>
 	</head>
 	<body>
-		<wikinote-layout>
+		<wikinote-page>
 			{{ block "contents" . }}
 			<!-- contents here -->
 			{{ end }}
-		</wikinote-layout>
-		<script type="module" src="/!/static/js/v1/index.js"></script>
+		</wikinote-page>
+		<script type="module" src="/!/static/js/index.js"></script>
 	</body>
 </html>

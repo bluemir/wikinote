@@ -27,6 +27,7 @@ build/static/%: web/%
 
 ## esbuild
 STATICS += build/static/js/v1/index.js # entrypoint
+STATICS += build/static/js/index.js # entrypoint
 build/static/js/%: export NODE_PATH=web/js:web/lib
 build/static/js/%: $(JS_SOURCES) build/yarn-updated
 	@$(MAKE) build/tools/npx

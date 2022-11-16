@@ -451,6 +451,8 @@ export class CustomElement extends HTMLElement {
 			this.attachShadow({mode: 'open'})
 		}
 		this["--handler"] = {}
+
+		this.render && this.render();
 	}
 	// syntactic sugar
 	attributeChangedCallback(name, oldValue, newValue) {
@@ -467,12 +469,13 @@ export class CustomElement extends HTMLElement {
 		this.onAttributeChanged && this.onAttributeChanged(name, oldValue, newValue);
 	}
 	connectedCallback()  {
-		this.fireEvent("connected")
+		this.render && this.render();
 		this.onConnected && this.onConnected();
+		this.fireEvent("connected")
 	}
 	disconnectedCallback() {
-		this.fireEvent("disconnected")
 		this.onDisconnected && this.onDisconnected();
+		this.fireEvent("disconnected")
 	}
 	get shadow() {
 		return this.shadowRoot;
