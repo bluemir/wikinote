@@ -3,7 +3,6 @@
 GO_SOURCES = $(shell find . -name "vendor"  -prune -o \
                             -type f -name "*.go" -print)
 
-.watched_sources: $(GO_SOURCES) go.mod go.sum
 build/docker-image: $(GO_SOURCES)
 
 .PHONY: build

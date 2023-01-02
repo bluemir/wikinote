@@ -128,6 +128,8 @@ func (handler *Handler) UpdateWithForm(c *gin.Context) {
 		return
 	}
 
+	logrus.Tracef("data: %s", req.Data)
+
 	if err := handler.backend.FileWrite(p, []byte(req.Data)); err != nil {
 		c.HTML(http.StatusInternalServerError, PageErrInternalServerError, gin.H{})
 		c.Abort()

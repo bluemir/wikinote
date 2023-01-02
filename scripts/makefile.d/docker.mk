@@ -23,8 +23,6 @@ build/docker-image.pushed: build/docker-image
 docker-run: build/docker-image ## Run docker container
 	docker run -it --rm -v $(PWD)/runtime:/var/run/wiki $(shell cat $<) $(APP_NAME) -vvv server
 
-.watched_sources: Dockerfile
-
 tools: build/tools/docker
 build/tools/docker:
 	@which $(notdir $@)

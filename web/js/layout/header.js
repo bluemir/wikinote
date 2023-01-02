@@ -11,36 +11,64 @@ var tmpl = (app) => html`
 			color:      var(--header-fg-color);
 		}
 
+		header {
+			display: grid;
+			grid-template-columns: 1fr auto;
+			grid-template-areas:
+				"logo search"
+				"nav  menu";
+		}
+
 		#logo a {
 			color:      var(--header-fg-color);
 			text-decoration: none;
+			font-size: 2rem;
+			font-weight: bold;
+		}
+		/* nav */
+		c-breadcrumbs {
+			align-self: end;
+			margin-bottom: 0.3rem;
+		}
+
+		*:not(:defined) {
+			display:none;
+		}
+
+		menu {
+			align-self: end;
+			justify-self: end;
+			padding: 0px;
+			margin: 0px;
 		}
 
 	</style>
-	<header>
+	<header part="wrapper">
 		<section id="logo">
 			<a href="/">Wikinote</a>
 		</section>
 		<section class="search">
+			<form>
+				<input />
+				<button><c-icon kind="search"></c-icon></button>
+			</form>
 		</section>
-		<nav>
-			${app.breadcrumbs.map(item => html`/ <a href="${item.path}">${item.name}</a> `)}
-		</nav>
+		<c-breadcrumbs></c-breadcrumbs>
 		<menu>
-			<ul>
-				<li><a href="?edit">Edit</a></li>
-				<li>
-					<a href="">More</a>
-					<ul class="sub">
-						<li><a href="?delete">Delete</a></li>
-						<hr>
-						<!-- TODO make split -->
-						<li><a href="/!/auth/login">Login</a></li>
-						<li><a href="/!/auth/profile">Profile</a></li>
-						<li><a href="/!/auth/register">Sign Up</a></li>
-					</ul>
-				</li>
-			</ul>
+			<c-button>
+				<a href="?edit">Edit</a>
+			</c-button>
+			<c-dropdown title="More">
+				<c-dropdown-item>
+					<a href="/!/auth/login">Login</a>
+				</c-dropdown-item>
+				<c-dropdown-item>
+					<a href="/!/auth/login">Profile</a>
+				</c-dropdown-item>
+				<c-dropdown-item>
+					<a href="/!/auth/login">Sign Up</a>
+				</c-dropdown-item>
+			</c-dropdown>
 		</menu>
 	</header>
 `;
