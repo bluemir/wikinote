@@ -50,17 +50,19 @@ export async function request(method, url, options) {
 		var opts = o;
 	}
 
-	if (opts.timestamp !== false) {
+	if (opts.timestamp === true) {
 		opts.query = opts.query || {};
 		opts.query["_timestamp"] = Date.now();
 	}
 
 	// parse url
 	const u = new URL(url, location);
-	[...u.searchParams.entries()].reduce((obj, [key, value]) => {
+	opts.query = [...u.searchParams.entries()].reduce((obj, [key, value]) => {
 		obj[key] = value
 		return obj
-	}, opts.query);
+	}, opts.query || {});
+
+
 
 	u.search = "";
 	url = u.href
@@ -101,6 +103,8 @@ export async function request(method, url, options) {
 		Object.keys(opts.headers || {}).forEach(function(name){
 			req.setRequestHeader(name, opts.headers[name]);
 		});
+
+		opts.body = opts.body || opts.data;
 
 		switch (typeof opts.body) {
 			case "object":
@@ -155,6 +159,14 @@ export function form(form) {
 		}
 		return obj;
 	}, {});
+}
+export function debounce(func, {timeout = 200} = {}) {
+	let timer;
+
+	return function(...args) {
+		clearTimeout(timer);
+		timer = setTimeout(_=> func.apply(this, args), timeout)
+	}
 }
 
 // for await ( let dt of $.frames()){ /* do something */ }
@@ -292,7 +304,7 @@ function queryString(obj) {
 		return "";
 	}
 	return "?" + Object.keys(obj).map(function(key) {
-		return key + "=" + obj[key];
+		return key + "=" + encodeURIComponent(obj[key]);
 	}).join("&");
 }
 
