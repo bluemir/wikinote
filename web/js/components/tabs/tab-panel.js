@@ -3,8 +3,6 @@ import {html, render} from 'lit-html';
 
 var tmpl = (app) => html`
 	<style>
-		@import url("/static/css/common.css");
-
 		:host {
 		}
 	</style>

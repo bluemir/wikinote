@@ -10,8 +10,8 @@ import (
 )
 
 type SearchResult struct {
-	Line int
-	Text string
+	Line int    `json:"line"`
+	Text string `json:"text"`
 }
 
 func (fs *FileStore) Search(query string) (map[string][]SearchResult, error) {

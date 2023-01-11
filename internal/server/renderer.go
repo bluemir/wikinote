@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"html/template"
 	"os"
 	"path/filepath"
@@ -15,6 +16,10 @@ import (
 func NewRender() (render.HTMLRender, error) {
 	fMap := template.FuncMap{
 		"join": strings.Join,
+		"json": json.Marshal,
+		"toString": func(buf []byte) string {
+			return string(buf)
+		},
 	}
 	renderer := &HTMLRender{
 		templates: map[string]*template.Template{},

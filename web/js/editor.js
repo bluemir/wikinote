@@ -6,17 +6,17 @@ var tmpl = (app) => html`
 		@import url("/!/static/css/color.css");
 
 		textarea {
-			width: 100%;
 			min-height: 30rem;
-			max-width: 100%;
-			min-width: 100%;
+			width: 100%;
+			resize: vertical;
+			box-sizing: border-box;
 		}
 	</style>
 	<c-tabs selected="editor">
 		<c-tab-header slot="header" role="editor">Editor</c-tab-header>
 		<c-tab-panel  slot="panel"  role="editor">
 			<form method="POST" action="${location.pathname}">
-				<textarea name="data"></textarea>
+				<textarea name="data">${app.data}</textarea>
 				<button>Save</button>
 			</form>
 		</c-tab-panel>
@@ -33,8 +33,11 @@ class WikinoteEditor extends $.CustomElement {
 	}
 	async render() {
 		render(tmpl(this), this.shadow);
-		$.get(this.shadowRoot, "textarea").innerHTML = this.innerHTML;
 	}
 	// attribute
+	get data() {
+		console.log($.get(this, "c-data").text);
+		return $.get(this, "c-data").text;
+	}
 }
 customElements.define("wikinote-editor", WikinoteEditor);

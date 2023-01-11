@@ -12,9 +12,6 @@ var tmpl = (app) => html`
 			width: 100%;
 			height: 100%;
 		}
-		wikinote-header {
-
-		}
 		wikinote-header::part(wrapper), main {
 			padding: 0 2rem;
 			max-width: 1200px;
@@ -27,7 +24,6 @@ var tmpl = (app) => html`
 		}
 
 		main {
-			width: 100%;
 			padding: 2rem;
 			background: var(--contents-bg-color);
 		}

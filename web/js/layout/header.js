@@ -48,8 +48,8 @@ var tmpl = (app) => html`
 			<a href="/">Wikinote</a>
 		</section>
 		<section class="search">
-			<form>
-				<input />
+			<form action="/!/search">
+				<input name="q"/>
 				<button><c-icon kind="search"></c-icon></button>
 			</form>
 		</section>
@@ -81,18 +81,5 @@ class WikinoteHeader extends $.CustomElement {
 		render(tmpl(this), this.shadow);
 	}
 	// attribute
-	get breadcrumbs() {
-		const arr = location.pathname.split("/").filter(e => e.length);
-		if ( arr[0] == "!") {
-			return [];
-		}
-
-		return arr.map((item, index) => {
-			return {
-				name: item,
-				path: "/" + arr.slice(0, index+1).join("/"),
-			}
-		});
-	}
 }
 customElements.define("wikinote-header", WikinoteHeader);

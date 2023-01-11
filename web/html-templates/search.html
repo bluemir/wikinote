@@ -1,18 +1,6 @@
 {{ define "contents"}}
 <wikinote-search>
 	<h1>Search Result</h1>
-	<table>
-		{{range $key, $elem := .result }}
-		<tr>
-			<th colspan="2"><a href="{{$key}}">{{ $key }}</a></th>
-		</tr>
-		{{range $elem}}
-		<tr>
-			<th>{{.Line}}</th>
-			<td>{{.Text}}</td>
-		</tr>
-		{{end}}
-		{{end}}
-	</table>
+	<c-data>{{ .result | json | toString}}</c-data>
 </wikinote-search>
 {{ end }}
