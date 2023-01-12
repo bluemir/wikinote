@@ -31,7 +31,7 @@ class Tabs extends $.CustomElement {
 	async onConnected(){
 		let role = this.attr("selected") || $.get(this, `c-tab-header`).attr("role");
 
-		this.selected = role;
+		this.changePanel(role);
 	}
 	async onAttributeChanged(name, ov, nv) {
 		switch(name) {
@@ -39,7 +39,7 @@ class Tabs extends $.CustomElement {
 				if (ov == nv) {
 					return;
 				}
-				this.selected = nv;
+				this.changePanel(nv);
 				return
 		}
 	}
@@ -52,14 +52,20 @@ class Tabs extends $.CustomElement {
 	}
 
 	get selected() {
-		return $.get(this, `c-tab-panel.show`).attr("role");
+		return this.attr("selected");
 	}
 	set selected(role) {
 		this.attr("selected", role);
+	}
+	changePanel(role) {
 		$.all(this, `c-tab-header`).forEach(elem => elem.classList.remove("selected"));
 		$.get(this, `c-tab-header[role=${role}]`).classList.add("selected");
 		$.all(this, `c-tab-panel`).forEach(elem => elem.classList.remove("selected"));
 		$.get(this, `c-tab-panel[role=${role}]`).classList.add("selected");
+
+		$.all(this, `.selected`).forEach(e => {
+			e.fireEvent("active")
+		});
 	}
 }
 customElements.define("c-tabs", Tabs);
