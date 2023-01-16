@@ -10,13 +10,14 @@ var tmpl = (app) => html`
 			width: 100%;
 			resize: vertical;
 			box-sizing: border-box;
+			tab-size: 4;
 		}
 	</style>
 	<c-tabs selected="editor">
 		<c-tab-header slot="header" role="editor">Editor</c-tab-header>
 		<c-tab-panel  slot="panel"  role="editor">
 			<form method="POST" action="${location.pathname}">
-				<textarea name="data">${app.data}</textarea>
+				<textarea name="data" @keydown="${evt => app.handleTextareaInput(evt)}">${app.data}</textarea>
 				<button>Save</button>
 			</form>
 		</c-tab-panel>
@@ -49,9 +50,31 @@ class WikinoteEditor extends $.CustomElement {
 
 		elem.innerHTML = res.text;
 	}
+	handleTextareaInput(evt) {
+		switch(evt.code) {
+			case "Tab":
+				evt.preventDefault();
+				if (evt.shiftKey) {
+					// TODO remove tab
+				} else {
+					this.addTab();
+				}
+				return
+			default:
+				//console.log(evt);
+		}
+	}
+	addTab() {
+		var $textarea = $.get(this.shadow, "textarea[name=data]");
+		var start = $textarea.selectionStart;
+		var end = $textarea.selectionEnd;
+		var data = $textarea.value;
+
+		$textarea.value = data.substring(0, start) + "\t" + data.substring(end);
+		$textarea.selectionStart = $textarea.selectionEnd = start + 1;
+	}
 	// attribute
 	get data() {
-		console.log($.get(this, "c-data").text);
 		return $.get(this, "c-data").text;
 	}
 }
