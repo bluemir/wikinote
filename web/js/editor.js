@@ -21,8 +21,9 @@ var tmpl = (app) => html`
 			</form>
 		</c-tab-panel>
 		<c-tab-header slot="header" role="preview">Preview</c-tab-header>
-		<c-tab-panel  slot="panel"  role="preview">
+		<c-tab-panel  slot="panel"  role="preview" @active="${evt => app.loadPreview(evt)}">
 			<!-- use slot? or import css -->
+			<slot name="preview"></slot>
 		</c-tab-panel>
 	</c-tabs>
 `;
@@ -33,6 +34,20 @@ class WikinoteEditor extends $.CustomElement {
 	}
 	async render() {
 		render(tmpl(this), this.shadow);
+	}
+	async loadPreview(evt) {
+		// TODO show 'now loading..."
+
+		let data = $.get(this.shadowRoot, "form textarea")?.value;
+
+		let res = await $.request("POST", "/!/api/preview", {
+			data,
+		});
+
+
+		let elem = $.get(document, "[slot=preview]");
+
+		elem.innerHTML = res.text;
 	}
 	// attribute
 	get data() {
