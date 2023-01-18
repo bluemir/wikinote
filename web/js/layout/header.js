@@ -4,6 +4,9 @@ import {html, render} from 'lit-html';
 var tmpl = (app) => html`
 	<style>
 		@import url("/!/static/css/color.css");
+		*:not(:defined) {
+			display:none;
+		}
 
 		:host {
 			display: block;
@@ -19,23 +22,28 @@ var tmpl = (app) => html`
 				"nav  menu";
 		}
 
+		#logo {
+			grid-area: logo;
+		}
+
 		#logo a {
 			color:      var(--header-fg-color);
 			text-decoration: none;
 			font-size: 2rem;
 			font-weight: bold;
 		}
+		.search {
+			grid-area: search;
+		}
 		/* nav */
 		c-breadcrumbs {
+			grid-area: nav;
 			align-self: end;
 			margin-bottom: 0.3rem;
 		}
 
-		*:not(:defined) {
-			display:none;
-		}
-
 		menu {
+			grid-area: menu;
 			align-self: end;
 			justify-self: end;
 			padding: 0px;
@@ -53,7 +61,7 @@ var tmpl = (app) => html`
 				<button><c-icon kind="search"></c-icon></button>
 			</form>
 		</section>
-		<c-breadcrumbs></c-breadcrumbs>
+		${ app.isSpecialPath ? "": html`<c-breadcrumbs></c-breadcrumbs>` }
 		<menu>
 			<c-button>
 				<a href="?edit">Edit</a>
@@ -63,7 +71,7 @@ var tmpl = (app) => html`
 					<a href="/!/auth/login">Login</a>
 				</c-dropdown-item>
 				<c-dropdown-item>
-					<a href="/!/auth/login">Profile</a>
+					<a href="/!/auth/profile">Profile</a>
 				</c-dropdown-item>
 				<c-dropdown-item>
 					<a href="/!/auth/login">Sign Up</a>
@@ -81,5 +89,12 @@ class WikinoteHeader extends $.CustomElement {
 		render(tmpl(this), this.shadow);
 	}
 	// attribute
+	get isSpecialPath() {
+		const arr = location.pathname.split("/").filter(e => e.length);
+		if ( arr[0] == "!") {
+			return true;
+		}
+		return false;
+	}
 }
 customElements.define("wikinote-header", WikinoteHeader);

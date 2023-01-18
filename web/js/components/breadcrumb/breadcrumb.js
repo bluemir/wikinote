@@ -34,9 +34,6 @@ class Breadcrumbs extends $.CustomElement {
 	// attribute
 	get breadcrumbs() {
 		const arr = location.pathname.split("/").filter(e => e.length);
-		if ( arr[0] == "!") {
-			return [];
-		}
 
 		return arr.map((item, index) => {
 			return {

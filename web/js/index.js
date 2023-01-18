@@ -9,4 +9,4 @@ import "./viewers/video.js";
 
 import "./editor.js";
 import "./search.js";
-
+import "./profile.js";
