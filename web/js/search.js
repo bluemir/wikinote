@@ -23,7 +23,7 @@ var tmpl = (app) => html`
 		<tbody>
 			${Object.entries(app.data|| {}).map(([filename, matches]) => html`
 				<tr colspan="2">
-					${filename}
+					<a href="${filename}">${filename}</a>
 				</tr>
 				${matches.map((m) => html`
 					<tr>
