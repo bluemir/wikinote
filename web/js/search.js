@@ -16,13 +16,20 @@ var tmpl = (app) => html`
 			font-family: monospace;
 			font-size: 1rem;
 		}
+		tbody a {
+			color: var(--link-fg-color);
+			text-decoration: none;
+		}
+		tbody a:hover {
+			text-decoration: underline;
+		}
 	</style>
 	<table>
 		<thead>
 		</thead>
 		<tbody>
 			${Object.entries(app.data|| {}).map(([filename, matches]) => html`
-				<tr colspan="2">
+				<tr>
 					<a href="${filename}">${filename}</a>
 				</tr>
 				${matches.map((m) => html`

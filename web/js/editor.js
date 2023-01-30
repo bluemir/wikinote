@@ -26,6 +26,12 @@ var tmpl = (app) => html`
 			<!-- use slot? or import css -->
 			<slot name="preview"></slot>
 		</c-tab-panel>
+		<c-tab-header slot="header" role="upload">Upload</c-tab-header>
+		<c-tab-panel slot="panel" role="upload">
+			<form method="POST">
+				<input type="file" />
+			</form>
+		</c-tab-panel>
 	</c-tabs>
 `;
 

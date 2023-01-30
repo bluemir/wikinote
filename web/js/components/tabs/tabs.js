@@ -14,6 +14,10 @@ var tmpl = (app) => html`
 		::slotted(c-tab-panel.selected) {
 			display: block;
 		}
+		header {
+			margin-bottom: 1rem;
+			border-bottom: 1px solid gray;
+		}
 	</style>
 	<header @click=${evt => app.handleTabHeaderClick(evt)}>
 		<slot name="header"></slot>
@@ -48,6 +52,9 @@ class Tabs extends $.CustomElement {
 	}
 	async handleTabHeaderClick(evt) {
 		let role = evt.target.attr("role");
+		if (!role) {
+			return
+		}
 		this.selected = role;
 	}
 
