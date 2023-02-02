@@ -1,5 +1,6 @@
 import * as $ from "bm.js/bm.module.js";
 import {html, render} from 'lit-html';
+import {shortcut} from './shortcut.js';
 
 var tmpl = (app) => html`
 	<style>
@@ -44,6 +45,7 @@ class WikinoteEditor extends $.CustomElement {
 	}
 	onConnected() {
 		$.get(this.shadowRoot, "textarea").focus();
+		shortcut.add("ctrl+s", evt => this.save(evt))
 	}
 	async loadPreview(evt) {
 		// TODO show 'now loading..."
@@ -81,6 +83,13 @@ class WikinoteEditor extends $.CustomElement {
 
 		$textarea.value = data.substring(0, start) + "\t" + data.substring(end);
 		$textarea.selectionStart = $textarea.selectionEnd = start + 1;
+	}
+	async save(evt) {
+		let str = $.get(this.shadowRoot, "textarea").value;
+		let path = $.get(this.shadowRoot, "form").attr("action");
+		let res = await $.request("PUT", path, {
+			body: str
+		});
 	}
 	// attribute
 	get data() {
