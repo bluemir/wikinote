@@ -75,7 +75,9 @@ func (m *Manager) TriggerFileWriteHook(path string, data []byte) ([]byte, error)
 			// TODO report to event store and show it to admin?
 			logrus.Error(err)
 		}
-		data = newData
+		if newData != nil {
+			data = newData
+		}
 	}
 	return data, nil
 }

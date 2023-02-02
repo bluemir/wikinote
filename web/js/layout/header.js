@@ -91,8 +91,10 @@ class WikinoteHeader extends $.CustomElement {
 	// attribute
 	get isSpecialPath() {
 		const arr = location.pathname.split("/").filter(e => e.length);
-		if ( arr[0] == "!") {
-			return true;
+		switch (arr[0]) {
+			case "!":
+			case "%21":
+				return true;
 		}
 		return false;
 	}

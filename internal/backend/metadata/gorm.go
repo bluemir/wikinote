@@ -1,6 +1,7 @@
 package metadata
 
 import (
+	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )
 
@@ -23,6 +24,9 @@ func (store *GormStore) Take(path, key string) (string, error) {
 		Key:  key,
 	}
 	if err := store.DB.Take(entry).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return "", ErrNotFound
+		}
 		return "", err
 	}
 	return entry.Value, nil

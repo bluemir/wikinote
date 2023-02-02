@@ -40,8 +40,8 @@ func New(o interface{}, store metadata.Store) (plugins.Plugin, error) {
 
 func (r *Recents) FileWriteHook(path string, data []byte) ([]byte, error) {
 	list, err := r.read()
-	if err != nil {
-		return data, nil
+	if err != nil && !errors.Is(err, metadata.ErrNotFound) {
+		return data, err
 	}
 
 	if len(list) >= r.opt.Limit {
@@ -75,8 +75,8 @@ func (r *Recents) Route(app gin.IRouter) error {
 			result += fmt.Sprintf(`<p><a href="%s">%s</a> %s</p>`, d.Path, d.Path, d.Time.Local().Format(time.RFC3339))
 		}
 
-		c.HTML(http.StatusOK, "/view/markdown.html", gin.H{
-			"data": template.HTML(result),
+		c.HTML(http.StatusOK, "/viewers/markdown.html", gin.H{
+			"content": template.HTML(result),
 		})
 	})
 
