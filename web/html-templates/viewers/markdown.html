@@ -5,9 +5,7 @@
 <wikinote-viewer-markdown>
 	{{ .content }}
 </wikinote-viewer-markdown>
-<wikinote-plugin-footer>
-	{{ range .footers }}
-	<p>{{.}}</p>
-	{{ end }}
-</wikinote-plugin-footer>
+{{ range .footers }}
+<wikinote-plugin-footer>{{.}}</wikinote-plugin-footer>
+{{ end }}
 {{ end }}
