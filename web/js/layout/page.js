@@ -1,5 +1,6 @@
 import * as $ from "bm.js/bm.module.js";
 import {html, render} from 'lit-html';
+import {shortcut} from "shortcut.js";
 
 var tmpl = (app) => html`
 	<style>
@@ -39,6 +40,14 @@ var tmpl = (app) => html`
 class WikinotePage extends $.CustomElement {
 	constructor() {
 		super();
+	}
+	onConnected() {
+		shortcut.add(`ctrl+shift+e`, evt => {
+			// show editor
+			console.log("editor");
+
+			location.assign(location.pathname+"?edit");
+		})
 	}
 	async render() {
 		render(tmpl(this), this.shadow);

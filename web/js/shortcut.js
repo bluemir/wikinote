@@ -1,10 +1,9 @@
 import * as $ from "bm.js/bm.module.js";
 
-
 // tab + space
 // alt + s
 // ctrl + s
-//
+// ctrl + shift + e
 const noop = ()=>{}
 
 //var L = console;
@@ -146,4 +145,6 @@ const toCode = {
 	}
 })();
 
-export {Shortcut};
+let shortcut = new Shortcut(document.body);
+
+export {Shortcut, shortcut};

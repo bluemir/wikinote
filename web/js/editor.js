@@ -42,6 +42,9 @@ class WikinoteEditor extends $.CustomElement {
 	async render() {
 		render(tmpl(this), this.shadow);
 	}
+	onConnected() {
+		$.get(this.shadowRoot, "textarea").focus();
+	}
 	async loadPreview(evt) {
 		// TODO show 'now loading..."
 
