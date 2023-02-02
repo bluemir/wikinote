@@ -11,7 +11,6 @@ var icon = {
 }
 var tmpl = (app) => html`
 	<style>
-		@import url("/!/static/css/color.css");
 		.icon {
 			display: inline-block;
 			width: 1em;

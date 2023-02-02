@@ -4,8 +4,6 @@ import {html, render} from 'lit-html';
 
 var tmpl = (self) => html`
 	<style>
-		@import url("/static/css/common.css");
-
 		:host {
 			display: none;
 			position: fixed;

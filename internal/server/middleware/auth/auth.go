@@ -68,7 +68,7 @@ func Login(c *gin.Context) {
 	if u != nil {
 		if c.Query("exclude") == "" {
 			// logined, but first try.
-			c.Redirect(http.StatusTemporaryRedirect, "/!/auth/login?exclude="+u.Name)
+			c.Redirect(http.StatusTemporaryRedirect, "/-/auth/login?exclude="+u.Name)
 			return
 		}
 

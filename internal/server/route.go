@@ -20,7 +20,7 @@ var (
 func (server *Server) RegisterRoute(app gin.IRouter) {
 	app.GET("/", server.redirectToFrontPage)
 
-	special := app.Group("/!", reqtype.MarkHTML)
+	special := app.Group("/-", reqtype.MarkHTML)
 	{
 		special.Group("/static", server.staticCache).StaticFS("/", static.Files.HTTPBox())
 
@@ -33,15 +33,16 @@ func (server *Server) RegisterRoute(app gin.IRouter) {
 
 		special.GET("/search", authz(Global, "search"), server.handler.Search)
 
-		// plugins
-		server.Backend.Plugin.RouteHook(special.Group("/plugins"))
-
 	}
 	api := special.Group("/api", reqtype.MarkAPI)
 	{
 		api.POST("/preview", server.handler.Preview) // render body
 		api.GET("/me", auth.Me)
 	}
+
+	// plugins
+	server.Backend.Plugin.RouteHook(app.Group("/~"))
+
 	{
 		// - GET            render file or render functional page
 		//   - edit      : show editor

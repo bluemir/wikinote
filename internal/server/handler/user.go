@@ -23,14 +23,14 @@ func (handler *Handler) Register(c *gin.Context) {
 
 	if err := c.ShouldBind(req); err != nil {
 		c.HTML(http.StatusBadRequest, "/errors/bad-request.html", gin.H{
-			"retryURL": "/!/auth/register",
+			"retryURL": "/-/auth/register",
 		})
 		c.Abort()
 		return
 	}
 	if req.Password != req.Confirm {
 		c.HTML(http.StatusBadRequest, "/errors/bad-request.html", gin.H{
-			"retryURL": "/!/auth/register",
+			"retryURL": "/-/auth/register",
 			"message":  "password and password confirm not matched",
 		})
 		c.Abort()
@@ -45,7 +45,7 @@ func (handler *Handler) Register(c *gin.Context) {
 	})
 	if err != nil {
 		c.HTML(http.StatusInternalServerError, "/errors/internal-server-error.html", gin.H{
-			"retryURL": "/!/auth/register",
+			"retryURL": "/-/auth/register",
 			"message":  "fail to register new user try again",
 			"error":    err.Error(),
 		})
@@ -57,7 +57,7 @@ func (handler *Handler) Register(c *gin.Context) {
 	_, err = handler.backend.Auth.IssueToken(req.Username, req.Password, nil)
 	if err != nil {
 		c.HTML(http.StatusInternalServerError, "errors/internal-server-error.html", gin.H{
-			"retryURL": "/!/auth/register",
+			"retryURL": "/-/auth/register",
 			"message":  "fail to register new user try again",
 		})
 		c.Abort()

@@ -3,8 +3,6 @@ import {html, render} from 'lit-html';
 
 var tmpl = (app) => html`
 	<style>
-		@import url("/!/static/css/color.css");
-
 		nav {
 			font-size: 0.8rem;
 			color: var(--breadcrumbs-fg-color);

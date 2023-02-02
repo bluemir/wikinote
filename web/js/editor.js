@@ -4,7 +4,7 @@ import {shortcut} from './shortcut.js';
 
 var tmpl = (app) => html`
 	<style>
-		@import url("/!/static/css/color.css");
+		@import url("/-/static/css/color.css");
 
 		textarea {
 			min-height: 30rem;
@@ -52,7 +52,7 @@ class WikinoteEditor extends $.CustomElement {
 
 		let data = $.get(this.shadowRoot, "form textarea")?.value;
 
-		let res = await $.request("POST", "/!/api/preview", {
+		let res = await $.request("POST", "/-/api/preview", {
 			data,
 		});
 

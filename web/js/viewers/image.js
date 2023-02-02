@@ -3,7 +3,7 @@ import {html, render} from 'lit-html';
 
 var tmpl = (app) => html`
 	<style>
-		@import url("/!/static/css/color.css");
+		@import url("/-/static/css/color.css");
 	</style>
 	<img src=${app.attr("url")} />
 `;

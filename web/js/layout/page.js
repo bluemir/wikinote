@@ -4,7 +4,7 @@ import {shortcut} from "shortcut.js";
 
 var tmpl = (app) => html`
 	<style>
-		@import url("/!/static/css/color.css");
+		@import url("/-/static/css/color.css");
 
 		:host {
 			position: fixed;

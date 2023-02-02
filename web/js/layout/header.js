@@ -3,7 +3,7 @@ import {html, render} from 'lit-html';
 
 var tmpl = (app) => html`
 	<style>
-		@import url("/!/static/css/color.css");
+		@import url("/-/static/css/color.css");
 		*:not(:defined) {
 			display:none;
 		}
@@ -56,7 +56,7 @@ var tmpl = (app) => html`
 			<a href="/">Wikinote</a>
 		</section>
 		<section class="search">
-			<form action="/!/search">
+			<form action="/-/search">
 				<input name="q"/>
 				<button><c-icon kind="search"></c-icon></button>
 			</form>
@@ -68,13 +68,13 @@ var tmpl = (app) => html`
 			</c-button>
 			<c-dropdown title="More">
 				<c-dropdown-item>
-					<a href="/!/auth/login">Login</a>
+					<a href="/-/auth/login">Login</a>
 				</c-dropdown-item>
 				<c-dropdown-item>
-					<a href="/!/auth/profile">Profile</a>
+					<a href="/-/auth/profile">Profile</a>
 				</c-dropdown-item>
 				<c-dropdown-item>
-					<a href="/!/auth/login">Sign Up</a>
+					<a href="/-/auth/login">Sign Up</a>
 				</c-dropdown-item>
 			</c-dropdown>
 		</menu>
@@ -92,8 +92,8 @@ class WikinoteHeader extends $.CustomElement {
 	get isSpecialPath() {
 		const arr = location.pathname.split("/").filter(e => e.length);
 		switch (arr[0]) {
-			case "!":
-			case "%21":
+			case "-":
+			case "~":
 				return true;
 		}
 		return false;
