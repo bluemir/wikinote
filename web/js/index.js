@@ -10,4 +10,5 @@ import "./viewers/video.js";
 import "./editor.js";
 import "./search.js";
 import "./profile.js";
+import "./files.js";
 import "./plugin-footer.js";

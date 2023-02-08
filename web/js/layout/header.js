@@ -68,6 +68,10 @@ var tmpl = (app) => html`
 			</c-button>
 			<c-dropdown title="More">
 				<c-dropdown-item>
+					<a href="?files">Files</a>
+				</c-dropdown-item>
+				<hr />
+				<c-dropdown-item>
 					<a href="/-/auth/login">Login</a>
 				</c-dropdown-item>
 				<c-dropdown-item>

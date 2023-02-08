@@ -58,6 +58,31 @@ func (fs *FileStore) WriteStream(path string, r io.ReadCloser) error {
 func (fs *FileStore) Delete(path string) error {
 	return os.Remove(fs.getFullPath(path))
 }
+func (fs *FileStore) List(path string) ([]FileInfo, error) {
+	files, err := ioutil.ReadDir(fs.getFullPath(path))
+	if err != nil {
+		return nil, err
+	}
+	ret := []FileInfo{}
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+		if file.Name()[0] == '.' {
+			continue
+		}
+		ret = append(ret, FileInfo{
+			Name: file.Name(),
+			Path: filepath.Join(path, file.Name()),
+		})
+	}
+	return ret, nil
+}
+
+type FileInfo struct {
+	Name string `json:"name"`
+	Path string `json:"path"`
+}
 
 func (fs *FileStore) getFullPath(path string) string {
 	return filepath.Join(fs.wikipath, path)

@@ -1,6 +1,10 @@
 package backend
 
-import "io"
+import (
+	"io"
+
+	"github.com/bluemir/wikinote/internal/backend/files"
+)
 
 func (backend *Backend) FileRead(path string) ([]byte, error) {
 	// TODO post hook?
@@ -21,4 +25,7 @@ func (backend *Backend) FileWrite(path string, data []byte) error {
 
 func (backend *Backend) FileDelete(path string) error {
 	return backend.files.Delete(path)
+}
+func (backend *Backend) FileList(path string) ([]files.FileInfo, error) {
+	return backend.files.List(path)
 }

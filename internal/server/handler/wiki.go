@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"mime"
 	"net/http"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -80,6 +81,7 @@ func (handler *Handler) View(c *gin.Context) {
 		})
 	default:
 		if !strings.HasSuffix(c.Request.URL.Path, ".md") {
+			// or show files?
 			c.Redirect(http.StatusTemporaryRedirect, c.Request.URL.Path+".md")
 		}
 	}
@@ -162,6 +164,21 @@ func (handler *Handler) UploadForm(c *gin.Context) {
 		"path": path.Base(c.Request.URL.Path),
 	})
 }
+func (handler *Handler) Files(c *gin.Context) {
+	path := c.Request.URL.Path
+	if strings.HasSuffix(path, ".md") {
+		path = strings.TrimSuffix(path, ".md")
+	}
+	files, err := handler.backend.FileList(path)
+	if err != nil && !os.IsNotExist(err) {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.HTML(http.StatusOK, "/viewers/files.html", gin.H{
+		"files": files,
+	})
+}
 func (handler *Handler) Delete(c *gin.Context) {
 	if c.GetHeader("X-Confirm") != path.Base(c.Request.URL.Path) {
 		c.HTML(http.StatusBadRequest, PageErrBadRequest, gin.H{})
@@ -179,6 +196,7 @@ func (handler *Handler) Preview(c *gin.Context) {
 	data, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
+		return
 	}
 	renderedData, err := handler.backend.Render(data)
 	if err != nil {

@@ -20,8 +20,8 @@ var (
 func (server *Server) RegisterRoute(app gin.IRouter) {
 	app.GET("/", server.redirectToFrontPage)
 
-	special := app.Group("/-", reqtype.MarkHTML)
 	{
+		special := app.Group("/-", reqtype.MarkHTML)
 		special.Group("/static", server.staticCache).StaticFS("/", static.Files.HTTPBox())
 
 		special.GET("/auth/login", auth.Login)
@@ -34,8 +34,8 @@ func (server *Server) RegisterRoute(app gin.IRouter) {
 		special.GET("/search", authz(Global, "search"), server.handler.Search)
 
 	}
-	api := special.Group("/api", reqtype.MarkAPI)
 	{
+		api := app.Group("/-/api", reqtype.MarkAPI)
 		api.POST("/preview", server.handler.Preview) // render body
 		api.GET("/me", auth.Me)
 	}
@@ -57,7 +57,7 @@ func (server *Server) RegisterRoute(app gin.IRouter) {
 		pages.GET("edit", authz(Page, "update"), server.handler.EditForm)
 		pages.GET("raw", authz(Page, "read"), server.handler.Raw)
 		pages.GET("delete", authz(Page, "delete"), server.handler.DeleteForm)
-		pages.GET("upload", authz(Page, "update"), server.handler.UploadForm)
+		pages.GET("files", authz(Page, "update"), server.handler.Files)
 		pages.GET("*", authz(Page, "read"), server.handler.View)
 		pages.POST("*", authz(Page, "update"), server.handler.UpdateWithForm)
 		pages.PUT("*", authz(Page, "update"), server.handler.Update)
