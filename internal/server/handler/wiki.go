@@ -167,7 +167,8 @@ func (handler *Handler) UploadForm(c *gin.Context) {
 func (handler *Handler) Files(c *gin.Context) {
 	path := c.Request.URL.Path
 	if strings.HasSuffix(path, ".md") {
-		path = strings.TrimSuffix(path, ".md")
+		c.Redirect(http.StatusSeeOther, strings.TrimSuffix(path, ".md")+"?files")
+		return
 	}
 	files, err := handler.backend.FileList(path)
 	if err != nil && !os.IsNotExist(err) {
