@@ -1,0 +1,9 @@
+{{ define "head" }}
+<style>@import url("/-/static/css/markdown.css");</style>
+{{ end }}
+{{ define "contents" }}
+<wikinote-editor>
+	<c-data>{{.data}}</c-data>
+	<wikinote-viewer-markdown slot="preview"></wikinote-viewer-markdown>
+</wikinote-editor>
+{{ end }}

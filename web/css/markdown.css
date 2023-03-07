@@ -1,0 +1,37 @@
+@import url(./color.css);
+
+/* headers */
+wikinote-viewer-markdown h1 {
+	font-size: 2rem;
+	text-shadow: 1px 1px 5px var(--gray);
+}
+wikinote-viewer-markdown h2 {
+	font-size: 1.7rem;
+	border-bottom: 1px solid var(--gray);
+}
+wikinote-viewer-markdown h3 {
+	font-size: 1.5rem;
+}
+wikinote-viewer-markdown h4 {
+	font-size: 1.3rem;
+}
+wikinote-viewer-markdown h5 {
+	font-size: 1.2rem;
+}
+wikinote-viewer-markdown h6 {
+	font-size 1rem;
+}
+
+wikinote-viewer-markdown a {
+	color: var(--link-fg-color);
+	text-decoration: none;
+}
+wikinote-viewer-markdown a:hover {
+	text-decoration: underline;
+}
+wikinote-viewer-markdown table {
+	border-collapse: collapse;
+}
+wikinote-viewer-markdown table th, table td {
+	border: 1px solid var(--gray);
+}

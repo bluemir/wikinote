@@ -1,0 +1,10 @@
+/* Pre-styling unregistered elements
+ * prevent FOUC */
+*:not(:defined) {
+	display:none;
+}
+
+body {
+	margin: 0px;
+}
+

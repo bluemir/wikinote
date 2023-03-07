@@ -1,40 +1,78 @@
 package cmd
 
 import (
-	"errors"
 	"os"
 
-	docopt "github.com/docopt/docopt-go"
-	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"gopkg.in/alecthomas/kingpin.v2"
+
+	"github.com/bluemir/wikinote/cmd/config"
+
+	serverCmd "github.com/bluemir/wikinote/cmd/server"
 )
 
-func Execute(version string) error {
-	//docopt.Parse(doc, argv, help, version, optionsFirst)
-	args, err := docopt.Parse(usage, os.Args[1:], true, version, true)
+const (
+	describe        = ``
+	defaultLogLevel = logrus.InfoLevel
+)
+
+func Run(AppName string, Version string) error {
+	conf := config.NewConfig()
+
+	app := kingpin.New(AppName, describe)
+	app.Version(Version)
+
+	app.Flag("verbose", "Log level").
+		Short('v').
+		CounterVar(&conf.LogLevel)
+	app.Flag("log-format", "Log format").
+		StringVar(&conf.LogFormat)
+	app.PreAction(setupLogger(conf))
+
+	// app flags
+	app.Flag("wiki-path", "wiki data path").
+		Short('w').
+		Default(os.ExpandEnv("$HOME/wiki")).
+		PlaceHolder("$HOME/wiki").
+		StringVar(&conf.Backend.Wikipath)
+	app.Flag("admin-user", "admin user").
+		StringMapVar(&conf.Backend.AdminUsers)
+
+	// server flags
+
+	serverCmd.Register(app.Command("server", "server"), conf)
+	//clientCmd.Register(app.Command("client", "client"))
+
+	_, err := app.Parse(os.Args[1:])
 	if err != nil {
-		logrus.Panicf("error on parse usage %s", err)
 		return err
 	}
+	logrus.Debug("Shutdown")
 
-	logrus.Debug(args)
-	if args["--debug"].(bool) {
-		logrus.Info("Turn on debug mode")
-		logrus.SetLevel(logrus.DebugLevel)
-	} else {
-		gin.SetMode(gin.ReleaseMode)
-	}
-
-	switch args["<command>"] {
-	case "serve":
-		if err := doServe(args["<args>"].([]string), version); err != nil {
-			return err
-		}
-	case "user", "config":
-		// proxy
-		return errors.New("Not Implements")
-	default:
-		return errors.New("Not Implements")
-	}
 	return nil
+}
+func setupLogger(conf *config.Config) func(*kingpin.ParseContext) error {
+	return func(*kingpin.ParseContext) error {
+		level := logrus.Level(conf.LogLevel) + defaultLogLevel
+		logrus.SetOutput(os.Stderr)
+		logrus.SetLevel(level)
+		logrus.SetReportCaller(true)
+		logrus.Infof("logrus level: %s", level)
+
+		switch conf.LogFormat {
+		case "text-color":
+			logrus.SetFormatter(&logrus.TextFormatter{ForceColors: true})
+		case "text":
+			logrus.SetFormatter(&logrus.TextFormatter{})
+		case "json":
+			logrus.SetFormatter(&logrus.JSONFormatter{})
+		case "":
+			// do nothing. it means smart.
+		default:
+			return errors.Errorf("unknown log format")
+		}
+
+		return nil
+	}
 }

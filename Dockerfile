@@ -1,27 +1,48 @@
-FROM fedora:29 as builder
+ARG VERSION=dev
+FROM fedora:36 as build-env
 
-RUN dnf -y install \
-	nodejs \
-	golang \
-	git \
-	findutils \
-	make && dnf clean all
+RUN echo "fastestmirror=1" >> /etc/dnf/dnf.conf
+RUN dnf install -y \
+    make findutils which \
+    golang nodejs \
+    && dnf clean all
 
-RUN npm install -g less
+ENV GOPATH=/root/go
+ENV PATH=$PATH:/root/go/bin
 
-ENV GOPATH /go
-ENV PATH /go/bin:$PATH
-RUN go get github.com/GeertJohan/go.rice/rice
+# pre build
+WORKDIR /pre-build
 
+ADD go.mod go.sum package.json yarn.lock Makefile  ./
+ADD scripts/makefile.d/ scripts/makefile.d/
+
+## install build tools
+RUN make build-tools
+
+## download dependancy
+### go
+RUN go mod download
+### nodejs
+RUN yarn install
+
+# build
 WORKDIR /src
-COPY . .
 
-RUN make
+## for use vendor folder. uncomment next line
+#ENV OPTIONAL_BUILD_ARGS="-mod=vendor"
+ENV  OPTIONAL_WEB_BUILD_ARGS="--minify"
 
-FROM fedora:29
-#RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
+ARG VERSION
 
-COPY --from=builder /src/wikinote /wikinote
-EXPOSE 80
-ENTRYPOINT ["/wikinote"]
-CMD ["serve", "--bind", ":80"]
+## copy source
+ADD . /src
+
+RUN make build/wikinote
+
+################################################################################
+# running image
+FROM fedora:36
+
+COPY --from=build-env /src/build/wikinote /bin/wikinote
+
+CMD wikinote server

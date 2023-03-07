@@ -1,0 +1,119 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wikinote
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  - port: 443
+    protocol: TCP
+    targetPort: 443
+  selector:
+    app: wikinote-proxy
+---
+apiVersion: apps/v1
+kind: Deployments
+metadata:
+  name: wikinote-proxy
+spec:
+  repliacas: 1
+  selector:
+    matchLabels:
+      app: wikinote-proxy
+  template:
+    metadata:
+      labels:
+        app: wikinote-proxy
+    spec:
+      containers:
+      - image: nginx
+        volumeMounts:
+        - mountPath: /etc/nginx/conf.d
+          name: nginx-config
+        - mountPath: /var/www/cert-bot
+    volumes:
+      - name: nginx-config
+        configMap:
+          name: wikinote-nginx-config
+      - name: certs
+        configMap:
+          name: wikinote-cert
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wikinote-nginx-config
+data:
+  nginx.conf: |
+    server {
+        listen 80;
+        server_name example.org;
+        location /.well-known/acme-challenge/ {
+            root /var/www/certbot;
+        }
+        location / {
+            return 301 https://$host$request_uri;
+        }
+    }
+    server {
+        listen 443 ssl;
+        server_name example.org;
+        location / {
+            proxy_pass http://example.org; #for demo purposes
+        }
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wikinote-cert
+data:
+  .placeholder: |
+    placeholder
+---
+kind: cronjob
+metadata:
+  name: renew-cert
+spec:
+  # TODO renew cert and update to configmap.
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: wikinote
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wikinote
+  serviceName: wikinote
+  template:
+    metadata:
+      labels:
+        app: wikinote
+    spec:
+      containers:
+      - env:
+        - name: TZ
+          value: "Asia/Seoul"
+        image: bluemir/wikinote:latest
+        name: server
+        volumeMounts:
+        - mountPath: /wikidata
+          name: wikidata
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: wikidata
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 200Gi
+      volumeMode: Filesystem
+
