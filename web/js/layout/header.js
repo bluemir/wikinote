@@ -78,12 +78,17 @@ var tmpl = (app) => html`
 					<a href="/-/auth/profile">Profile</a>
 				</c-dropdown-item>
 				<c-dropdown-item>
+					<a href="/-/messages">Messages</a>
+				</c-dropdown-item>
+				<c-dropdown-item>
 					<a href="/-/auth/login">Sign Up</a>
 				</c-dropdown-item>
 			</c-dropdown>
 		</menu>
 	</header>
 `;
+
+// ${auth.can("read", "users")?html`<c-dropdown-item><a href="/-/auth/users">Users</a></c-dropdown-item>`:""}
 
 class WikinoteHeader extends $.CustomElement {
 	constructor() {
@@ -92,6 +97,7 @@ class WikinoteHeader extends $.CustomElement {
 	async render() {
 		render(tmpl(this), this.shadow);
 	}
+
 	// attribute
 	get isSpecialPath() {
 		const arr = location.pathname.split("/").filter(e => e.length);

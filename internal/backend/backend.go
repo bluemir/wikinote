@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"encoding/gob"
 	"path/filepath"
 
 	"github.com/pkg/errors"
@@ -11,6 +12,7 @@ import (
 	"github.com/bluemir/wikinote/internal/auth"
 	"github.com/bluemir/wikinote/internal/backend/files"
 	"github.com/bluemir/wikinote/internal/backend/metadata"
+	"github.com/bluemir/wikinote/internal/events"
 	"github.com/bluemir/wikinote/internal/plugins"
 )
 
@@ -28,6 +30,7 @@ type Backend struct {
 	Metadata metadata.Store
 	Plugin   *plugins.Manager
 	files    *files.FileStore
+	hub      *events.Hub[Message]
 
 	db *gorm.DB
 }
@@ -75,6 +78,21 @@ func New(wikipath string, users map[string]string) (*Backend, error) {
 		return nil, errors.Wrap(err, "failed to init plugins")
 	}
 
+	gob.Register(Message{})
+
+	hub, err := events.NewHub[Message](db)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to init message hub")
+	}
+
+	if err := hub.Fire(events.Event[Message]{
+		// XXX
+		Name:   "user/bluemir",
+		Detail: Message{"server started"},
+	}); err != nil {
+		return nil, err
+	}
+
 	backend := &Backend{
 		wikipath: wikipath,
 		Config:   conf,
@@ -83,11 +101,17 @@ func New(wikipath string, users map[string]string) (*Backend, error) {
 		Auth:     auth,
 		Plugin:   plugin,
 		files:    store,
+		hub:      hub,
 	}
 	logrus.Trace("backend initailized")
 
 	return backend, nil
 }
+
+type Message struct {
+	Text string
+}
+
 func (b *Backend) ConfigPath(path string) string {
 	return filepath.Join(b.wikipath, ".app", path)
 }

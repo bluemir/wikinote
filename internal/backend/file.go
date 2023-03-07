@@ -4,6 +4,7 @@ import (
 	"io"
 
 	"github.com/bluemir/wikinote/internal/backend/files"
+	"github.com/bluemir/wikinote/internal/events"
 )
 
 func (backend *Backend) FileRead(path string) ([]byte, error) {
@@ -17,6 +18,12 @@ func (backend *Backend) FileReadStream(path string) (io.ReadSeekCloser, error) {
 func (backend *Backend) FileWrite(path string, data []byte) error {
 	data, err := backend.Plugin.TriggerFileWriteHook(path, data)
 	if err != nil {
+		backend.hub.Fire(events.Event[Message]{
+			Name: "group/admin",
+			Detail: Message{
+				Text: err.Error(),
+			},
+		})
 		return err
 	}
 

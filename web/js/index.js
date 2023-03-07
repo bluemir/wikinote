@@ -12,3 +12,4 @@ import "./search.js";
 import "./profile.js";
 import "./files.js";
 import "./plugin-footer.js";
+import "./messages.js";

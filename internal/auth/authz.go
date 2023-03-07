@@ -4,6 +4,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+func (manager *Manager) Can(user *User, verb Verb, resource Resource) error {
+	return manager.IsAllow(resource, verb, user)
+}
 func (manager *Manager) IsAllow(resource Resource, verb Verb, user *User) error {
 	logrus.Tracef("user: %#v", user)
 	logrus.Tracef("resource: %#v", resource)

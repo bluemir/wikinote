@@ -48,10 +48,9 @@ class WikinoteSearch extends $.CustomElement {
 		super();
 	}
 	async render() {
+		this.data = $.get(this, "c-data").json;
+
 		render(tmpl(this), this.shadow);
-		let data = $.get(this, "c-data").json;
-		this.data = data;
-		console.log(data);
 	}
 	// attribute
 }

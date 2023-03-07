@@ -31,7 +31,10 @@ func (server *Server) RegisterRoute(app gin.IRouter) {
 		special.GET("/auth/register", server.handler.RegisterForm)
 		special.POST("/auth/register", server.handler.Register)
 
+		special.GET("/messages", server.handler.Messages)
 		special.GET("/search", authz(Global, "search"), server.handler.Search)
+
+		//special.GET("/auth/can", server.handler.Can)
 
 	}
 	{

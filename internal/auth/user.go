@@ -58,3 +58,19 @@ func (user *User) AddGroup(group string) {
 func (user *User) RemoveGroup(group string) {
 	delete(user.Groups, group)
 }
+func (m *Manager) GetMember(group string) ([]User, error) {
+	users := []User{}
+	if err := m.db.Find(&users).Error; err != nil {
+		return users, nil
+	}
+	ret := []User{}
+	for _, u := range users {
+		for g := range u.Groups {
+			if g == group {
+				ret = append(ret, u)
+				break
+			}
+		}
+	}
+	return ret, nil
+}

@@ -65,10 +65,6 @@ func Run(b *backend.Backend, conf *Config) error {
 
 	app.Use(location.Default(), fixURL)
 
-	// Session
-	//store := cookie.NewStore([]byte("__wikinote__"))
-	//app.Use(sessions.Sessions("session", store))
-
 	// Renderer
 	if r, err := NewRender(); err != nil {
 		return errors.WithStack(err)
