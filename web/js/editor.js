@@ -87,7 +87,7 @@ class WikinoteEditor extends $.CustomElement {
 	}
 	// attribute
 	get data() {
-		return $.get(this, "c-data").text;
+		return $.get(this, "c-data").json?.data;
 	}
 }
 customElements.define("wikinote-editor", WikinoteEditor);
