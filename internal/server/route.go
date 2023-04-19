@@ -9,7 +9,6 @@ import (
 
 	queryrouter "github.com/bluemir/wikinote/internal/query-router"
 	"github.com/bluemir/wikinote/internal/server/middleware/auth"
-	"github.com/bluemir/wikinote/internal/server/middleware/reqtype"
 	"github.com/bluemir/wikinote/internal/static"
 )
 
@@ -21,7 +20,7 @@ func (server *Server) RegisterRoute(app gin.IRouter) {
 	app.GET("/", server.redirectToFrontPage)
 
 	{
-		special := app.Group("/-", reqtype.MarkHTML)
+		special := app.Group("/-")
 		special.Group("/static", server.staticCache).StaticFS("/", static.Files.HTTPBox())
 
 		special.GET("/auth/login", auth.Login)
@@ -38,7 +37,7 @@ func (server *Server) RegisterRoute(app gin.IRouter) {
 
 	}
 	{
-		api := app.Group("/-/api", reqtype.MarkAPI)
+		api := app.Group("/-/api")
 		api.POST("/preview", server.handler.Preview) // render body
 		api.GET("/me", auth.Me)
 		api.GET("auth/can/:verb/*kind", server.handler.Can)

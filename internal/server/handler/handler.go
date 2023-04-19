@@ -18,7 +18,6 @@ type Handler struct {
 
 var (
 	HTTPErrorHandler = errors.HTTPErrorHandler
-	WithType         = errors.WithType
 	WithAuthHeader   = errors.WithAuthHeader
 )
 var (

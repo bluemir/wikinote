@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"mime"
 	"net/http"
 	"strings"
 
@@ -10,16 +11,10 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/bluemir/wikinote/internal/auth"
-	"github.com/bluemir/wikinote/internal/server/middleware/reqtype"
 )
 
 type HTTPErrorHandlerOption func(ctx *HTTPErrorContext)
 
-func WithType(reqType reqtype.ReqType) HTTPErrorHandlerOption {
-	return func(ctx *HTTPErrorContext) {
-		ctx.Type = reqType
-	}
-}
 func WithHeader(key, value string) HTTPErrorHandlerOption {
 	return func(ctx *HTTPErrorContext) {
 		ctx.Headers.Add(key, value)
@@ -36,7 +31,6 @@ type HTTPErrorContext struct {
 	Code     int
 	Error    error
 	Response *HTTPErrorResponse
-	Type     reqtype.ReqType
 	Headers  http.Header
 }
 
@@ -53,7 +47,6 @@ func HTTPErrorHandler(c *gin.Context, err error, opts ...HTTPErrorHandlerOption)
 		Error:    err,
 		Code:     findErrorCode(err),
 		Response: makeErrorResponse(err),
-		Type:     reqtype.FindRequestType(c),
 	}
 
 	for _, f := range opts {
@@ -62,17 +55,16 @@ func HTTPErrorHandler(c *gin.Context, err error, opts ...HTTPErrorHandlerOption)
 
 	logrus.Debugf("%+v", ctx)
 
-	switch ctx.Type {
-	case reqtype.API:
+	t, _, err := mime.ParseMediaType(c.Request.Header.Get("Accepted"))
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	switch t {
+	case "application/json":
 		c.JSON(ctx.Code, ctx.Response)
 		return
-	case reqtype.HTML:
-		c.HTML(ctx.Code, getErrorHTMLName(ctx.Code), ctx.Response)
-		return
-	//case reqtype.Unknown:
-	//	c.String(ctx.Code, ctx.Response.String())
 	default:
-		logrus.Trace(getErrorHTMLName(ctx.Code))
 		c.HTML(ctx.Code, getErrorHTMLName(ctx.Code), ctx.Response)
 		return
 	}
