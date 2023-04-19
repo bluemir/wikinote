@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"path"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -27,7 +28,7 @@ func (server *Server) RegisterRoute(app gin.IRouter) {
 		special.GET("/auth/profile", server.handler.Profile)
 
 		// Register
-		special.GET("/auth/register", server.handler.RegisterForm)
+		special.GET("/auth/register", server.static("/register.html"))
 		special.POST("/auth/register", server.handler.Register)
 
 		special.GET("/messages", server.handler.Messages)
@@ -59,7 +60,7 @@ func (server *Server) RegisterRoute(app gin.IRouter) {
 
 		pages.GET("edit", authz(Page, "update"), server.handler.EditForm)
 		pages.GET("raw", authz(Page, "read"), server.handler.Raw)
-		pages.GET("delete", authz(Page, "delete"), server.handler.DeleteForm)
+		pages.GET("delete", authz(Page, "delete"), server.static("/delete.html"))
 		pages.GET("files", authz(Page, "update"), server.handler.Files)
 		pages.GET("*", authz(Page, "read"), server.handler.View)
 		pages.POST("*", authz(Page, "update"), server.handler.UpdateWithForm)

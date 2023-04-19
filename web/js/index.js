@@ -2,6 +2,7 @@ import "./components/index.js";
 
 import "./layout/page.js";
 import "./layout/header.js";
+import "./layout/header/logo.js";
 
 import "./viewers/markdown.js";
 import "./viewers/image.js";

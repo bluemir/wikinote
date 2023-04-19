@@ -57,3 +57,4 @@
 - [x] TLS cache
 - [ ] Accept 에 따라서 API 와 아닌것 구분 하기
 - [ ] js map(ECMA script)
+- [ ] error handling with `c.Error()`

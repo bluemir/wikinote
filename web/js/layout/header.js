@@ -23,16 +23,10 @@ var tmpl = (app) => html`
 				"nav  menu";
 		}
 
-		#logo {
+		wikinote-logo {
 			grid-area: logo;
 		}
 
-		#logo a {
-			color:      var(--header-fg-color);
-			text-decoration: none;
-			font-size: 2rem;
-			font-weight: bold;
-		}
 		.search {
 			grid-area: search;
 		}
@@ -53,9 +47,7 @@ var tmpl = (app) => html`
 
 	</style>
 	<header part="wrapper">
-		<section id="logo">
-			<a href="/">Wikinote</a>
-		</section>
+		<wikinote-logo></wikinote-logo>
 		<section class="search">
 			<form action="/-/search">
 				<input name="q"/>

@@ -154,16 +154,7 @@ func (handler *Handler) Update(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{})
 }
-func (handler *Handler) DeleteForm(c *gin.Context) {
-	c.HTML(http.StatusOK, "/delete.html", gin.H{
-		"name": path.Base(c.Request.URL.Path),
-	})
-}
-func (handler *Handler) UploadForm(c *gin.Context) {
-	c.HTML(http.StatusOK, "/upload.html", gin.H{
-		"path": path.Base(c.Request.URL.Path),
-	})
-}
+
 func (handler *Handler) Files(c *gin.Context) {
 	path := c.Request.URL.Path
 	if strings.HasSuffix(path, ".md") {

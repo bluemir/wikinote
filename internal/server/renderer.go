@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"html/template"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -15,6 +16,7 @@ import (
 
 func NewRender() (render.HTMLRender, error) {
 	fMap := template.FuncMap{
+		"base": path.Base,
 		"join": strings.Join,
 		"json": json.Marshal,
 		"toString": func(buf []byte) string {
