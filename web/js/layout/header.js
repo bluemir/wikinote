@@ -1,5 +1,6 @@
 import * as $ from "bm.js/bm.module.js";
 import {html, render} from 'lit-html';
+import * as auth from "../auth.js";
 
 var tmpl = (app) => html`
 	<style>
@@ -83,12 +84,13 @@ var tmpl = (app) => html`
 				<c-dropdown-item>
 					<a href="/-/auth/login">Sign Up</a>
 				</c-dropdown-item>
+				${auth.can("read", "admin")?html`<c-dropdown-item><a href="/-/admin">Admin</a></c-dropdown-item>`:""}
 			</c-dropdown>
 		</menu>
 	</header>
 `;
 
-// ${auth.can("read", "users")?html`<c-dropdown-item><a href="/-/auth/users">Users</a></c-dropdown-item>`:""}
+//
 
 class WikinoteHeader extends $.CustomElement {
 	constructor() {

@@ -77,3 +77,20 @@ func (handler *Handler) Profile(c *gin.Context) {
 		"user": user,
 	})
 }
+func (handler *Handler) Can(c *gin.Context) {
+	user, err := User(c)
+	if err != nil {
+		HTTPErrorHandler(c, err, WithAuthHeader)
+		return
+	}
+
+	verb := c.Param("verb")
+	kind := c.Param("kind")
+
+	if err := handler.backend.Auth.Can(user, auth.Verb(verb), auth.KeyValues{"kind": kind}); err != nil {
+		HTTPErrorHandler(c, err, WithAuthHeader)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{})
+}

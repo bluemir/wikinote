@@ -26,6 +26,8 @@
 ## 기타 고려사항
 - cookie free
 	- basic auth
+- Web 표준
+
 
 ## TODO
 - [ ] UI 구조개선
@@ -40,9 +42,9 @@
 - [x] image viewer max width
 - [x] video viewer
 - [x] Profile
-- [ ] Logout(hidden from menu, for debug)
+- [ ] Login with other username
 - [x] Unauthroized page
-- [ ] Register Page
+- [x] Register Page
 - [ ] Forbidden page...
 - [ ] git plugin
 - [ ] html templates 의 not found Error handling
@@ -53,4 +55,5 @@
 - [ ] change embed
 - [ ] http redirect to https
 - [x] TLS cache
-
+- [ ] Accept 에 따라서 API 와 아닌것 구분 하기
+- [ ] js map(ECMA script)

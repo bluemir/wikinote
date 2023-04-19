@@ -56,7 +56,6 @@ func (hub *Hub[T]) Fire(evt Event[T]) error {
 	}
 
 	return ch.fire(evt)
-
 }
 
 func (hub *Hub[T]) GetEvents(name string) ([]Event[T], error) {

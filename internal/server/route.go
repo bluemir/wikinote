@@ -34,13 +34,14 @@ func (server *Server) RegisterRoute(app gin.IRouter) {
 		special.GET("/messages", server.handler.Messages)
 		special.GET("/search", authz(Global, "search"), server.handler.Search)
 
-		//special.GET("/auth/can", server.handler.Can)
+		special.GET("/admin", authz(Global, "read"), server.handler.Admin)
 
 	}
 	{
 		api := app.Group("/-/api", reqtype.MarkAPI)
 		api.POST("/preview", server.handler.Preview) // render body
 		api.GET("/me", auth.Me)
+		api.GET("auth/can/:verb/*kind", server.handler.Can)
 	}
 
 	// plugins

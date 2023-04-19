@@ -100,6 +100,9 @@ export async function request(method, url, options) {
 			req.open(method, resolveParam(url, opts.params) + queryString(opts.query), true);
 		}
 
+		// default accept is json
+		req.setRequestHeader("Accept", "application/json");
+
 		Object.keys(opts.headers || {}).forEach(function(name){
 			req.setRequestHeader(name, opts.headers[name]);
 		});
