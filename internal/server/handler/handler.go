@@ -2,7 +2,6 @@ package handler
 
 import (
 	"github.com/bluemir/wikinote/internal/backend"
-	"github.com/bluemir/wikinote/internal/server/errors"
 	"github.com/bluemir/wikinote/internal/server/middleware/auth"
 )
 
@@ -16,10 +15,6 @@ type Handler struct {
 	backend *backend.Backend
 }
 
-var (
-	HTTPErrorHandler = errors.HTTPErrorHandler
-	WithAuthHeader   = errors.WithAuthHeader
-)
 var (
 	User = auth.User
 )

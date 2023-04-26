@@ -2,7 +2,6 @@ package server
 
 import (
 	"net/http"
-	"path"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -35,12 +34,11 @@ func (server *Server) RegisterRoute(app gin.IRouter) {
 		special.GET("/search", authz(Global, "search"), server.handler.Search)
 
 		special.GET("/admin", authz(Global, "read"), server.handler.Admin)
-
 	}
 	{
 		api := app.Group("/-/api")
 		api.POST("/preview", server.handler.Preview) // render body
-		api.GET("/me", auth.Me)
+		api.GET("/me", server.handler.Me)
 		api.GET("auth/can/:verb/*kind", server.handler.Can)
 	}
 
@@ -83,14 +81,13 @@ func Page(c *gin.Context) (auth.Resource, error) {
 		"path": c.Request.URL.Path,
 	}, nil
 }
-func PageAttr(c *gin.Context) (auth.Resource, error) {
-	return auth.KeyValues{
-		"kind": "attribute",
-		"path": c.Request.URL.Path,
-	}, nil
-}
 func Global(c *gin.Context) (auth.Resource, error) {
 	return auth.KeyValues{}, nil
+}
+func Admin(c *gin.Context) (auth.Resource, error) {
+	return auth.KeyValues{
+		"kind": "admin",
+	}, nil
 }
 func rejectDotApp(c *gin.Context) {
 	if strings.HasPrefix(c.Request.URL.Path, "/.app") {

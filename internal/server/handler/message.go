@@ -11,12 +11,14 @@ func (handler *Handler) Messages(c *gin.Context) {
 
 	user, err := User(c)
 	if err != nil {
-		HTTPErrorHandler(c, err, WithAuthHeader)
+		c.Error(err)
+		c.Abort()
 		return
 	}
 	messages, err := handler.backend.GetMessages("user/" + user.Name)
 	if err != nil {
-		HTTPErrorHandler(c, err)
+		c.Error(err)
+		c.Abort()
 		return
 	}
 	logrus.Trace(messages)

@@ -15,6 +15,9 @@ const (
 	httpAuthorizationHeader = "Authorization"
 )
 
+func LoginHeader(req *http.Request) (string, string) {
+	return HeaderWWWAuthenticate, "basic realm=" + req.URL.Host
+}
 func (m *Manager) HTTP(req *http.Request) (*User, error) {
 	return m.HTTPHeaderString(req.Header.Get(HeaderAuthorization))
 }

@@ -10,7 +10,10 @@ func (m *Manager) Default(name, unhashedKey string) (*User, error) {
 	if err := m.db.Where(&User{
 		Name: name,
 	}).Take(&user).Error; err != nil {
-		return nil, ErrUnauthorized
+		if err == gorm.ErrRecordNotFound {
+			return nil, ErrUnauthorized
+		}
+		return nil, err
 	}
 
 	token := &Token{}

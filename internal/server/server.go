@@ -13,7 +13,8 @@ import (
 
 	"github.com/bluemir/wikinote/internal/backend"
 	"github.com/bluemir/wikinote/internal/server/handler"
-	authMiddleware "github.com/bluemir/wikinote/internal/server/middleware/auth"
+	auth_middleware "github.com/bluemir/wikinote/internal/server/middleware/auth"
+	error_middleware "github.com/bluemir/wikinote/internal/server/middleware/errors"
 )
 
 type Config struct {
@@ -54,11 +55,16 @@ func Run(b *backend.Backend, conf *Config) error {
 	defer writer.Close()
 	app.Use(gin.LoggerWithWriter(writer))
 
+	// Error Handling
+	app.Use(error_middleware.Middleware)
+
 	// Recovery
 	//app.Use(gin.Recovery())
 	app.Use(gin.CustomRecovery(func(c *gin.Context, recovered interface{}) {
 		if err, ok := recovered.(string); ok {
-			c.String(http.StatusInternalServerError, err)
+			c.Error(errors.New(err))
+			c.Abort()
+			return
 		}
 		c.AbortWithStatus(http.StatusInternalServerError)
 	}))
@@ -72,19 +78,21 @@ func Run(b *backend.Backend, conf *Config) error {
 		app.HTMLRender = r
 	}
 
-	app.Use(authMiddleware.Middleware(server.Backend.Auth))
+	app.Use(auth_middleware.Middleware(server.Backend.Auth))
 
+	// favicon
 	app.GET("/favicon.ico", NotFound)
+
 	// Register Routing
 	server.RegisterRoute(app)
 
-	cacheDir := conf.AutoTLSCache
-	if cacheDir == "" {
-		cacheDir = b.ConfigPath("cert-cache")
-	}
-	os.MkdirAll(cacheDir, 0700)
-
 	if conf.EnableHttps {
+		cacheDir := conf.AutoTLSCache
+		if cacheDir == "" {
+			cacheDir = b.ConfigPath("cert-cache")
+		}
+		os.MkdirAll(cacheDir, 0700)
+
 		logrus.Infof("Run Server with AutoTLS")
 		return autotls.RunWithManager(app, &autocert.Manager{
 			Prompt:     autocert.AcceptTOS,

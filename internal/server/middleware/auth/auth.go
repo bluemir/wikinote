@@ -2,19 +2,12 @@ package auth
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/internal/auth"
-	httpError "github.com/bluemir/wikinote/internal/server/errors"
-)
-
-var (
-	HTTPErrorHandler = httpError.HTTPErrorHandler
-	WithAuthHeader   = httpError.WithAuthHeader
 )
 
 type Resource = auth.Resource
@@ -24,8 +17,6 @@ type KeyValues = auth.KeyValues
 const (
 	ContextKeyManager = "__auth_manager__"
 	ContextKeyUser    = "__auth_user__"
-
-	realm = "wikinote.bluemir.me"
 )
 
 func Middleware(m *auth.Manager) gin.HandlerFunc {
@@ -61,7 +52,8 @@ func User(c *gin.Context) (*auth.User, error) {
 func Login(c *gin.Context) {
 	u, err := User(c)
 	if errors.Is(err, auth.ErrUnauthorized) {
-		HTTPErrorHandler(c, err, WithAuthHeader)
+		c.Error(err)
+		c.Abort()
 		return
 	}
 
@@ -74,19 +66,12 @@ func Login(c *gin.Context) {
 
 		if u != nil && u.Name == c.Query("exclude") {
 			// logined, but try to login same id
-			HTTPErrorHandler(c, auth.ErrUnauthorized, WithAuthHeader)
+			c.Error(err)
+			c.Abort()
 			return
 		}
 	}
 	c.Redirect(http.StatusTemporaryRedirect, "/")
-}
-func Me(c *gin.Context) {
-	user, err := User(c)
-	if errors.Is(err, auth.ErrUnauthorized) {
-		HTTPErrorHandler(c, err)
-		return
-	}
-	c.JSON(http.StatusOK, user)
 }
 
 type ResourceGetter func(c *gin.Context) (auth.Resource, error)
@@ -95,54 +80,22 @@ func Authz(getResource ResourceGetter, verb Verb) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user, err := User(c)
 		if err != nil && !errors.Is(err, auth.ErrUnauthorized) {
-			HTTPErrorHandler(c, err, WithAuthHeader)
+			c.Error(err)
+			c.Abort()
 			return
 		}
 
 		resource, err := getResource(c)
 		if err != nil {
-			HTTPErrorHandler(c, err)
+			c.Error(err)
+			c.Abort()
 			return
 		}
 
 		if err := manager(c).IsAllow(resource, verb, user); err != nil {
-			HTTPErrorHandler(c, err, WithAuthHeader)
+			c.Error(err)
+			c.Abort()
 			return
 		}
-	}
-}
-func IssueToken(c *gin.Context) {
-	req := struct {
-		Username string
-		Password string
-	}{}
-
-	if err := c.ShouldBind(&req); err != nil {
-		HTTPErrorHandler(c, err)
-		return
-	}
-
-	user, err := manager(c).Default(req.Username, req.Password)
-	if err != nil {
-		HTTPErrorHandler(c, err)
-		return
-	}
-
-	t := time.Now().Add(6 * time.Hour)
-	token, err := manager(c).NewHTTPToken(user.Name, t)
-	if err != nil {
-		HTTPErrorHandler(c, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"token":     token,
-		"expiredAt": t.Format(time.RFC3339),
-	})
-}
-func RevokeToken(c *gin.Context) {
-	if err := manager(c).RevokeHTTPToken(c.Request); err != nil {
-		HTTPErrorHandler(c, err)
-		return
 	}
 }

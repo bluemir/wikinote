@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -8,10 +9,6 @@ import (
 
 	"github.com/bluemir/wikinote/internal/auth"
 )
-
-func (handler *Handler) RegisterForm(c *gin.Context) {
-	c.HTML(http.StatusOK, "/register.html", gin.H{})
-}
 
 func (handler *Handler) Register(c *gin.Context) {
 	req := &struct {
@@ -69,7 +66,8 @@ func (handler *Handler) Register(c *gin.Context) {
 func (handler *Handler) Profile(c *gin.Context) {
 	user, err := User(c)
 	if err != nil {
-		HTTPErrorHandler(c, err, WithAuthHeader)
+		c.Error(err)
+		c.Abort()
 		return
 	}
 
@@ -80,7 +78,9 @@ func (handler *Handler) Profile(c *gin.Context) {
 func (handler *Handler) Can(c *gin.Context) {
 	user, err := User(c)
 	if err != nil {
-		HTTPErrorHandler(c, err, WithAuthHeader)
+		c.Header(auth.LoginHeader(c.Request))
+		c.Error(err)
+		c.Abort()
 		return
 	}
 
@@ -88,9 +88,21 @@ func (handler *Handler) Can(c *gin.Context) {
 	kind := c.Param("kind")
 
 	if err := handler.backend.Auth.Can(user, auth.Verb(verb), auth.KeyValues{"kind": kind}); err != nil {
-		HTTPErrorHandler(c, err, WithAuthHeader)
+		c.Header(auth.LoginHeader(c.Request))
+		c.Error(err)
+		c.Abort()
+		//HTTPErrorHandler(c, err, WithAuthHeader)
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{})
+}
+func (handler *Handler) Me(c *gin.Context) {
+	user, err := User(c)
+	if errors.Is(err, auth.ErrUnauthorized) {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+	c.JSON(http.StatusOK, user)
 }
