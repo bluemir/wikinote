@@ -12,14 +12,18 @@ import (
 )
 
 const (
-	httpAuthorizationHeader = "Authorization"
+	headerAuthorization   = "Authorization"
+	headerWWWAuthenticate = "WWW-Authenticate"
 )
 
+func HttpRealm(relam string) string {
+	return `Basic realm="` + relam + `"`
+}
 func LoginHeader(req *http.Request) (string, string) {
-	return HeaderWWWAuthenticate, "basic realm=" + req.URL.Host
+	return headerWWWAuthenticate, "basic realm=" + req.URL.Host
 }
 func (m *Manager) HTTP(req *http.Request) (*User, error) {
-	return m.HTTPHeaderString(req.Header.Get(HeaderAuthorization))
+	return m.HTTPHeaderString(req.Header.Get(headerAuthorization))
 }
 func (m *Manager) HTTPHeaderString(header string) (*User, error) {
 	if header == "" {
@@ -70,7 +74,7 @@ func (m *Manager) NewHTTPToken(username string, expireAt time.Time) (string, err
 }
 
 func (m *Manager) RevokeHTTPToken(req *http.Request) error {
-	username, key, err := parseHTTPHeader(req.Header.Get(HeaderAuthorization))
+	username, key, err := parseHTTPHeader(req.Header.Get(headerAuthorization))
 	if err != nil {
 
 		return err

@@ -20,12 +20,3 @@ func hash(str string, salt ...string) string {
 func salt(username string) string {
 	return "__salt__" + username + "__salt__"
 }
-
-const (
-	HeaderAuthorization   = "Authorization"
-	HeaderWWWAuthenticate = "WWW-Authenticate"
-)
-
-func HttpRealm(relam string) string {
-	return `Basic realm="` + relam + `"`
-}
