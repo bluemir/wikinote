@@ -21,7 +21,18 @@ const (
 
 func Middleware(m *auth.Manager) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// Attach manager
 		c.Set(ContextKeyManager, m)
+
+		// try to login
+		user, err := m.HTTP(c.Request)
+		if err != nil {
+			return
+		}
+		if user == nil {
+			return
+		}
+		c.Set(ContextKeyUser, user)
 	}
 }
 func manager(c *gin.Context) *auth.Manager {
@@ -66,7 +77,7 @@ func Login(c *gin.Context) {
 
 		if u != nil && u.Name == c.Query("exclude") {
 			// logined, but try to login same id
-			c.Error(err)
+			c.Error(auth.ErrUnauthorized)
 			c.Abort()
 			return
 		}

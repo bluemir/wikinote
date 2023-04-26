@@ -78,7 +78,6 @@ func (handler *Handler) Profile(c *gin.Context) {
 func (handler *Handler) Can(c *gin.Context) {
 	user, err := User(c)
 	if err != nil {
-		c.Header(auth.LoginHeader(c.Request))
 		c.Error(err)
 		c.Abort()
 		return
@@ -88,10 +87,8 @@ func (handler *Handler) Can(c *gin.Context) {
 	kind := c.Param("kind")
 
 	if err := handler.backend.Auth.Can(user, auth.Verb(verb), auth.KeyValues{"kind": kind}); err != nil {
-		c.Header(auth.LoginHeader(c.Request))
 		c.Error(err)
 		c.Abort()
-		//HTTPErrorHandler(c, err, WithAuthHeader)
 		return
 	}
 

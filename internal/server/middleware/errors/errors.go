@@ -31,7 +31,6 @@ func Middleware(c *gin.Context) {
 	code := code(err)
 
 	// with header or without header, or other processer/ maybe hook? depend on error type? or just code
-
 	for _, accept := range strings.Split(c.Request.Header.Get("Accept"), ",") {
 		t, _, e := mime.ParseMediaType(accept)
 		if e != nil {
@@ -78,7 +77,7 @@ func htmlName(err *gin.Error) string {
 	case errors.Is(err, validator.ValidationErrors{}):
 		return "/errors/bad-request.html"
 	case errors.Is(err, auth.ErrUnauthorized):
-		return "/errors/unauthrized.html"
+		return "/errors/unauthorized.html"
 	case errors.Is(err, auth.ErrForbidden):
 		return "/errors/forbidden.html"
 	case errors.Is(err, os.ErrNotExist):
