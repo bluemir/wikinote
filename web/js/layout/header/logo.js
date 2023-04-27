@@ -14,7 +14,7 @@ var tmpl = (app) => html`
 	<a href="/">Wikinote</a>
 `;
 
-class WikinoteLogo extends $.CustomElement {
+class WikinoteHeaderLogo extends $.CustomElement {
 	constructor() {
 		super();
 	}
@@ -23,4 +23,4 @@ class WikinoteLogo extends $.CustomElement {
 	}
 	// attribute
 }
-customElements.define("wikinote-logo", WikinoteLogo);
+customElements.define("wikinote-header-logo", WikinoteHeaderLogo);

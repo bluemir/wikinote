@@ -23,11 +23,10 @@ var tmpl = (app) => html`
 				"nav  menu";
 		}
 
-		wikinote-logo {
+		wikinote-header-logo {
 			grid-area: logo;
 		}
-
-		.search {
+		wikinote-header-search {
 			grid-area: search;
 		}
 		/* nav */
@@ -36,49 +35,17 @@ var tmpl = (app) => html`
 			align-self: end;
 			margin-bottom: 0.3rem;
 		}
-
-		menu {
+		wikinote-header-menu {
 			grid-area: menu;
 			align-self: end;
 			justify-self: end;
-			padding: 0px;
-			margin: 0px;
 		}
-
 	</style>
 	<header part="wrapper">
-		<wikinote-logo></wikinote-logo>
-		<section class="search">
-			<form action="/-/search">
-				<input name="q"/>
-				<button><c-icon kind="search"></c-icon></button>
-			</form>
-		</section>
+		<wikinote-header-logo></wikinote-header-logo>
+		<wikinote-header-search></wikinote-header-search>
 		${ app.isSpecialPath ? "": html`<c-breadcrumbs></c-breadcrumbs>` }
-		<menu>
-			<c-button>
-				<a href="?edit">Edit</a>
-			</c-button>
-			<c-dropdown title="More">
-				<c-dropdown-item>
-					<a href="?files">Files</a>
-				</c-dropdown-item>
-				<hr />
-				<c-dropdown-item>
-					<a href="/-/auth/login">Login</a>
-				</c-dropdown-item>
-				<c-dropdown-item>
-					<a href="/-/auth/profile">Profile</a>
-				</c-dropdown-item>
-				<c-dropdown-item>
-					<a href="/-/messages">Messages</a>
-				</c-dropdown-item>
-				<c-dropdown-item>
-					<a href="/-/auth/login">Sign Up</a>
-				</c-dropdown-item>
-				${auth.can("read", "admin")?html`<c-dropdown-item><a href="/-/admin">Admin</a></c-dropdown-item>`:""}
-			</c-dropdown>
-		</menu>
+		<wikinote-header-menu></wikinote-header-menu>
 	</header>
 `;
 

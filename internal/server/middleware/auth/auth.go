@@ -103,7 +103,7 @@ func Authz(getResource ResourceGetter, verb Verb) gin.HandlerFunc {
 			return
 		}
 
-		if err := manager(c).IsAllow(resource, verb, user); err != nil {
+		if err := manager(c).Can(user, verb, resource); err != nil {
 			c.Error(err)
 			c.Abort()
 			return

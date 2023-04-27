@@ -24,6 +24,8 @@ var tmpl = (app) => html`
 			text-decoration: underline;
 		}
 	</style>
+	<h2>Search Result</h2>
+	<p>total: ${Object.entries(app.data|| {}).map(([filename, matches]) => matches.length).reduce((s, n) => s + n, 0)}</p>
 	<table>
 		<thead>
 		</thead>
