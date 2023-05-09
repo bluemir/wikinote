@@ -78,6 +78,9 @@ func (fs *FileStore) List(path string) ([]FileInfo, error) {
 	}
 	return ret, nil
 }
+func (fs *FileStore) Move(oldPath, newPath string) error {
+	return nil
+}
 
 type FileInfo struct {
 	Name string `json:"name"`

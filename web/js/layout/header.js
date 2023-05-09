@@ -50,7 +50,6 @@ var tmpl = (app) => html`
 `;
 
 //
-
 class WikinoteHeader extends $.CustomElement {
 	constructor() {
 		super();

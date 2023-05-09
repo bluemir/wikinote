@@ -5,10 +5,34 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/internal/auth"
 )
+
+func (handler *Handler) Login(c *gin.Context) {
+	u, err := User(c)
+	if errors.Is(err, auth.ErrUnauthorized) {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+
+	if u != nil {
+		if c.Query("exclude") == "" {
+			// logined, but first try.
+			c.Redirect(http.StatusTemporaryRedirect, "/-/auth/login?exclude="+u.Name)
+			return
+		}
+
+		if u != nil && u.Name == c.Query("exclude") {
+			// logined, but try to login same id
+			c.Error(auth.ErrUnauthorized)
+			c.Abort()
+			return
+		}
+	}
+	c.Redirect(http.StatusTemporaryRedirect, "/")
+}
 
 func (handler *Handler) Register(c *gin.Context) {
 	req := &struct {
@@ -22,7 +46,6 @@ func (handler *Handler) Register(c *gin.Context) {
 		c.HTML(http.StatusBadRequest, "/errors/bad-request.html", gin.H{
 			"retryURL": "/-/auth/register",
 		})
-		c.Abort()
 		return
 	}
 	if req.Password != req.Confirm {
@@ -30,33 +53,22 @@ func (handler *Handler) Register(c *gin.Context) {
 			"retryURL": "/-/auth/register",
 			"message":  "password and password confirm not matched",
 		})
-		c.Abort()
 		return
 	}
 
-	err := handler.backend.Auth.CreateUser(&auth.User{
+	if err := handler.backend.Auth.CreateUser(&auth.User{
 		Name: req.Username,
 		Labels: auth.Labels{
 			"wikinote.io/email": req.Email,
 		},
-	})
-	if err != nil {
-		c.HTML(http.StatusInternalServerError, "/errors/internal-server-error.html", gin.H{
-			"retryURL": "/-/auth/register",
-			"message":  "fail to register new user try again",
-			"error":    err.Error(),
-		})
-		logrus.Error(err)
+	}); err != nil {
+		c.Error(err)
 		c.Abort()
 		return
 	}
 
-	_, err = handler.backend.Auth.IssueToken(req.Username, req.Password, nil)
-	if err != nil {
-		c.HTML(http.StatusInternalServerError, "errors/internal-server-error.html", gin.H{
-			"retryURL": "/-/auth/register",
-			"message":  "fail to register new user try again",
-		})
+	if _, err := handler.backend.Auth.IssueToken(req.Username, req.Password, nil); err != nil {
+		c.Error(err)
 		c.Abort()
 		return
 	}

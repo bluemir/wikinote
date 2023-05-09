@@ -23,7 +23,7 @@ func (server *Server) RegisterRoute(app gin.IRouter) {
 		special := app.Group("/-")
 		special.Group("/static", server.staticCache).StaticFS("/", static.Files.HTTPBox())
 
-		special.GET("/auth/login", auth.Login)
+		special.GET("/auth/login", server.handler.Login)
 		special.GET("/auth/profile", server.handler.Profile)
 
 		// Register

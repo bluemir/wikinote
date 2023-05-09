@@ -1,8 +1,6 @@
 package auth
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -58,31 +56,6 @@ func User(c *gin.Context) (*auth.User, error) {
 	c.Set(ContextKeyUser, user)
 
 	return user, nil
-}
-
-func Login(c *gin.Context) {
-	u, err := User(c)
-	if errors.Is(err, auth.ErrUnauthorized) {
-		c.Error(err)
-		c.Abort()
-		return
-	}
-
-	if u != nil {
-		if c.Query("exclude") == "" {
-			// logined, but first try.
-			c.Redirect(http.StatusTemporaryRedirect, "/-/auth/login?exclude="+u.Name)
-			return
-		}
-
-		if u != nil && u.Name == c.Query("exclude") {
-			// logined, but try to login same id
-			c.Error(auth.ErrUnauthorized)
-			c.Abort()
-			return
-		}
-	}
-	c.Redirect(http.StatusTemporaryRedirect, "/")
 }
 
 type ResourceGetter func(c *gin.Context) (auth.Resource, error)

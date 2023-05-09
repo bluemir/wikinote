@@ -36,3 +36,6 @@ func (backend *Backend) FileDelete(path string) error {
 func (backend *Backend) FileList(path string) ([]files.FileInfo, error) {
 	return backend.files.List(path)
 }
+func (backend *Backend) FileMove(oldPath, newPath string) error {
+	return backend.files.Move(oldPath, newPath)
+}
