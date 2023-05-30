@@ -30,7 +30,11 @@ export function create(tagname, attr = {}) {
 		newTag.innerHTML = attr.$html;
 	}
 	if (attr.$child) {
-		newTag.appendChild(attr.$child)
+		if (attr.$child instanceof Array){
+			attr.$child.forEach(n => newTag.appendChild(n))
+		} else {
+			newTag.appendChild(attr.$child)
+		}
 	}
 	if (attr.$values) {
 		Object.entries(attr.$values).forEach(([k, v]) => {
@@ -42,12 +46,11 @@ export function create(tagname, attr = {}) {
 	});
 	return newTag;
 }
-export async function request(method, url, options) {
-	var o = options || {}
+export async function request(method, url, options = {}) {
 	try {
-		var opts = config.hook.preRequest(method, url, o) || o;
+		var opts = config.hook.preRequest(method, url, options) || options;
 	} catch(e) {
-		var opts = o;
+		var opts = options;
 	}
 
 	if (opts.timestamp === true) {
@@ -68,7 +71,9 @@ export async function request(method, url, options) {
 	url = u.href
 
 	return new Promise(function(resolve, reject) {
-		var req = new XMLHttpRequest();
+		let req = new XMLHttpRequest();
+		// default accepts
+		req.setRequestHeader("Accept", "application/json,*/*");
 
 		req.addEventListener("readystatechange", function(){
 			if (req.readyState  == 4) {
@@ -100,9 +105,7 @@ export async function request(method, url, options) {
 			req.open(method, resolveParam(url, opts.params) + queryString(opts.query), true);
 		}
 
-		// default accept is json
-		req.setRequestHeader("Accept", "application/json");
-
+		req.withCredentials = opts.withCredentials;
 		Object.keys(opts.headers || {}).forEach(function(name){
 			req.setRequestHeader(name, opts.headers[name]);
 		});
@@ -256,6 +259,25 @@ export function jq(data, query, value) {
 	} catch(e) {
 		throw new ExtendedError("[$.jq] not found", e);
 	}
+}
+export function merge(...args) {
+	return args.reduce((target, src={}) => {
+		return Object.entries(src).reduce((t, [key,value]) => {
+			if (value instanceof Array) {
+				return {
+					...t,
+					[key]: [...(t[key]||[]), ...value],
+				}
+			}
+			if (value instanceof Object) {
+				return {
+					...t,
+					[key]: merge(t[key], value)
+				}
+			}
+			return {...t, [key]:value}
+		}, target)
+	}, {})
 }
 
 class ExtendedError extends Error {
