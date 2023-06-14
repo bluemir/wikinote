@@ -72,8 +72,6 @@ export async function request(method, url, options = {}) {
 
 	return new Promise(function(resolve, reject) {
 		let req = new XMLHttpRequest();
-		// default accepts
-		req.setRequestHeader("Accept", "application/json,*/*");
 
 		req.addEventListener("readystatechange", function(){
 			if (req.readyState  == 4) {
@@ -104,8 +102,11 @@ export async function request(method, url, options = {}) {
 		} else {
 			req.open(method, resolveParam(url, opts.params) + queryString(opts.query), true);
 		}
-
 		req.withCredentials = opts.withCredentials;
+
+		// default accepts
+		req.setRequestHeader("Accept", "application/json,*/*");
+
 		Object.keys(opts.headers || {}).forEach(function(name){
 			req.setRequestHeader(name, opts.headers[name]);
 		});
