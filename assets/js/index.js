@@ -1,4 +1,5 @@
-import "./components/index.js";
+//import "./components/index.js";
+import "bm.js/components/index.js";
 
 import "./layout/page.js";
 import "./layout/header.js";
@@ -16,3 +17,4 @@ import "./profile.js";
 import "./files.js";
 import "./plugin-footer.js";
 import "./messages.js";
+

@@ -1,5 +1,6 @@
-import * as $ from "bm.js/bm.module.js";
+import * as $ from "../../bm.module.js";
 import {html, render} from 'lit-html';
+import {css} from "../common.js";
 
 /*
 
@@ -12,6 +13,8 @@ import {html, render} from 'lit-html';
 
 var tmpl = (app) => html`
 	<style>
+		${css}
+
 		:host {
 			display: inline-block;
 			position: relative;

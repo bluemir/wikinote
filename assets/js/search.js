@@ -10,6 +10,7 @@ var tmpl = (app) => html`
 		}
 		table th, table td {
 			border: 1px solid gray;
+			word-break: break-all;
 		}
 		table th {
 			text-align: right;

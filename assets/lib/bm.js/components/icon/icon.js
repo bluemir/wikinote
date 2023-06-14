@@ -1,4 +1,4 @@
-import * as $ from "bm.js/bm.module.js";
+import * as $ from "../../bm.module.js";
 import {html, render} from 'lit-html';
 
 var tmpl = (elem) => html`
@@ -16,6 +16,18 @@ var tmpl = (elem) => html`
 class Icon extends $.CustomElement {
 	constructor() {
 		super();
+	}
+	onConnected() {
+		// add stylesheet
+		if ($.get(document, "head link#icons")) {
+			// skip
+			return
+		}
+		$.get(document, "head").appendChild($.create("link", {
+			href: "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined",
+			rel: "stylesheet",
+			id: "icons",
+		}));
 	}
 	static get observedAttributes() {
 		return ["kind", "size"];

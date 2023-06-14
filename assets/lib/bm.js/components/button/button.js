@@ -1,20 +1,23 @@
-import * as $ from "bm.js/bm.module.js";
+import * as $ from "../../bm.module.js";
 import {html, render} from 'lit-html';
+import {css} from "../common.js";
 
 var tmpl = (app) => html`
 	<style>
+		${css}
+
 		:host {
 			display: inline-block;
 			padding: 0.3rem 0.8rem;
 		}
 		:host(:hover) {
-			background: #343434;
+			background: var(--bg-color, #343434);
 		}
 
 		::slotted(*) {
 			display: block;
 			text-decoration: none;
-			color: white;
+			color: var(--fg-color, white);
 			white-space: nowrap;
 		}
 	</style>

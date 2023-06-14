@@ -1,8 +1,11 @@
-import * as $ from "bm.js/bm.module.js";
+import * as $ from "../../bm.module.js";
 import {html, render} from 'lit-html';
+import {css} from "../common.js";
 
 var tmpl = (app) => html`
 	<style>
+		${css}
+
 		nav {
 			font-size: 0.8rem;
 			color: var(--breadcrumbs-fg-color);

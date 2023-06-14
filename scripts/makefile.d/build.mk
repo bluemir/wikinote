@@ -17,7 +17,6 @@ build/$(APP_NAME): $(GO_SOURCES) $(MAKEFILE_LIST) fmt vet
 	@mkdir -p build
 	go build -v \
 		-trimpath \
-		-tags embed \
 		-ldflags "\
 			-X 'main.AppName=$(APP_NAME)' \
 			-X 'main.Version=$(VERSION)'  \
@@ -25,6 +24,7 @@ build/$(APP_NAME): $(GO_SOURCES) $(MAKEFILE_LIST) fmt vet
 		" \
 		$(OPTIONAL_BUILD_ARGS) \
 		-o $@ .
+		#-tags embed \
 
 build-tools: build/tools/go
 build/tools/go:
