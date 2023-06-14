@@ -1,37 +1,37 @@
 ##@ Web
 ## FE sources
-JS_SOURCES    := $(shell find web/js             -type f -name '*.js'   -print -o \
-                                                 -type f -name '*.jsx'  -print -o \
-                                                 -type f -name '*.json' -print)
-CSS_SOURCES   := $(shell find web/css            -type f -name '*.css'  -print)
-WEB_LIBS      := $(shell find web/lib            -type f                -print)
-HTML_SOURCES  := $(shell find web/html-templates -type f -name '*.html' -print)
-IMAGES        := $(shell find web/images         -type f                -print)
-WEB_META      := web/manifest.json web/favicon.ico
+JS_SOURCES    := $(shell find assets/js             -type f -name '*.js'   -print -o \
+                                                    -type f -name '*.jsx'  -print -o \
+                                                    -type f -name '*.json' -print)
+CSS_SOURCES   := $(shell find assets/css            -type f -name '*.css'  -print)
+WEB_LIBS      := $(shell find assets/lib            -type f                -print)
+HTML_SOURCES  := $(shell find assets/html-templates -type f -name '*.html' -print)
+IMAGES        := $(shell find assets/images         -type f                -print)
+WEB_META      := assets/manifest.json assets/favicon.ico
 
 build/docker-image: $(JS_SOURCES) $(CSS_SOURCES) $(WEB_LIBS) $(HTML_SOURCES)
 
 STATICS :=
 
 ## common static files
-STATICS += $(CSS_SOURCES:web/%=build/static/%)
-STATICS += $(WEB_LIBS:web/%=build/static/%)
-STATICS += $(IMAGES:web/%=build/static/%)
-#STATICS += $(WEB_META:web/%=build/static/%)
+STATICS += $(CSS_SOURCES:assets/%=build/static/%)
+STATICS += $(WEB_LIBS:assets/%=build/static/%)
+STATICS += $(IMAGES:assets/%=build/static/%)
+#STATICS += $(WEB_META:assets/%=build/static/%)
 
 
-build/static/%: web/%
+build/static/%: assets/%
 	@mkdir -p $(dir $@)
 	cp $< $@
 
 ## esbuild
 STATICS += build/static/js/v1/index.js # entrypoint
 STATICS += build/static/js/index.js # entrypoint
-build/static/js/%: export NODE_PATH=web/js:web/lib
+build/static/js/%: export NODE_PATH=assets/js:assets/lib
 build/static/js/%: $(JS_SOURCES) build/yarn-updated
 	@$(MAKE) build/tools/npx
 	@mkdir -p $(dir $@)
-	npx esbuild $(@:build/static/%=web/%) --outdir=$(dir $@) \
+	npx esbuild $(@:build/static/%=assets/%) --outdir=$(dir $@) \
 		--bundle --sourcemap --format=esm $(OPTIONAL_WEB_BUILD_ARGS)
 	#--external:/config.js \
 	#--minify \

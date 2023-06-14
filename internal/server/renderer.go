@@ -3,15 +3,16 @@ package server
 import (
 	"encoding/json"
 	"html/template"
-	"os"
+	"io/fs"
 	"path"
 	"path/filepath"
 	"strings"
 
 	"github.com/gin-gonic/gin/render"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
-	"github.com/bluemir/wikinote/internal/static"
+	"github.com/bluemir/wikinote/internal/assets"
 )
 
 func NewRender() (render.HTMLRender, error) {
@@ -27,12 +28,19 @@ func NewRender() (render.HTMLRender, error) {
 		templates: map[string]*template.Template{},
 	}
 	// layout
-	layout, err := template.New("__root__").Funcs(fMap).Parse(static.HTMLTemplates.MustString("layout.html"))
+	buf, err := fs.ReadFile(assets.HTMLTemplates, "layout.html")
+	if err != nil {
+		return nil, err
+	}
+	layout, err := template.New("__root__").Funcs(fMap).Parse(string(buf))
 	if err != nil {
 		return nil, err
 	}
 
-	if err := static.HTMLTemplates.Walk("/", func(path string, info os.FileInfo, err error) error {
+	if err := fs.WalkDir(assets.HTMLTemplates, ".", func(path string, info fs.DirEntry, err error) error {
+		if err != nil {
+			return errors.Wrapf(err, "read template error: path: %s", path)
+		}
 		logrus.Tracef("find %s", path)
 		if info.IsDir() && info.Name()[0] == '.' && path != "/" {
 			return filepath.SkipDir
@@ -55,11 +63,17 @@ func NewRender() (render.HTMLRender, error) {
 		if err != nil {
 			return err
 		}
-		tmpl, err := layout.Parse(static.HTMLTemplates.MustString(path))
+		buf, err := fs.ReadFile(assets.HTMLTemplates, path)
+		if err != nil {
+			return err
+		}
+		tmpl, err := layout.Parse(string(buf))
 		if err != nil {
 			return err
 		}
 
+		// XXX for lagacy
+		renderer.templates["/"+path] = tmpl
 		renderer.templates[path] = tmpl
 
 		return nil

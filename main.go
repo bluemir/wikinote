@@ -18,10 +18,12 @@ import (
 
 var Version string
 var AppName string
+var BuildTime string
 
 func main() {
 	buildinfo.AppName = AppName
 	buildinfo.Version = Version
+	buildinfo.AppName = BuildTime
 
 	if err := cmd.Run(AppName, Version); err != nil {
 		logrus.Fatal(err)

@@ -7,9 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 
+	"github.com/bluemir/wikinote/internal/assets"
 	queryrouter "github.com/bluemir/wikinote/internal/query-router"
 	"github.com/bluemir/wikinote/internal/server/middleware/auth"
-	"github.com/bluemir/wikinote/internal/static"
 )
 
 var (
@@ -21,7 +21,7 @@ func (server *Server) RegisterRoute(app gin.IRouter) {
 
 	{
 		special := app.Group("/-")
-		special.Group("/static", server.staticCache).StaticFS("/", static.Files.HTTPBox())
+		special.Group("/static", server.staticCache).StaticFS("/", http.FS(assets.Static))
 
 		special.GET("/auth/login", server.handler.Login)
 		special.GET("/auth/profile", server.handler.Profile)
