@@ -4,10 +4,11 @@ import {html, render} from 'lit-html';
 var tmpl = (app) => html`
 	<style>
 		@import url("/-/static/css/color.css");
+
 	</style>
 	<form action="/-/search">
 		<input name="q" value="${app.query}" />
-		<button><c-icon kind="search"></c-icon></button>
+		<button><c-icon kind="search" size="1rem"></c-icon></button>
 	</form>
 `;
 

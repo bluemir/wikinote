@@ -12,7 +12,7 @@ dev-run: ## Run dev server. If detect file change, automatically rebuild&restart
 			--include "yarn.lock" \
 			--include "Makefile" \
 			--include "scripts/makefile.d/**.mk" \
-			--include "web/**" \
+			--include "assets/**" \
 			--include "**.go" \
 			--include "runtime/.app/config.yaml" \
 			-- \

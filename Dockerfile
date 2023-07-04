@@ -1,5 +1,5 @@
 ARG VERSION=dev
-FROM fedora:36 as build-env
+FROM fedora:38 as build-env
 
 RUN echo "fastestmirror=1" >> /etc/dnf/dnf.conf
 RUN dnf install -y \
@@ -28,9 +28,8 @@ RUN yarn install
 # build
 WORKDIR /src
 
-## for use vendor folder. uncomment next line
-#ENV OPTIONAL_BUILD_ARGS="-mod=vendor"
-ENV  OPTIONAL_WEB_BUILD_ARGS="--minify"
+ENV OPTIONAL_BUILD_ARGS="-tags embed"
+ENV OPTIONAL_WEB_BUILD_ARGS="--minify"
 
 ARG VERSION
 
@@ -41,7 +40,7 @@ RUN make build/wikinote
 
 ################################################################################
 # running image
-FROM fedora:36
+FROM fedora:38
 
 COPY --from=build-env /src/build/wikinote /bin/wikinote
 

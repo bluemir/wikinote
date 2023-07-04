@@ -41,7 +41,7 @@ class Icon extends $.CustomElement {
 	// attribute
 	get size() {
 		let n = this.attr("size");
-		return n ? `font-size: ${n}` : ""
+		return n ? `font-size: ${n};` : ""
 	}
 }
 customElements.define("c-icon", Icon);

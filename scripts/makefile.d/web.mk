@@ -28,7 +28,7 @@ build/static/%: assets/%
 STATICS += build/static/js/v1/index.js # entrypoint
 STATICS += build/static/js/index.js # entrypoint
 build/static/js/%: export NODE_PATH=assets/js:assets/lib
-build/static/js/%: $(JS_SOURCES) build/yarn-updated
+build/static/js/%: $(JS_SOURCES) $(WEB_LIBS) build/yarn-updated
 	@$(MAKE) build/tools/npx
 	@mkdir -p $(dir $@)
 	npx esbuild $(@:build/static/%=assets/%) --outdir=$(dir $@) \
@@ -40,6 +40,12 @@ build/static/js/%: $(JS_SOURCES) build/yarn-updated
 build-web: $(STATICS) ## Build web-files. (bundle, minify, transpile, etc.)
 
 build/$(APP_NAME): $(HTML_SOURCES) $(STATICS)
+
+vet: build/static
+
+build/static:
+	mkdir -p $@
+	touch $@/.placeholder
 
 ## resolve depandancy
 OPTIONAL_CLEAN += node_modules
