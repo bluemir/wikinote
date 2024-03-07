@@ -3,14 +3,14 @@ package auth
 import "regexp"
 
 type Group struct {
-	Name string
+	Name string `json:"name,omitempty"`
 }
 
 type Token struct {
-	ID        uint `gorm:"primary_key"`
-	Username  string
-	HashedKey string `json:""`
-	RevokeKey string
+	ID        uint   `gorm:"primary_key" json:"id,omitempty"`
+	Username  string `json:"username,omitempty"`
+	HashedKey string `json:"-,omitempty"`
+	RevokeKey string `json:"revoke_key,omitempty"`
 }
 type Role struct {
 	Rules []Rule `yaml:"rules"`

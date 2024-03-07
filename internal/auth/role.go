@@ -1,8 +1,8 @@
 package auth
 
 import (
-	"github.com/antonmedv/expr"
-	"github.com/antonmedv/expr/vm"
+	"github.com/expr-lang/expr"
+	"github.com/expr-lang/expr/vm"
 	yaml "gopkg.in/yaml.v3"
 )
 
