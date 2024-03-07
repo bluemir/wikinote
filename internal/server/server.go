@@ -72,11 +72,11 @@ func Run(b *backend.Backend, conf *Config) error {
 
 	app.Use(location.Default(), fixURL)
 
-	// Renderer
-	if r, err := NewRender(); err != nil {
+	// add template
+	if html, err := NewRenderer(); err != nil {
 		return errors.WithStack(err)
 	} else {
-		app.HTMLRender = r
+		app.SetHTMLTemplate(html)
 	}
 
 	app.Use(auth_middleware.Middleware(server.Backend.Auth))
