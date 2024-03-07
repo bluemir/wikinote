@@ -66,7 +66,7 @@ func (m *Manager) NewHTTPToken(username string, expireAt time.Time) (string, err
 
 	newKey := hash(xid.New().String(), user.Salt)
 
-	if _, err := m.IssueToken(username, newKey, &expireAt); err != nil {
+	if _, err := m.IssueToken(username, newKey, ExpiredAt(expireAt)); err != nil {
 		return "", err
 	}
 

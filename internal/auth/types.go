@@ -1,16 +1,26 @@
 package auth
 
-import "regexp"
+import (
+	"regexp"
+	"time"
+)
 
+type User struct {
+	ID     uint   `gorm:"primary_key" json:"-"`
+	Name   string `gorm:"unique" json:"name"`
+	Groups Set    `sql:"type:json" json:"groups"`
+	Labels Labels `sql:"type:json" json:"labels"`
+	Salt   string `json:"-"`
+}
 type Group struct {
 	Name string `json:"name,omitempty"`
 }
-
 type Token struct {
-	ID        uint   `gorm:"primary_key" json:"id,omitempty"`
+	Id        uint   `gorm:"primary_key" json:"id,omitempty"`
 	Username  string `json:"username,omitempty"`
 	HashedKey string `json:"-,omitempty"`
 	RevokeKey string `json:"revoke_key,omitempty"`
+	ExpiredAt *time.Time
 }
 type Role struct {
 	Rules []Rule `yaml:"rules"`
@@ -19,7 +29,6 @@ type Rule struct {
 	Verbs     []Verb          `yaml:"verbs"`
 	Resources []ResourceMatch `yaml:"resources"`
 }
-
 type Resource interface {
 	Get(key string) string
 	KeyValues() KeyValues
@@ -60,4 +69,30 @@ func (r *Regexp) MarshalText() ([]byte, error) {
 	}
 
 	return nil, nil
+}
+
+type Subject struct {
+	Kind Kind   `gorm:"primaryKey;size:256" expr:"kind"`
+	Name string `gorm:"primaryKey;size:256" expr:"name"`
+}
+
+type Kind string
+
+const (
+	KindUser  Kind = "user"
+	KindGroup Kind = "group"
+)
+
+type TokenOpt func(*Token)
+
+func ExpiredAt(t time.Time) func(*Token) {
+	return func(token *Token) {
+		token.ExpiredAt = &t
+	}
+}
+func ExpiredAfter(d time.Duration) func(*Token) {
+	return func(token *Token) {
+		t := time.Now().Add(d)
+		token.ExpiredAt = &t
+	}
 }

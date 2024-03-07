@@ -44,14 +44,6 @@ func (m *Manager) UpdateUser(user *User) error {
 	return m.db.Save(user).Error
 }
 
-type User struct {
-	ID     uint   `gorm:"primary_key" json:"-"`
-	Name   string `gorm:"unique" json:"name"`
-	Groups Set    `sql:"type:json" json:"groups"`
-	Labels Labels `sql:"type:json" json:"labels"`
-	Salt   string `json:"-"`
-}
-
 func (user *User) AddGroup(group string) {
 	user.Groups[group] = struct{}{}
 }
