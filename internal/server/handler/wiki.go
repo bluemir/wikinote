@@ -2,7 +2,7 @@ package handler
 
 import (
 	"html/template"
-	"io/ioutil"
+	"io"
 	"mime"
 	"net/http"
 	"os"
@@ -48,19 +48,19 @@ func (handler *Handler) View(c *gin.Context) {
 			data, err := handler.backend.FileRead(c.Request.URL.Path)
 			if err != nil {
 				logrus.Warnf("md file not found, %s", err)
-				c.HTML(http.StatusNotFound, "/errors/not-found.html", gin.H{})
+				c.HTML(http.StatusNotFound, PageErrNotFound, gin.H{})
 				return
 			}
 			renderedData, err := handler.backend.Render(data)
 			if err != nil {
-				c.HTML(http.StatusInternalServerError, "/errors/internal-server-error.html", gin.H{})
+				c.HTML(http.StatusInternalServerError, PageErrInternalServerError, gin.H{})
 				return
 			}
 
 			footerData, err := handler.backend.Plugin.GetWikiFooter(c.Request.URL.Path)
 			if err != nil {
 				logrus.Warn(err)
-				c.HTML(http.StatusInternalServerError, "/errors/internal-server-error.html", gin.H{})
+				c.HTML(http.StatusInternalServerError, PageErrInternalServerError, gin.H{})
 				return
 			}
 
@@ -108,13 +108,13 @@ func (handler *Handler) EditForm(c *gin.Context) {
 	switch category {
 	case "text":
 		data, err := handler.backend.FileRead(c.Request.URL.Path)
-		c.HTML(http.StatusOK, "/editor.html", gin.H{
+		c.HTML(http.StatusOK, PageEditor, gin.H{
 			"data":  template.HTML(data),
 			"path":  c.Request.URL.Path,
 			"isNew": err != nil,
 		})
 	default:
-		c.HTML(http.StatusOK, "/upload.html", gin.H{
+		c.HTML(http.StatusOK, PageUpload, gin.H{
 			"path": c.Request.URL.Path,
 		})
 	}
@@ -141,7 +141,7 @@ func (handler *Handler) UpdateWithForm(c *gin.Context) {
 }
 func (handler *Handler) Update(c *gin.Context) {
 	p := c.Request.URL.Path
-	data, err := ioutil.ReadAll(c.Request.Body)
+	data, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -167,7 +167,7 @@ func (handler *Handler) Files(c *gin.Context) {
 		return
 	}
 
-	c.HTML(http.StatusOK, "/viewers/files.html", gin.H{
+	c.HTML(http.StatusOK, PageFiles, gin.H{
 		"files": files,
 	})
 }
@@ -185,7 +185,7 @@ func (handler *Handler) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 func (handler *Handler) Preview(c *gin.Context) {
-	data, err := ioutil.ReadAll(c.Request.Body)
+	data, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
