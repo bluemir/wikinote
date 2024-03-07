@@ -8,8 +8,8 @@ import (
 type User struct {
 	ID     uint   `gorm:"primary_key" json:"-"`
 	Name   string `gorm:"unique" json:"name"`
-	Groups Set    `sql:"type:json" json:"groups"`
-	Labels Labels `sql:"type:json" json:"labels"`
+	Groups Set    `gorm:"type:bytes;serializer:gob" json:"groups"`
+	Labels Labels `gorm:"type:bytes;serializer:gob" json:"labels" expr:"labels"`
 	Salt   string `json:"-"`
 }
 type Group struct {
@@ -96,3 +96,7 @@ func ExpiredAfter(d time.Duration) func(*Token) {
 		token.ExpiredAt = &t
 	}
 }
+
+type Labels map[string]string
+type List []string
+type Set map[string]struct{}

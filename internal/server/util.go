@@ -19,16 +19,14 @@ func (server *Server) static(path string) func(c *gin.Context) {
 	}
 }
 
-func (server *Server) initEtag() error {
+func initEtag() string {
 	hashed := crypto.SHA512.New()
 
 	io.WriteString(hashed, buildinfo.AppName)
 	io.WriteString(hashed, buildinfo.Version)
 	io.WriteString(hashed, buildinfo.BuildTime)
 
-	server.etag = hex.EncodeToString(hashed.Sum(nil))[:20]
-
-	return nil
+	return hex.EncodeToString(hashed.Sum(nil))[:20]
 }
 
 func (server *Server) staticCache(c *gin.Context) {

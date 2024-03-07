@@ -16,7 +16,7 @@ var (
 	authz = auth.Authz
 )
 
-func (server *Server) RegisterRoute(app gin.IRouter) {
+func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc)) {
 	app.GET("/", server.redirectToFrontPage)
 
 	{
@@ -36,7 +36,7 @@ func (server *Server) RegisterRoute(app gin.IRouter) {
 		special.GET("/admin", authz(Global, "read"), server.handler.Admin)
 	}
 	{
-		api := app.Group("/-/api")
+		api := app.Group("/-/api", markAPI)
 		api.POST("/preview", server.handler.Preview) // render body
 		api.GET("/me", server.handler.Me)
 		api.GET("auth/can/:verb/*kind", server.handler.Can)
@@ -65,14 +65,13 @@ func (server *Server) RegisterRoute(app gin.IRouter) {
 		pages.PUT("*", authz(Page, "update"), server.handler.Update)
 		pages.DELETE("*", authz(Page, "delete"), server.handler.Delete)
 
-		app.Use(rejectDotApp, pages.Handler)
+		noRoute(rejectDotApp, markHTML, pages.Handler)
 	}
 }
 func (server *Server) redirectToFrontPage(c *gin.Context) {
 	logrus.Debugf("redirect to front page: %s", server.frontPage)
 	c.Redirect(http.StatusTemporaryRedirect, "/"+server.frontPage)
 	c.Abort()
-	return
 }
 func Page(c *gin.Context) (auth.Resource, error) {
 	// get attributes

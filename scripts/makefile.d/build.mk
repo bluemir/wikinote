@@ -18,9 +18,9 @@ build/$(APP_NAME): $(GO_SOURCES) $(MAKEFILE_LIST) fmt vet
 	go build -v \
 		-trimpath \
 		-ldflags "\
-			-X 'main.AppName=$(APP_NAME)' \
-			-X 'main.Version=$(VERSION)'  \
-			-X 'main.BuildTime=$(shell date --rfc-3339=ns)' \
+			-X '$(IMPORT_PATH)/internal/buildinfo.AppName=$(APP_NAME)' \
+			-X '$(IMPORT_PATH)/internal/buildinfo.Version=$(VERSION)' \
+			-X '$(IMPORT_PATH)/internal/buildinfo.BuildTime=$(shell date --rfc-3339=ns)' \
 		" \
 		$(OPTIONAL_BUILD_ARGS) \
 		-o $@ .

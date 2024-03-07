@@ -8,6 +8,7 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/bluemir/wikinote/cmd/config"
+	"github.com/bluemir/wikinote/internal/buildinfo"
 
 	serverCmd "github.com/bluemir/wikinote/cmd/server"
 )
@@ -17,11 +18,11 @@ const (
 	defaultLogLevel = logrus.InfoLevel
 )
 
-func Run(AppName string, Version string) error {
+func Run() error {
 	conf := config.NewConfig()
 
-	app := kingpin.New(AppName, describe)
-	app.Version(Version)
+	app := kingpin.New(buildinfo.AppName, describe)
+	app.Version(buildinfo.Version)
 
 	app.Flag("verbose", "Log level").
 		Short('v').

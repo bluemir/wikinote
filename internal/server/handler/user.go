@@ -24,7 +24,7 @@ func (handler *Handler) Login(c *gin.Context) {
 			return
 		}
 
-		if u != nil && u.Name == c.Query("exclude") {
+		if u.Name == c.Query("exclude") {
 			// logined, but try to login same id
 			c.Error(auth.ErrUnauthorized)
 			c.Abort()

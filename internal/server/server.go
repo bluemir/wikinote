@@ -46,6 +46,7 @@ func Run(b *backend.Backend, conf *Config) error {
 		Backend:   b,
 		handler:   h,
 		frontPage: conf.FrontPage,
+		etag:      initEtag(),
 	}
 
 	app := gin.New()
@@ -84,7 +85,7 @@ func Run(b *backend.Backend, conf *Config) error {
 	app.GET("/favicon.ico", NotFound)
 
 	// Register Routing
-	server.RegisterRoute(app)
+	server.route(app, app.NoRoute)
 
 	if conf.EnableHttps {
 		cacheDir := conf.AutoTLSCache
