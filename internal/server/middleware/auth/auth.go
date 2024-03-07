@@ -60,7 +60,7 @@ func User(c *gin.Context) (*auth.User, error) {
 
 type ResourceGetter func(c *gin.Context) (auth.Resource, error)
 
-func Authz(getResource ResourceGetter, verb Verb) gin.HandlerFunc {
+func Can(verb Verb, getResource ResourceGetter) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user, err := User(c)
 		if err != nil && !errors.Is(err, auth.ErrUnauthorized) {
