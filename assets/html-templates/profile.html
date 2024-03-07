@@ -1,5 +1,14 @@
-{{ define "contents" }}
-<wikinote-profile user="{{ .user.Name }}">
-	<!-- TODO info here -->
-</wikinote-profile>
-{{ end }}
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Wikinote</title>
+	{{ template "snippet/header.html"}}
+</head>
+<body>
+	<wikinote-page>
+        <wikinote-profile user="{{ .user.Name }}">
+			<!-- TODO info here -->
+		</wikinote-profile>
+	</wikinote-page>
+</body>
+</html>

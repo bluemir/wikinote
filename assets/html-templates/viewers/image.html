@@ -1,4 +1,13 @@
-{{ define "contents" }}
-<wikinote-viewer-image url="{{.path}}?raw">
-</wikinote-viewer-image>
-{{ end }}
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Wikinote</title>
+		{{ template "snippet/header.html"}}
+	</head>
+	<body>
+		<wikinote-page>
+			<wikinote-viewer-image url="{{.path}}?raw">
+            </wikinote-viewer-image>
+		</wikinote-page>
+	</body>
+</html>

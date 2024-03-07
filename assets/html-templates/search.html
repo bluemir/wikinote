@@ -1,5 +1,14 @@
-{{ define "contents"}}
-<wikinote-search>
-	<c-data>{{ .result | json | toString}}</c-data>
-</wikinote-search>
-{{ end }}
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Wikinote</title>
+	{{ template "snippet/header.html"}}
+</head>
+<body>
+	<wikinote-page>
+        <wikinote-search>
+			<c-data>{{ .result | json | toString}}</c-data>
+		</wikinote-search>
+	</wikinote-page>
+</body>
+</html>

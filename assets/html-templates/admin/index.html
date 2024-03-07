@@ -1,7 +1,14 @@
-{{ define "contents"}}
-
-<a href="/-/admin/users">Users</a>
-<a href="/-/admin/groups">Groups</a>
-<a href="/-/admin/roles">Roles</a>
-
-{{ end }}
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Wikinote</title>
+	{{ template "snippet/header.html"}}
+</head>
+<body>
+	<wikinote-page>        
+        <a href="/-/admin/users">Users</a>
+        <a href="/-/admin/groups">Groups</a>
+        <a href="/-/admin/roles">Roles</a>
+	</wikinote-page>
+</body>
+</html>

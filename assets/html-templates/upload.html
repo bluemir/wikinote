@@ -1,3 +1,12 @@
-{{ define "contents"}}
-<wikinote-upload path="{{.path}}"></wikinote-upload>
-{{ end }}
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Wikinote</title>
+	{{ template "snippet/header.html"}}
+</head>
+<body>
+	<wikinote-page>
+        <wikinote-upload path="{{.path}}"></wikinote-upload>
+	</wikinote-page>
+</body>
+</html>

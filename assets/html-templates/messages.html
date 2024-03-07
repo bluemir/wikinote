@@ -1,5 +1,14 @@
-{{ define "contents" }}
-<wikinote-messages>
-	<c-data>{{.messages | json | toString}}</c-data>
-</wikinote-messages>
-{{ end }}
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Wikinote</title>
+	{{ template "snippet/header.html"}}
+</head>
+<body>
+	<wikinote-page>
+        <wikinote-messages>
+			<c-data>{{.messages | json | toString}}</c-data>
+		</wikinote-messages>
+	</wikinote-page>
+</body>
+</html>
