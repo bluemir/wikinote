@@ -53,7 +53,7 @@ func initAdminUser(authm *auth.Manager, users map[string]string) error {
 		// ensure user
 		user, ok, err := authm.GetUser(name)
 		if err != nil {
-			return err
+			return errors.WithStack(err)
 		}
 		if !ok {
 			err := authm.CreateUser(&auth.User{
@@ -61,7 +61,7 @@ func initAdminUser(authm *auth.Manager, users map[string]string) error {
 				Groups: map[string]struct{}{"admin": {}},
 			})
 			if err != nil {
-				return err
+				return errors.WithStack(err)
 			}
 		} else {
 			user.AddGroup("admin")
@@ -73,7 +73,7 @@ func initAdminUser(authm *auth.Manager, users map[string]string) error {
 		if err := authm.RevokeTokenAll(name); err != nil {
 			return err
 		}
-		if _, err := authm.IssueToken(name, key, nil); err != nil {
+		if _, err := authm.IssueToken(name, key); err != nil {
 			return err
 		}
 	}
