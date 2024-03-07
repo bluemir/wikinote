@@ -13,6 +13,7 @@ import (
 
 	"github.com/bluemir/wikinote/internal/backend"
 	"github.com/bluemir/wikinote/internal/server/handler"
+	"github.com/bluemir/wikinote/internal/server/injector"
 	auth_middleware "github.com/bluemir/wikinote/internal/server/middleware/auth"
 	error_middleware "github.com/bluemir/wikinote/internal/server/middleware/errors"
 )
@@ -50,6 +51,8 @@ func Run(b *backend.Backend, conf *Config) error {
 	}
 
 	app := gin.New()
+
+	app.Use(injector.Inject(b))
 
 	// Log
 	writer := logrus.WithFields(logrus.Fields{}).WriterLevel(logrus.DebugLevel)

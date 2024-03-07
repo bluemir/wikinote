@@ -13,5 +13,4 @@ func init() {
 	if err := assets.InitFS(os.DirFS("./")); err != nil {
 		panic(err)
 	}
-
 }

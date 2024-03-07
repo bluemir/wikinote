@@ -68,6 +68,7 @@ func Can(verb Verb, getResource ResourceGetter) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+		// at this point, user can be nil(it means not logined user)
 
 		resource, err := getResource(c)
 		if err != nil {

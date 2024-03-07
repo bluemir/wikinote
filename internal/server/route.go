@@ -60,7 +60,7 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc)) {
 
 		pages.GET("edit", can(verb.Update, resource.Page), server.handler.EditForm)
 		pages.GET("raw", can(verb.Get, resource.Page), server.handler.Raw)
-		pages.GET("delete", can(verb.Delete, resource.Page), server.static("/delete.html"))
+		pages.GET("delete", can(verb.Delete, resource.Page), server.static("delete.html"))
 		pages.GET("files", can(verb.Update, resource.Page), server.handler.Files)
 		pages.GET("*", can(verb.Get, resource.Page), server.handler.View)
 		pages.POST("*", can(verb.Update, resource.Page), server.handler.UpdateWithForm)
