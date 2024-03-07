@@ -1,3 +1,13 @@
-{{ define "contents"}}
-<wikinote-viewer-video url="{{.path}}?raw"></wikinote-viewer-video>
-{{ end }}
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Wikinote</title>
+	{{ template "snippet/header.html"}}
+	<style>@import url("/-/static/css/markdown.css");</style>
+</head>
+<body>
+	<wikinote-page>
+		<wikinote-viewer-video url="{{.path}}?raw"></wikinote-viewer-video>
+	</wikinote-page>
+</body>
+</html>

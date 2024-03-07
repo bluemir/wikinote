@@ -1,3 +1,13 @@
-{{ define "contents"}}
-<wikinote-delete></wikinote-delete>
-{{ end }}
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Wikinote</title>
+	{{ template "snippet/header.html"}}
+	<style>@import url("/-/static/css/markdown.css");</style>
+</head>
+<body>
+	<wikinote-page>
+        <wikinote-delete></wikinote-delete>
+	</wikinote-page>
+</body>
+</html>

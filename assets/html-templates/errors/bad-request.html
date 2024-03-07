@@ -1,4 +1,13 @@
-{{ define "contents" }}
-<h1>Bad Request</h1>
-{{.message}}
-{{ end }}
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Wikinote</title>
+	{{ template "snippet/header.html"}}
+</head>
+<body>
+	<wikinote-page>
+        <h1>Bad Request</h1>
+        {{.message}}>
+	</wikinote-page>
+</body>
+</html>

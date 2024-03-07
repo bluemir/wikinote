@@ -1,5 +1,14 @@
-{{ define "contents"}}
-<wikinote-files>
-	<c-data>{{ .files | json | toString}}</c-data>
-</wikinote-files>
-{{ end }}
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Wikinote</title>
+		{{ template "snippet/header.html"}}
+	</head>
+	<body>
+		<wikinote-page>
+			<wikinote-files>
+				<c-data>{{ .files | json | toString}}</c-data>
+			</wikinote-files>
+		</wikinote-page>
+	</body>
+</html>

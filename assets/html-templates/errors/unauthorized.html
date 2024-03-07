@@ -1,6 +1,15 @@
-{{ define "contents" }}
-<h1>Unauthorized</h1>
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Wikinote</title>
+	{{ template "snippet/header.html"}}
+</head>
+<body>
+	<wikinote-page>
+        <h1>Unauthorized</h1>
 
-<a href="/">Front Page</a>
-<a href="/-/auth/register">Register</a>
-{{ end }}
+        <a href="/">Front Page</a>
+        <a href="/-/auth/register">Register</a>
+	</wikinote-page>
+</body>
+</html>

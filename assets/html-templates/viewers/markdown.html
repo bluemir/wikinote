@@ -1,11 +1,18 @@
-{{ define "head" }}
-<style>@import url("/-/static/css/markdown.css");</style>
-{{ end }}
-{{ define "contents" }}
-<wikinote-viewer-markdown>
-	{{ .content }}
-</wikinote-viewer-markdown>
-{{ range .footers }}
-<wikinote-plugin-footer>{{.}}</wikinote-plugin-footer>
-{{ end }}
-{{ end }}
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Wikinote</title>
+	{{ template "snippet/header.html"}}
+	<style>@import url("/-/static/css/markdown.css");</style>
+</head>
+<body>
+	<wikinote-page>
+		<wikinote-viewer-markdown>
+			{{ .content }}
+		</wikinote-viewer-markdown>
+		{{ range .footers }}
+		<wikinote-plugin-footer>{{.}}</wikinote-plugin-footer>
+		{{ end }}
+	</wikinote-page>
+</body>
+</html>

@@ -1,9 +1,15 @@
-{{ define "head" }}
-<style>@import url("/-/static/css/markdown.css");</style>
-{{ end }}
-{{ define "contents" }}
-<wikinote-editor>
-	<c-data>{{. | json | toString }}</c-data>
-	<wikinote-viewer-markdown slot="preview"></wikinote-viewer-markdown>
-</wikinote-editor>
-{{ end }}
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Wikinote</title>
+	{{ template "snippet/header.html"}}
+</head>
+<body>
+	<wikinote-page>
+        <wikinote-editor>
+			<c-data>{{. | json | toString }}</c-data>
+			<wikinote-viewer-markdown slot="preview"></wikinote-viewer-markdown>
+		</wikinote-editor>
+	</wikinote-page>
+</body>
+</html>
