@@ -6,8 +6,9 @@
 </head>
 <body>
 	<wikinote-page>
-        <wikinote-profile user="{{ .user.Name }}">
+        <wikinote-profile user="{{ .User.Name }}">
 			<!-- TODO info here -->
+			<c-data>{{ .User | json | toString }}</c-data>
 		</wikinote-profile>
 	</wikinote-page>
 </body>

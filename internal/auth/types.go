@@ -1,8 +1,11 @@
 package auth
 
 import (
+	"encoding/json"
 	"regexp"
 	"time"
+
+	"golang.org/x/exp/maps"
 )
 
 type User struct {
@@ -100,3 +103,22 @@ func ExpiredAfter(d time.Duration) func(*Token) {
 type Labels map[string]string
 type List []string
 type Set map[string]struct{}
+
+func setFromArray(arr []string) Set {
+	s := Set{}
+	for _, v := range arr {
+		s[v] = struct{}{}
+	}
+	return s
+}
+
+var x = struct{}{}
+
+func (s Set) Add(vs ...string) {
+	for _, v := range vs {
+		s[v] = x
+	}
+}
+func (s Set) MarshalJSON() ([]byte, error) {
+	return json.Marshal(maps.Keys(s))
+}

@@ -9,6 +9,7 @@ import (
 
 	"github.com/bluemir/wikinote/internal/assets"
 	queryrouter "github.com/bluemir/wikinote/internal/query-router"
+	"github.com/bluemir/wikinote/internal/server/handler"
 	"github.com/bluemir/wikinote/internal/server/middleware/auth"
 	"github.com/bluemir/wikinote/internal/server/middleware/auth/resource"
 	"github.com/bluemir/wikinote/internal/server/middleware/auth/verb"
@@ -26,7 +27,7 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc)) {
 		special.Group("/static", server.staticCache).StaticFS("/", http.FS(assets.Static))
 
 		special.GET("/auth/login", server.handler.Login)
-		special.GET("/auth/profile", server.handler.Profile)
+		special.GET("/auth/profile", handler.Profile)
 
 		// Register
 		special.GET("/auth/register", server.static("/register.html"))

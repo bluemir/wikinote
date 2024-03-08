@@ -41,6 +41,7 @@ build-web: $(STATICS) ## Build web-files. (bundle, minify, transpile, etc.)
 
 build/$(APP_NAME): $(HTML_SOURCES) $(STATICS)
 
+.PHONY: vet
 vet: build/static
 
 build/static:

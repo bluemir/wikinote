@@ -77,7 +77,8 @@ func (handler *Handler) Register(c *gin.Context) {
 
 	c.HTML(http.StatusOK, "/welcome.html", gin.H{})
 }
-func (handler *Handler) Profile(c *gin.Context) {
+
+func Profile(c *gin.Context) {
 	user, err := User(c)
 	if err != nil {
 		c.Error(err)
@@ -85,8 +86,10 @@ func (handler *Handler) Profile(c *gin.Context) {
 		return
 	}
 
-	c.HTML(http.StatusOK, PageProfile, gin.H{
-		"user": user,
+	c.HTML(http.StatusOK, PageProfile, struct {
+		User *auth.User
+	}{
+		User: user,
 	})
 }
 func (handler *Handler) Can(c *gin.Context) {
