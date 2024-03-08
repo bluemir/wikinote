@@ -14,5 +14,5 @@ func (handler *Handler) Search(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
-	c.HTML(http.StatusOK, "/search.html", gin.H{"result": result})
+	c.HTML(http.StatusOK, PageSearch, gin.H{"result": result})
 }

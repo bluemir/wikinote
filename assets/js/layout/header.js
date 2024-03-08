@@ -1,8 +1,8 @@
 import * as $ from "bm.js/bm.module.js";
 import {html, render} from 'lit-html';
-import * as auth from "../auth.js";
 
-var tmpl = (app) => html`
+
+var tmpl = (elem) => html`
 	<style>
 		@import url("/-/static/css/color.css");
 		*:not(:defined) {
@@ -44,7 +44,7 @@ var tmpl = (app) => html`
 	<header part="wrapper">
 		<wikinote-header-logo></wikinote-header-logo>
 		<wikinote-header-search></wikinote-header-search>
-		${ app.isSpecialPath ? "": html`<c-breadcrumbs></c-breadcrumbs>` }
+		${ elem.isSpecialPath ? "": html`<c-breadcrumbs></c-breadcrumbs>` }
 		<wikinote-header-menu></wikinote-header-menu>
 	</header>
 `;
@@ -68,5 +68,6 @@ class CustomElement extends $.CustomElement {
 		}
 		return false;
 	}
+
 }
 customElements.define("wikinote-header", CustomElement);

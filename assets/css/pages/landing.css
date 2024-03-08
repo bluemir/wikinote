@@ -1,0 +1,21 @@
+#hero-contents {
+	padding: 1rem;
+	min-height: 20rem;
+}
+#hero-contents h1 {
+	font-size: 3rem;
+}
+
+
+#features {
+}
+
+#features > section {
+	text-align: center;
+	padding: 1rem;
+}
+
+#features p {
+	color: var(--gray-600);
+	text-align: left;
+}

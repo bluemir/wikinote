@@ -20,7 +20,7 @@ func HttpRealm(relam string) string {
 	return `Basic realm="` + relam + `"`
 }
 func LoginHeader(req *http.Request) (string, string) {
-	return headerWWWAuthenticate, "basic realm=" + req.URL.Host
+	return headerWWWAuthenticate, HttpRealm(req.URL.Host) //req.URL.Host
 }
 func (m *Manager) HTTP(req *http.Request) (*User, error) {
 	return m.HTTPHeaderString(req.Header.Get(headerAuthorization))

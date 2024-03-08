@@ -42,6 +42,14 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc)) {
 		api.POST("/preview", server.handler.Preview) // render body
 		api.GET("/me", server.handler.Me)
 		api.GET("auth/can/:verb/*kind", server.handler.Can)
+
+		{
+			v1 := api.Group("/v1")
+
+			v1.GET("/me", server.handler.Me)
+			v1.GET("/can/:verb/*kind", server.handler.Can)
+		}
+
 	}
 
 	// plugins

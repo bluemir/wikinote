@@ -3,8 +3,10 @@ package handler
 import (
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/internal/auth"
 )
@@ -83,7 +85,7 @@ func (handler *Handler) Profile(c *gin.Context) {
 		return
 	}
 
-	c.HTML(http.StatusOK, "/profile.html", gin.H{
+	c.HTML(http.StatusOK, PageProfile, gin.H{
 		"user": user,
 	})
 }
@@ -96,7 +98,9 @@ func (handler *Handler) Can(c *gin.Context) {
 	}
 
 	verb := c.Param("verb")
-	kind := c.Param("kind")
+	kind := strings.TrimPrefix(c.Param("kind"), "/")
+
+	logrus.WithField("verb", verb).WithField("kind", kind).Trace("API called")
 
 	if err := handler.backend.Auth.Can(user, auth.Verb(verb), auth.KeyValues{"kind": kind}); err != nil {
 		c.Error(err)

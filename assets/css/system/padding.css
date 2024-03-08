@@ -1,0 +1,19 @@
+[p="1"] {
+	padding: 0.5rem;
+}
+[p="2"] {
+	padding: 1.0rem;
+}
+[p="3"] {
+	padding: 1.5rem;
+}
+[p="4"] {
+	padding: 2.0rem;
+}
+
+[round="1"] {
+	border-radius: 0.5rem;
+}
+[round="2"] {
+	border-radius: 1.0rem;
+}

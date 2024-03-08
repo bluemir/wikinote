@@ -1,8 +1,8 @@
 import * as $ from "bm.js/bm.module.js";
 import {html, render} from 'lit-html';
-import * as auth from "../../auth.js";
+import {me, can} from "api.js";
 
-var tmpl = (app) => html`
+var tmpl = (elem) => html`
 	<style>
 		@import url("/-/static/css/color.css");
 
@@ -20,19 +20,25 @@ var tmpl = (app) => html`
 				<a href="?files">Files</a>
 			</c-dropdown-item>
 			<hr />
-			<c-dropdown-item>
-				<a href="/-/auth/login">Login</a>
-			</c-dropdown-item>
+			${elem.me?html`
+				<c-dropdown-item>
+					<a href="/-/auth/login?exclude=${elem.me.name}">Logout</a>
+				</c-dropdown-item>
+			`:html`
+				<c-dropdown-item>
+					<a href="/-/auth/login">Login</a>
+				</c-dropdown-item>
+				<c-dropdown-item>
+					<a href="/-/auth/register">Register</a>
+				</c-dropdown-item>
+			`}
 			<c-dropdown-item>
 				<a href="/-/auth/profile">Profile</a>
 			</c-dropdown-item>
 			<c-dropdown-item>
 				<a href="/-/messages">Messages</a>
 			</c-dropdown-item>
-			<c-dropdown-item>
-				<a href="/-/auth/login">Sign Up</a>
-			</c-dropdown-item>
-			${auth.can("read", "admin")?html`<c-dropdown-item><a href="/-/admin">Admin</a></c-dropdown-item>`:""}
+			${elem.canAccessAdmin?html`<c-dropdown-item><a href="/-/admin">Admin</a></c-dropdown-item>`:""}
 		</c-dropdown>
 	</menu>
 `;
@@ -45,5 +51,12 @@ class WikinoteHeaderMenu extends $.CustomElement {
 		render(tmpl(this), this.shadow);
 	}
 	// attribute
+	async onConnected(){
+		this.me = await me();
+		this.canAccessAdmin = await can("read", "admin");
+
+		this.render();
+	}
+	
 }
 customElements.define("wikinote-header-menu", WikinoteHeaderMenu);

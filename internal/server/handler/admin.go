@@ -7,5 +7,5 @@ import (
 )
 
 func (handler *Handler) Admin(c *gin.Context) {
-	c.HTML(http.StatusOK, "/admin/index.html", c)
+	c.HTML(http.StatusOK, PageAdmin, c)
 }

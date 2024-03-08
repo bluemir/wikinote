@@ -75,13 +75,13 @@ func code(err *gin.Error) int {
 func htmlName(err *gin.Error) string {
 	switch {
 	case errors.Is(err, validator.ValidationErrors{}):
-		return "/errors/bad-request.html"
+		return "errors/bad-request.html"
 	case errors.Is(err, auth.ErrUnauthorized):
-		return "/errors/unauthorized.html"
+		return "errors/unauthorized.html"
 	case errors.Is(err, auth.ErrForbidden):
-		return "/errors/forbidden.html"
+		return "errors/forbidden.html"
 	case errors.Is(err, os.ErrNotExist):
-		return "/errors/not-found.html"
+		return "errors/not-found.html"
 	}
-	return "/errors/internal-server-error.html"
+	return "errors/internal-server-error.html"
 }
