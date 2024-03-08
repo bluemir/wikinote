@@ -102,11 +102,11 @@ export async function request(method, url, options = {}) {
 		} else {
 			req.open(method, resolveParam(url, opts.params) + queryString(opts.query), true);
 		}
-		req.withCredentials = opts.withCredentials;
 
-		// default accepts
+		// set default accept
 		req.setRequestHeader("Accept", "application/json,*/*");
 
+		req.withCredentials = opts.withCredentials;
 		Object.keys(opts.headers || {}).forEach(function(name){
 			req.setRequestHeader(name, opts.headers[name]);
 		});
@@ -481,6 +481,9 @@ extend(Array, {
 
 
 export class CustomElement extends HTMLElement {
+	// private
+	#handler = {}
+
 	constructor({enableShadow = true} = {}) {
 		super();
 
@@ -488,9 +491,6 @@ export class CustomElement extends HTMLElement {
 			//this["--shadow"] = this.attachShadow({mode: 'open'})
 			this.attachShadow({mode: 'open'})
 		}
-		this["--handler"] = {}
-
-		this.render && this.render();
 	}
 	// syntactic sugar
 	attributeChangedCallback(name, oldValue, newValue) {
@@ -504,7 +504,10 @@ export class CustomElement extends HTMLElement {
 			old: oldValue,
 			new: newValue,
 		});
-		this.onAttributeChanged && this.onAttributeChanged(name, oldValue, newValue);
+		this.onAttributeChanged(name, oldValue, newValue);
+	}
+	onAttributeChanged() {
+		this.render && this.render();
 	}
 	connectedCallback()  {
 		this.render && this.render();
@@ -517,16 +520,15 @@ export class CustomElement extends HTMLElement {
 	}
 	get shadow() {
 		return this.shadowRoot;
-		//return this["--shadow"];
 	}
 	handler(h) {
 		var name = h instanceof Function ? h.name : h;
 		var f = h instanceof Function ? h : this[h];
 
-		if (!this["--handler"][name]) {
-			this["--handler"][name] = evt => f.call(this, evt.detail);
+		if (!this.#handler[name]) {
+			this.#handler[name] = evt => f.call(this, evt.detail);
 		}
-		return this["--handler"][name];
+		return this.#handler[name];
 	}
 }
 

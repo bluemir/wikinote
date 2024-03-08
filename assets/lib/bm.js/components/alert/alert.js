@@ -2,7 +2,7 @@ import * as $ from "../../bm.module.js";
 import {html, render} from 'lit-html';
 import {css} from "../common.js";
 
-var tmpl = (app) => html`
+var tmpl = (elem) => html`
 	<style>
 		${css}
 
@@ -16,7 +16,7 @@ var tmpl = (app) => html`
 			font-weight: bold;
 		}
 	</style>
-	${app.attr("text")}
+	${elem.attr("text")}
 `;
 
 class Alert extends $.CustomElement {

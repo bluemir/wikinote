@@ -2,10 +2,9 @@ import * as $ from "../../bm.module.js";
 import {html, render} from 'lit-html';
 import {css} from "../common.js";
 
-var tmpl = (app) => html`
+var tmpl = (elem) => html`
 	<style>
 		${css}
-
 		:host {
 			display: block;
 			padding: 0.3rem 1rem;

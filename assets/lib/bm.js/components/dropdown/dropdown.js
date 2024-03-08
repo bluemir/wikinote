@@ -11,7 +11,7 @@ import {css} from "../common.js";
 
 */
 
-var tmpl = (app) => html`
+var tmpl = (elem) => html`
 	<style>
 		${css}
 
@@ -41,7 +41,7 @@ var tmpl = (app) => html`
 			display: block;
 		}
 	</style>
-	<a href="">${app.attr("title")}</a>
+	<a href="">${elem.attr("title")}</a>
 	<menu>
 		<slot></slot>
 	</menu>

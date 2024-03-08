@@ -1,12 +1,20 @@
 import * as $ from "../../bm.module.js";
 import {html, render} from 'lit-html';
+import {css} from "../common.js";
 
 var tmpl = (elem) => html`
 	<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 	<style>
+		${css}
+
+		:host {
+			display: inline;
+		}
+
 		span.material-symbols-outlined {
 			${elem.size}
 			cursor: default;
+			vertical-align: bottom;
 		}
 	</style>
 
@@ -18,9 +26,7 @@ class Icon extends $.CustomElement {
 		super();
 	}
 	onConnected() {
-		// add stylesheet
 		if ($.get(document, "head link#icons")) {
-			// skip
 			return
 		}
 		$.get(document, "head").appendChild($.create("link", {

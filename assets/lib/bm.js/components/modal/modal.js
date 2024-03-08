@@ -23,15 +23,29 @@ var tmpl = (self) => html`
 			background: #ffffff;
 			min-width: 15rem;
 		}
+		#modal header {
+			padding: 0.2rem 0.5rem;
+			border-bottom: 1px solid gray;
+		}
+		#modal header ::slotted(*) {
+			margin: 0;
+			font-size: 1rem;
+		}
 		#modal section {
 			min-height: 10rem;
+			margin: 0.2rem 0.5rem;
 		}
 	</style>
 	<section id="modal" @click="${evt => evt.stopPropagation()}">
-		<header><slot name="title"></slot></header>
+		<header>
+			<slot name="title">Modal</slot>
+		</header>
 		<section>
-			<slot name="main"></slot>
+			<slot></slot>
 		</section>
+		<footer>
+			<slot name="footer"></slot>
+		</footer>
 	</section>
 `;
 
