@@ -1,27 +1,25 @@
 package backend
 
 import (
-	"bytes"
-
-	"github.com/russross/blackfriday/v2"
+	"github.com/gomarkdown/markdown"
+	"github.com/gomarkdown/markdown/html"
+	"github.com/gomarkdown/markdown/parser"
 )
 
 func (backend *Backend) Render(input []byte) ([]byte, error) {
-	return blackfriday.Run(
-		bytes.Replace(input, []byte("\r\n"), []byte("\n"), -1),
-		blackfriday.WithExtensions(
-			0|
-				blackfriday.CommonExtensions|
-				blackfriday.Footnotes|
-				blackfriday.FencedCode|
-				blackfriday.Autolink|
-				blackfriday.AutoHeadingIDs|
-				blackfriday.Tables,
-		),
-		blackfriday.WithRenderer(
-			blackfriday.NewHTMLRenderer(blackfriday.HTMLRendererParameters{
-				Flags: blackfriday.CommonHTMLFlags | blackfriday.HrefTargetBlank, //| TOC
-			}),
-		),
+
+	extensions := 0 |
+		parser.CommonExtensions |
+		parser.Footnotes |
+		parser.FencedCode |
+		parser.Autolink |
+		parser.AutoHeadingIDs |
+		parser.Tables
+
+	return markdown.Render(
+		parser.NewWithExtensions(extensions).Parse(input),
+		html.NewRenderer(html.RendererOptions{
+			Flags: html.CommonFlags | html.HrefTargetBlank,
+		}),
 	), nil
 }
