@@ -1,74 +1,82 @@
 package events
 
 import (
+	"context"
 	"time"
 
 	"github.com/rs/xid"
 	"gorm.io/gorm"
 )
 
-type IHub[T any] interface {
-	Fire(Event[T]) error
-	GetEvents(name string) ([]Event[T], error)
-	WatchEvents(name string, done <-chan error) (<-chan Event[T], error)
+type IHub interface {
+	Fire(name string, detail any) error
+	GetEvents(name string) ([]Event, error)
+	WatchEvents(name string, done <-chan struct{}) (<-chan Event, error)
 }
 
-type Event[T any] struct {
+var _ IHub = &Hub{}
+
+type Event struct {
 	Id     string
 	At     time.Time
 	Name   string
-	Detail T `gorm:"type:bytes;serializer:gob"`
+	Detail any `gorm:"type:bytes;serializer:gob"`
 }
 
-func (Event[T]) TableName() string {
-	return "events"
-}
-
-func NewHub[T any](db *gorm.DB) (*Hub[T], error) {
-	if err := db.AutoMigrate(Event[T]{}); err != nil {
+func NewHub(ctx context.Context, db *gorm.DB) (*Hub, error) {
+	if err := db.AutoMigrate(Event{}); err != nil {
 		return nil, err
 	}
 
-	return &Hub[T]{
+	return &Hub{
 		db,
-		map[string]*Channel[T]{},
+		map[string]*Channel{},
 	}, nil
 }
 
-type Hub[T any] struct {
+type Hub struct {
 	db       *gorm.DB
-	channels map[string]*Channel[T]
+	channels map[string]*Channel
 }
 
-func (hub *Hub[T]) Fire(evt Event[T]) error {
-	evt.Id = xid.New().String()
-	evt.At = time.Now()
+func (hub *Hub) Fire(name string, detail any) error {
+	evt := Event{
+		Id:     xid.New().String(),
+		At:     time.Now(),
+		Name:   name,
+		Detail: detail,
+	}
+
 	if err := hub.db.Save(evt).Error; err != nil {
 		return err
 	}
 
 	ch, ok := hub.channels[evt.Name]
 	if !ok {
-		ch = &Channel[T]{
-			listener: map[chan<- Event[T]]struct{}{},
-		}
-		hub.channels[evt.Name] = ch
+		// there is no channel to broadcast event
+		return nil
 	}
 
 	return ch.fire(evt)
 }
 
-func (hub *Hub[T]) GetEvents(name string) ([]Event[T], error) {
-	ms := []Event[T]{}
+func (hub *Hub) GetEvents(name string) ([]Event, error) {
+	ms := []Event{}
 
 	// TODO limit
-	if err := hub.db.Where(Event[T]{Name: name}).Find(&ms).Error; err != nil {
+	if err := hub.db.Where(Event{Name: name}).Find(&ms).Error; err != nil {
 		return nil, err
 	}
 	return ms, nil
 }
-func (hub *Hub[T]) WatchEvents(name string, done <-chan error) (<-chan Event[T], error) {
-	c := make(chan Event[T])
+func (hub *Hub) WatchEvents(name string, done <-chan struct{}) (<-chan Event, error) {
+	c := make(chan Event)
+
+	if _, ok := hub.channels[name]; !ok {
+		hub.channels[name] = &Channel{
+			listener: map[chan<- Event]struct{}{},
+		}
+	}
 	hub.channels[name].listener[c] = struct{}{}
 	go func() {
 		<-done

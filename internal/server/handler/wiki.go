@@ -98,6 +98,7 @@ func (handler *Handler) Raw(c *gin.Context) {
 		c.Status(http.StatusNotFound)
 		return
 	}
+	defer rs.Close()
 
 	// github.com/gabriel-vasile/mimetype
 	// mtype := mimetype.Detect(buf)

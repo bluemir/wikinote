@@ -1,7 +1,7 @@
 package metadata
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 )
 
 type Store interface {

@@ -1,7 +1,6 @@
 package backend
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -33,12 +32,12 @@ func loadConfigFile(wikipath string) (*Config, error) {
 	configPath := filepath.Join(wikipath, ".app/config.yaml")
 	conf := Config{}
 
-	buf, err := ioutil.ReadFile(configPath)
+	buf, err := os.ReadFile(configPath)
 	if err != nil {
 		switch {
 		case errors.Is(err, os.ErrNotExist):
 			logrus.Warn("config.yaml not exist.", err)
-			if err := ioutil.WriteFile(configPath, []byte(defaultConfig), 0644); err != nil {
+			if err := os.WriteFile(configPath, []byte(defaultConfig), 0644); err != nil {
 				return nil, err
 			}
 			buf = []byte(defaultConfig)

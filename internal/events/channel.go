@@ -1,10 +1,10 @@
 package events
 
-type Channel[T any] struct {
-	listener map[chan<- Event[T]]struct{}
+type Channel struct {
+	listener map[chan<- Event]struct{}
 }
 
-func (ch *Channel[T]) fire(m Event[T]) error {
+func (ch *Channel) fire(m Event) error {
 	for l := range ch.listener {
 		l <- m
 	}

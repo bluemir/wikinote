@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"context"
 	"encoding/gob"
 	"path/filepath"
 
@@ -30,7 +31,7 @@ type Backend struct {
 	Metadata metadata.Store
 	Plugin   *plugins.Manager
 	files    *files.FileStore
-	hub      *events.Hub[Message]
+	hub      *events.Hub
 
 	db *gorm.DB
 }
@@ -80,16 +81,12 @@ func New(wikipath string, users map[string]string) (*Backend, error) {
 
 	gob.Register(Message{})
 
-	hub, err := events.NewHub[Message](db)
+	hub, err := events.NewHub(context.TODO(), db)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to init message hub")
 	}
 
-	if err := hub.Fire(events.Event[Message]{
-		// XXX
-		Name:   "user/bluemir",
-		Detail: Message{"server started"},
-	}); err != nil {
+	if err := hub.Fire("user/bluemir", Message{"server started"}); err != nil {
 		return nil, err
 	}
 

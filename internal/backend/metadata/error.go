@@ -1,6 +1,6 @@
 package metadata
 
-import "errors"
+import "github.com/pkg/errors"
 
 var (
 	ErrNotFound       = errors.New("metadata not found")

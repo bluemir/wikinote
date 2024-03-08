@@ -17,6 +17,9 @@ type SearchResult struct {
 func (fs *FileStore) Search(query string) (map[string][]SearchResult, error) {
 	result := map[string]([]SearchResult){}
 	err := filepath.Walk(fs.wikipath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
 		if info.IsDir() && info.Name()[0] == '.' {
 			logrus.Debug(info.Name())
 			return filepath.SkipDir

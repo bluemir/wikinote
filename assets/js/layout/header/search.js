@@ -12,7 +12,7 @@ var tmpl = (app) => html`
 	</form>
 `;
 
-class WikinoteHeaderSearch extends $.CustomElement {
+class CustomElement extends $.CustomElement {
 	constructor() {
 		super();
 	}
@@ -30,4 +30,4 @@ class WikinoteHeaderSearch extends $.CustomElement {
 		return params.get("q");
 	}
 }
-customElements.define("wikinote-header-search", WikinoteHeaderSearch);
+customElements.define("wikinote-header-search", CustomElement);

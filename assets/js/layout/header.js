@@ -50,7 +50,7 @@ var tmpl = (app) => html`
 `;
 
 //
-class WikinoteHeader extends $.CustomElement {
+class CustomElement extends $.CustomElement {
 	constructor() {
 		super();
 	}
@@ -69,4 +69,4 @@ class WikinoteHeader extends $.CustomElement {
 		return false;
 	}
 }
-customElements.define("wikinote-header", WikinoteHeader);
+customElements.define("wikinote-header", CustomElement);

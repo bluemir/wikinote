@@ -2,7 +2,7 @@ package metadata
 
 import (
 	"encoding/json"
-	"io/ioutil"
+
 	"os"
 	"path/filepath"
 
@@ -57,7 +57,7 @@ func (store *FileStore) getFullPath(path string) string {
 func (store *FileStore) read(path string) (map[string]string, error) {
 	kv := map[string]string{}
 
-	buf, err := ioutil.ReadFile(store.getFullPath(path))
+	buf, err := os.ReadFile(store.getFullPath(path))
 	if err != nil {
 		return kv, err
 	}
@@ -72,7 +72,7 @@ func (store *FileStore) write(path string, kv map[string]string) error {
 		return err
 	}
 
-	if err := ioutil.WriteFile(store.getFullPath(path), buf, 0644); err != nil {
+	if err := os.WriteFile(store.getFullPath(path), buf, 0644); err != nil {
 		return err
 	}
 	return err

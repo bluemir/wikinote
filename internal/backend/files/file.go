@@ -2,7 +2,6 @@ package files
 
 import (
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -16,7 +15,7 @@ func New(wikipath string) (*FileStore, error) {
 }
 
 func (fs *FileStore) Read(path string) ([]byte, error) {
-	return ioutil.ReadFile(fs.getFullPath(path))
+	return os.ReadFile(fs.getFullPath(path))
 }
 func (fs *FileStore) ReadStream(path string) (io.ReadSeekCloser, error) {
 	fullpath := fs.getFullPath(path)
@@ -29,7 +28,7 @@ func (fs *FileStore) Write(path string, data []byte) error {
 		return err
 	}
 
-	if err := ioutil.WriteFile(fullpath, data, 0644); err != nil {
+	if err := os.WriteFile(fullpath, data, 0644); err != nil {
 		return err
 	}
 
@@ -59,7 +58,7 @@ func (fs *FileStore) Delete(path string) error {
 	return os.Remove(fs.getFullPath(path))
 }
 func (fs *FileStore) List(path string) ([]FileInfo, error) {
-	files, err := ioutil.ReadDir(fs.getFullPath(path))
+	files, err := os.ReadDir(fs.getFullPath(path))
 	if err != nil {
 		return nil, err
 	}

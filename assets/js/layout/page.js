@@ -37,7 +37,7 @@ var tmpl = (app) => html`
 	</section>
 `;
 
-class WikinotePage extends $.CustomElement {
+class CustomElement extends $.CustomElement {
 	constructor() {
 		super();
 	}
@@ -54,4 +54,4 @@ class WikinotePage extends $.CustomElement {
 	}
 	// attribute
 }
-customElements.define("wikinote-page", WikinotePage);
+customElements.define("wikinote-page", CustomElement);
