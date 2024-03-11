@@ -25,7 +25,6 @@ build/static/%: assets/%
 	cp $< $@
 
 ## esbuild
-STATICS += build/static/js/v1/index.js # entrypoint
 STATICS += build/static/js/index.js # entrypoint
 build/static/js/%: export NODE_PATH=assets/js:assets/lib
 build/static/js/%: $(JS_SOURCES) $(WEB_LIBS) build/yarn-updated
@@ -42,7 +41,7 @@ build-web: $(STATICS) ## Build web-files. (bundle, minify, transpile, etc.)
 build/$(APP_NAME): $(HTML_SOURCES) $(STATICS)
 
 .PHONY: vet
-vet: build/static
+vet: $(STATICS)
 
 build/static:
 	mkdir -p $@

@@ -18,3 +18,4 @@ import "./files.js";
 import "./plugin-footer.js";
 import "./messages.js";
 
+import "./elements/auth/register.js"

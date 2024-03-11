@@ -9,6 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/internal/auth"
+	"github.com/bluemir/wikinote/internal/server/injector"
 )
 
 func (handler *Handler) Login(c *gin.Context) {
@@ -36,46 +37,34 @@ func (handler *Handler) Login(c *gin.Context) {
 	c.Redirect(http.StatusTemporaryRedirect, "/")
 }
 
-func (handler *Handler) Register(c *gin.Context) {
+func Register(c *gin.Context) {
+
+	backend := injector.Backend(c)
+
 	req := &struct {
-		Username string `form:"username"`
-		Password string `form:"password"`
+		Username string `form:"username"  validate:"required,min=4"`
+		Password string `form:"password"  validate:"required,min=4"`
 		Email    string `form:"email"`
-		Confirm  string `form:"confirm"`
+		Confirm  string `form:"confirm"   validate:"required,eqfield=Password"`
 	}{}
-
 	if err := c.ShouldBind(req); err != nil {
-		c.HTML(http.StatusBadRequest, "/errors/bad-request.html", gin.H{
-			"retryURL": "/-/auth/register",
-		})
+		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	if req.Password != req.Confirm {
-		c.HTML(http.StatusBadRequest, "/errors/bad-request.html", gin.H{
-			"retryURL": "/-/auth/register",
-			"message":  "password and password confirm not matched",
-		})
-		return
-	}
-
-	if err := handler.backend.Auth.CreateUser(&auth.User{
+	if err := backend.Auth.CreateUser(&auth.User{
 		Name: req.Username,
 		Labels: auth.Labels{
 			"wikinote.io/email": req.Email,
 		},
 	}); err != nil {
 		c.Error(err)
-		c.Abort()
 		return
 	}
-
-	if _, err := handler.backend.Auth.IssueToken(req.Username, req.Password, nil); err != nil {
+	if _, err := backend.Auth.IssueToken(req.Username, req.Password); err != nil {
 		c.Error(err)
-		c.Abort()
 		return
 	}
-
-	c.HTML(http.StatusOK, "/welcome.html", gin.H{})
+	c.Status(http.StatusOK)
 }
 
 func Profile(c *gin.Context) {
@@ -111,7 +100,7 @@ func (handler *Handler) Can(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{})
+	c.Status(http.StatusOK)
 }
 func (handler *Handler) Me(c *gin.Context) {
 	user, err := User(c)

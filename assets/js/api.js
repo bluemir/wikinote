@@ -24,8 +24,9 @@ export async function can(verb, kind) {
 
 	let res = await $.request("GET", `/-/api/v1/can/${verb}/${kind}`);
 
-	cache.set(key, res.json);
+    // not error
+	cache.set(key, true);
     
-    return res.json;
+    return true;
 }
 

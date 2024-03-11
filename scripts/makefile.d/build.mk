@@ -14,7 +14,7 @@ test: fmt vet ## Run test
 
 build/$(APP_NAME): $(GO_SOURCES) $(MAKEFILE_LIST) fmt vet
 	@$(MAKE) build/tools/go
-	@mkdir -p build
+	mkdir -p build
 	go build -v \
 		-trimpath \
 		-ldflags "\
@@ -38,4 +38,5 @@ fmt: ## Run go fmt against code
 
 .PHONY: vet
 vet: ## Run go vet against code
+	@mkdir -p build/static
 	go vet ./...

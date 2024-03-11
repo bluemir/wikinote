@@ -1,3 +1,5 @@
+@import url("/-/static/css/material/colors.css");
+
 :root, :host {
 /*
 	color : #04D3F5;
@@ -43,23 +45,4 @@
 	--link-fg-color: var(--light-blue);
 
 
-	/* for lagacy */
-	--header-background-color: var(--header-bg-color);
-	--header-font-color: var(--header-fg-color);
-
-	--menu-font-color: var(--menu-fg-color);
-	--menu-hover-background-color: var(--menu-hover-bg-color);
-
-	--sub-menu-background-color: var(--sub-menu-bg-color);
-	--sub-menu-hover-background-color: var(--sub-menu-hover-bg-color);
-
-	--body-padding-background-color: var(--contents-padding-bg-color);
-	--article-background-color: var(--contents-bg-color);
-
-	--button-background-color: var(--button-bg-color);
-	--button-font-color: var(--button-fg-color);
-	--button-hover-font-color: var(--button-hover-fg-color);
-	--button-selected-font-color: var(--button-selected-fg-color);
-
-	--link-font-color: var(--link-fg-color);
 }

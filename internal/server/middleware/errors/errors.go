@@ -1,16 +1,19 @@
 package errors
 
 import (
-	"errors"
 	"mime"
 	"net/http"
 	"os"
 	"strings"
 
-	"github.com/bluemir/wikinote/internal/auth"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/mattn/go-sqlite3"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
+
+	"github.com/bluemir/wikinote/internal/auth"
 )
 
 func Middleware(c *gin.Context) {
@@ -29,6 +32,8 @@ func Middleware(c *gin.Context) {
 	// Last one is most important
 	err := c.Errors.Last()
 	code := code(err)
+
+	logrus.Tracef("%T %#v, %d", err, err, code)
 
 	// with header or without header, or other processer/ maybe hook? depend on error type? or just code
 	for _, accept := range strings.Split(c.Request.Header.Get("Accept"), ",") {
@@ -49,7 +54,7 @@ func Middleware(c *gin.Context) {
 			if code == http.StatusUnauthorized {
 				c.Header(auth.LoginHeader(c.Request))
 			}
-			c.HTML(code, htmlName(err), c.Errors)
+			c.HTML(code, htmlName(code, err), c.Errors)
 			return
 		case "text/plain":
 			c.String(code, "%#v", c.Errors)
@@ -59,29 +64,58 @@ func Middleware(c *gin.Context) {
 	c.String(code, "%#v", c.Errors)
 }
 func code(err *gin.Error) int {
+	logrus.Tracef("%T", err.Err)
+
+	// errors.Is check same value, but errors.As check only its type.
 	switch {
+	case errors.Is(err, gorm.ErrDuplicatedKey):
+		return http.StatusConflict
 	case errors.Is(err, validator.ValidationErrors{}):
-		return 400
+		return http.StatusBadRequest
 	case errors.Is(err, auth.ErrUnauthorized):
-		return 401
+		return http.StatusUnauthorized
 	case errors.Is(err, auth.ErrForbidden):
-		return 403
+		return http.StatusForbidden
 	case errors.Is(err, os.ErrNotExist):
-		return 404
-	default:
-		return 500
+		return http.StatusNotFound
+	case errors.As(err, &sqlite3.Error{}):
+		e := sqlite3.Error{}
+		errors.As(err, &e)
+		switch e.ExtendedCode {
+		case sqlite3.ErrConstraintUnique:
+			return http.StatusConflict
+		default:
+			return http.StatusNotImplemented
+		}
 	}
-}
-func htmlName(err *gin.Error) string {
+
+	// finally check string match
+	logrus.Trace(err.Error())
 	switch {
+	case strings.HasPrefix(err.Error(), "html/template: ") && strings.HasSuffix(err.Error(), " is undefined"):
+		//html/template: ".*" is undefined
+		return http.StatusNotImplemented
+	}
+
+	return http.StatusInternalServerError
+}
+func htmlName(code int, err *gin.Error) string {
+	switch {
+	//override
 	case errors.Is(err, validator.ValidationErrors{}):
 		return "errors/bad-request.html"
-	case errors.Is(err, auth.ErrUnauthorized):
+	}
+
+	switch code {
+	case http.StatusBadRequest:
+		return "errors/bad-request.html"
+	case http.StatusUnauthorized:
 		return "errors/unauthorized.html"
-	case errors.Is(err, auth.ErrForbidden):
+	case http.StatusForbidden:
 		return "errors/forbidden.html"
-	case errors.Is(err, os.ErrNotExist):
+	case http.StatusNotFound:
 		return "errors/not-found.html"
 	}
+
 	return "errors/internal-server-error.html"
 }

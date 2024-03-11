@@ -15,7 +15,7 @@ var tmpl = (app) => html`
 	</ul>
 `;
 
-class WikinoteFiles extends $.CustomElement {
+class CustomElement extends $.CustomElement {
 	constructor() {
 		super();
 	}
@@ -27,4 +27,4 @@ class WikinoteFiles extends $.CustomElement {
 		return $.get(this, "c-data").json;
 	}
 }
-customElements.define("wikinote-files", WikinoteFiles);
+customElements.define("wikinote-files", CustomElement);

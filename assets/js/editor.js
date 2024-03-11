@@ -2,7 +2,7 @@ import * as $ from "bm.js/bm.module.js";
 import {html, render} from 'lit-html';
 import {shortcut} from './shortcut.js';
 
-var tmpl = (app) => html`
+var tmpl = (elem) => html`
 	<style>
 		@import url("/-/static/css/color.css");
 
@@ -17,13 +17,13 @@ var tmpl = (app) => html`
 	<c-tabs selected="editor">
 		<c-tab-header slot="header" role="editor">Editor</c-tab-header>
 		<c-tab-panel  slot="panel"  role="editor">
-			<form method="POST" action="${location.pathname}">
-				<textarea name="data" @keydown="${evt => app.handleTextareaInput(evt)}">${app.data}</textarea>
+			<form method="post" action="${location.pathname}">
+				<textarea name="data" @keydown="${evt => elem.handleTextareaInput(evt)}">${elem.data}</textarea>
 				<button>Save</button>
 			</form>
 		</c-tab-panel>
 		<c-tab-header slot="header" role="preview">Preview</c-tab-header>
-		<c-tab-panel  slot="panel"  role="preview" @active="${evt => app.loadPreview(evt)}">
+		<c-tab-panel  slot="panel"  role="preview" @active="${evt => elem.loadPreview(evt)}">
 			<!-- use slot? or import css -->
 			<slot name="preview"></slot>
 		</c-tab-panel>

@@ -13,7 +13,7 @@ import (
 	"github.com/bluemir/wikinote/internal/buildinfo"
 )
 
-func (server *Server) static(path string) func(c *gin.Context) {
+func html(path string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.HTML(http.StatusOK, path, c)
 	}
@@ -29,12 +29,14 @@ func initEtag() string {
 	return hex.EncodeToString(hashed.Sum(nil))[:20]
 }
 
-func (server *Server) staticCache(c *gin.Context) {
+var etag = initEtag()
+
+func staticCache(c *gin.Context) {
 	c.Header("Cache-Control", "no-cache, max-age=86400")
-	c.Header("ETag", server.etag)
+	c.Header("ETag", etag)
 
 	if match := c.GetHeader("If-None-Match"); match != "" {
-		if strings.Contains(match, server.etag) {
+		if strings.Contains(match, etag) {
 			c.Status(http.StatusNotModified)
 			c.Abort()
 			return

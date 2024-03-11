@@ -6,44 +6,58 @@ var tmpl = (elem) => html`
 	<style>
 		@import url("/-/static/css/color.css");
 
+		:host {
+			display: flex;
+		}
 		menu {
 			padding: 0px;
 			margin: 0px;
+			display: block;
+		}
+		a {
+			color: white;
+			padding: 0.5rem 1rem;
+			text-decoration: none;
+			display: block;
+		}
+		a:hover {
+			background-color: var(--gray-700);
+		}
+
+		menu[dropdown] {
+			[role=dropdown] {
+				display: none;
+				
+				position: absolute;
+				background: var(--gray-800);
+			}
+		}
+		menu[dropdown]:has(:hover) {
+			[role=dropdown] {
+				display: block;
+			}
 		}
 	</style>
-	<menu>
-		<c-button>
-			<a href="?edit">Edit</a>
-		</c-button>
-		<c-dropdown title="More">
-			<c-dropdown-item>
-				<a href="?files">Files</a>
-			</c-dropdown-item>
+	<a href="?edit">Edit</a>
+	<menu dropdown>
+		<a href="#" role="trigger">More</a>
+		<section role="dropdown">
+			<a href="?files">Files</a>
 			<hr />
 			${elem.me?html`
-				<c-dropdown-item>
-					<a href="/-/auth/login?exclude=${elem.me.name}">Logout</a>
-				</c-dropdown-item>
-			`:html`
-				<c-dropdown-item>
-					<a href="/-/auth/login">Login</a>
-				</c-dropdown-item>
-				<c-dropdown-item>
-					<a href="/-/auth/register">Register</a>
-				</c-dropdown-item>
-			`}
-			<c-dropdown-item>
 				<a href="/-/auth/profile">Profile</a>
-			</c-dropdown-item>
-			<c-dropdown-item>
+				<a href="/-/auth/login?exclude=${elem.me.name}">Logout</a>
 				<a href="/-/messages">Messages</a>
-			</c-dropdown-item>
-			${elem.canAccessAdmin?html`<c-dropdown-item><a href="/-/admin">Admin</a></c-dropdown-item>`:""}
-		</c-dropdown>
+			`:html`
+				<a href="/-/auth/login">Login</a>
+				<a href="/-/auth/register">Register</a>
+			`}
+			${elem.canAccessAdmin?html`<a href="/-/admin">Admin</a>`:""}
+		</section>
 	</menu>
 `;
 
-class WikinoteHeaderMenu extends $.CustomElement {
+class CustomElement extends $.CustomElement {
 	constructor() {
 		super();
 	}
@@ -59,4 +73,4 @@ class WikinoteHeaderMenu extends $.CustomElement {
 	}
 	
 }
-customElements.define("wikinote-header-menu", WikinoteHeaderMenu);
+customElements.define("wikinote-header-menu", CustomElement);

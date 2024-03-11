@@ -34,7 +34,6 @@ type Server struct {
 	*backend.Backend
 	handler   *handler.Handler
 	frontPage string
-	etag      string
 }
 
 func Run(b *backend.Backend, conf *Config) error {
@@ -47,7 +46,6 @@ func Run(b *backend.Backend, conf *Config) error {
 		Backend:   b,
 		handler:   h,
 		frontPage: conf.FrontPage,
-		etag:      initEtag(),
 	}
 
 	app := gin.New()
