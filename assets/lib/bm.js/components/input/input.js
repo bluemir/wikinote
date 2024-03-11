@@ -7,43 +7,68 @@ var tmpl = (elem) => html`
 		${css}
 
 		:host {
-			display: inline-block;
-			position: relative;
-			padding-top: 0.5rem;
-		}
-		input {
-			display: block;
-			outline: none;
-			height: 2rem;
-			border: 0;
-			border-bottom: 1px solid var(--gray-300);
-		}
-		input:focus, input:not(:placeholder-shown) {
-			border-bottom: 1px solid var(--gray-800);
+
 		}
 
-		input::placeholder {
-			opacity: 0;
+		/* remove input default system */
+		input {
+			appearance: none;
+			border: none;
+			outline: none;
 		}
-		input:focus::placeholder {
-			opacity: 1;
+
+		/* */
+
+		div {
+			position: relative;
+			label {
+				color: gray;
+				position: absolute;
+				font-size: 0.7rem;
+				top: 0;
+				left: 0;
+			}
+			input {
+				border-bottom: 1px solid gray;
+			}
+			input::placeholder {
+				opacity: 0;
+			}
+
+			padding-top: 0.7rem;
 		}
-		label {
-			display: block;
-			position: absolute;
-			top: 0.5rem;
+		
+		div:has(input:placeholder-shown) {
+			label {
+				font-size: 1rem;
+				top: 0.7rem;
+			}
 		}
-		input:focus + label, input:not(:placeholder-shown) + label {
-			font-size: 0.5rem;
-			top: 0;
+		div:has(input:not(:placeholder-shown)) {
+			label {
+				color: black;
+			}
 		}
+		div:has(input:focus) {
+			label {
+				top: 0;
+				font-size: 0.7rem;
+				color: black;
+			}
+			input::placeholder {
+				opacity: 1;
+			}
+		}
+		
 	</style>
-	<input
-		id="input" type="${elem.attr("type")}" name="${elem.name}" placeholder="${elem.attr("placeholder") || " " }"
-		@input="${ evt => elem.value = evt.target.value}"
-		@keypress="${ evt => elem.onKeyPress(evt)}"
-	/>
-	<label for="input">${elem.attr("label")}</label>
+	<div>
+		<label for="input">${elem.attr("label")}</label>
+		<input
+			id="input" type="${elem.attr("type")}" name="${elem.name}" placeholder="${elem.attr("placeholder") || " " }"
+			@input="${ evt => elem.value = evt.target.value}"
+			@keypress="${ evt => elem.onKeyPress(evt)}"
+		/>
+	</div>
 `;
 
 // TODO
@@ -81,8 +106,8 @@ class Input extends $.CustomElement {
 		this.#internal.setFormValue(v);
 	}
 	formResetCallback() {
+		this.#value = "";
 		$.get(this.shadowRoot, "input").value = "";
-		this.value = "";
 	}
 	onKeyPress(evt) {
 		if (evt.code == "Enter" && this.#internal.form) {
