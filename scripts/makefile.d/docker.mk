@@ -24,7 +24,10 @@ build/docker-image.pushed: build/docker-image
 
 .PHONY:  docker-run
 docker-run: build/docker-image ## Run docker container
-	docker run -it --rm -v $(PWD)/runtime:/var/run/wiki $(shell cat $<) $(APP_NAME) -vvv server
+	docker run -it --rm \
+	-v $(PWD)/runtime:/var/run/data:Z \
+	$(shell cat $<) \
+	$(APP_NAME) -vv server -w /var/run/data
 
 tools: build/tools/docker
 build/tools/docker:

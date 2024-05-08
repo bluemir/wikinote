@@ -38,7 +38,6 @@ func (handler *Handler) Login(c *gin.Context) {
 }
 
 func Register(c *gin.Context) {
-
 	backend := injector.Backend(c)
 
 	req := &struct {

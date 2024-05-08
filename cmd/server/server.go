@@ -1,9 +1,9 @@
 package server
 
 import (
+	"github.com/alecthomas/kingpin/v2"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/bluemir/wikinote/cmd/config"
 	"github.com/bluemir/wikinote/internal/backend"

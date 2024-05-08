@@ -7,10 +7,10 @@ spec:
   ports:
   - port: 80
     protocol: TCP
-    targetPort: 80
+    targetPort: http
   - port: 443
     protocol: TCP
-    targetPort: 443
+    targetPort: https
   selector:
     app: wikinote-proxy
 ---
@@ -34,6 +34,13 @@ spec:
         - mountPath: /etc/nginx/conf.d
           name: nginx-config
         - mountPath: /var/www/cert-bot
+        ports:
+        - name: https
+          containerPort: 443
+          protocol: TCP
+        - name: http
+          containerPort: 80
+          protocol: TCP
     volumes:
       - name: nginx-config
         configMap:
@@ -62,9 +69,16 @@ data:
         listen 443 ssl;
         server_name example.org;
         location / {
-            proxy_pass http://example.org; #for demo purposes
+            #proxy_pass http://example.org; #for demo purposes
+            proxy_pass http://wikinote-app;
         }
     }
+---
+kind: cronjob
+metadata:
+  name: renew-cert
+spec:
+  # TODO renew cert and update to configmap.
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -74,14 +88,21 @@ data:
   .placeholder: |
     placeholder
 ---
-kind: cronjob
+apiVersion: v1
+kind: Service
 metadata:
-  name: renew-cert
+  name: wikinote-app
 spec:
-  # TODO renew cert and update to configmap.
+  type: LoadBalancer
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: http
+  selector:
+    app: wikinote
 ---
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: wikinote
 spec:
@@ -89,7 +110,6 @@ spec:
   selector:
     matchLabels:
       app: wikinote
-  serviceName: wikinote
   template:
     metadata:
       labels:
@@ -102,18 +122,25 @@ spec:
         image: bluemir/wikinote:latest
         name: server
         volumeMounts:
-        - mountPath: /wikidata
-          name: wikidata
-  volumeClaimTemplates:
-  - apiVersion: v1
-    kind: PersistentVolumeClaim
-    metadata:
-      name: wikidata
-    spec:
-      accessModes:
-      - ReadWriteOnce
-      resources:
-        requests:
-          storage: 200Gi
-      volumeMode: Filesystem
+        - mountPath: /var/run/data
+          name: data
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: wikinote-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wikinote-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
 

@@ -10,5 +10,5 @@ deploy: build/docker-image.pushed ## Deploy webapp
 
 tools: build/tools/kubectl
 build/tools/kubectl:
-	@which $(notdir $@) || (echo "install kubectl. https://kubernetes.io/docs/tasks/tools/")
-
+	@which $(notdir $@) || (./scripts/tools/install-kubectl.sh)
+	#install kubectl. https://kubernetes.io/docs/tasks/tools/
