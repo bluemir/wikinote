@@ -1,4 +1,4 @@
-@import url(./color.css);
+@import "../common/color.css";
 
 wikinote-viewer-markdown {
 	/* headers */

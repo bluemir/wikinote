@@ -9,7 +9,6 @@ var tmpl = (app) => html`
 		:host {
 			
 		}
-
 	</style>
 	<form action="/-/search">
 		<input name="q" value="${app.query}" />
@@ -26,9 +25,9 @@ class CustomElement extends $.CustomElement {
 	}
 	// attribute
 	get query() {
-		if (location.pathname != "/-/search") {
-			return ""
-		}
+		//if (location.pathname != "/-/search") {
+		//	return ""
+		//}
 
 		let params = new URLSearchParams(document.location.search);
 

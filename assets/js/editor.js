@@ -1,13 +1,14 @@
 import * as $ from "bm.js/bm.module.js";
 import {html, render} from 'lit-html';
 import {shortcut} from './shortcut.js';
-import {css} from "common.js";
+import {css, events} from "common.js";
 
 var tmpl = (elem) => html`
 	<style>
 		${css}
 
 		textarea {
+			padding: 1rem;
 			min-height: 30rem;
 			width: 100%;
 			resize: vertical;
@@ -85,6 +86,10 @@ class WikinoteEditor extends $.CustomElement {
 		let res = await $.request("PUT", path, {
 			body: str
 		});
+
+		events.fireEvent("alert.info", {
+			title: "saved",
+		})
 	}
 	// attribute
 	get data() {

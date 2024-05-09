@@ -1,14 +1,10 @@
 import * as $ from "bm.js/bm.module.js";
 import {html, render} from 'lit-html';
-import {css} from "common.js";
+import {css, events} from "common.js";
 
 var tmpl = (elem) => html`
 	<style>
 		${css}
-
-		*:not(:defined) {
-			display:none;
-		}
 
 		:host {
 			display: block;
@@ -57,6 +53,12 @@ class CustomElement extends $.CustomElement {
 	}
 	async render() {
 		render(tmpl(this), this.shadow);
+	}
+	onConnected() {
+		events.on("")
+	}
+	onDisconnected() {
+
 	}
 
 	// attribute

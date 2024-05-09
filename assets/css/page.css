@@ -1,5 +1,6 @@
-@import "./reset.css";
-@import "./color.css";
+@import "./common/reset.css";
+@import "./common/color.css";
+@import "./pages/markdown.css";
 
 *:not(:defined) {
     display:none;
@@ -10,5 +11,8 @@ html {
 }
 html, body {
     margin: 0;
+}
+body {
+    overflow-y: scroll;
 }
 

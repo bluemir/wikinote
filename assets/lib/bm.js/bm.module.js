@@ -310,7 +310,7 @@ export const util = {
 		},
 	},
 };
-export var event = new EventTarget();
+export var events = new EventTarget();
 
 function resolveParam(url, params) {
 	if (params == null) {

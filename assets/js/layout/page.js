@@ -8,7 +8,7 @@ var tmpl = (app) => html`
 		${css}
 
 		:host {
-			overflow-y: scroll;
+
 		}
 		wikinote-header::part(wrapper), main {
 			padding: 0 2rem;
