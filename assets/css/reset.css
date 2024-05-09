@@ -1,0 +1,34 @@
+/* Pre-styling unregistered elements */ 
+/* prevent FOUC */
+*:not(:defined) {
+    display:none;
+}
+
+/* Box sizing rules */
+*, *::before, *::after {
+	box-sizing: border-box;
+}
+
+/* Prevent font size inflation */
+html {
+	-moz-text-size-adjust: none;
+	-webkit-text-size-adjust: none;
+	text-size-adjust: none;
+}
+
+/* Make images easier to work with */
+img,
+picture {
+	max-width: 100%;
+	display: block;
+}
+
+/* Anything that has been anchored to should have extra scroll margin */
+:target {
+	scroll-margin-block: 5ex;
+}
+
+/* table border */
+table {
+	border-collapse: collapse;
+}

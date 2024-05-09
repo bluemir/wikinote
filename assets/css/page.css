@@ -1,0 +1,14 @@
+@import "./reset.css";
+@import "./color.css";
+
+*:not(:defined) {
+    display:none;
+}
+
+html {
+    background: var(--contents-padding-bg-color);
+}
+html, body {
+    margin: 0;
+}
+

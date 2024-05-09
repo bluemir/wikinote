@@ -1,4 +1,4 @@
-@import url("/-/static/css/material/colors.css");
+@import url("./material/colors.css");
 
 :root, :host {
 /*
@@ -43,6 +43,4 @@
 	--button-selected-fg-color: var(--black);
 
 	--link-fg-color: var(--light-blue);
-
-
 }

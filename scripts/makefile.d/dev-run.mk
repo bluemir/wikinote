@@ -33,5 +33,5 @@ build/tools/entr:
 
 tools: build/tools/watcher
 build/tools/watcher:
-	@which $(notdir $@) || (./scripts/makefile.d/go-install-tool.sh github.com/bluemir/watcher)
+	@which $(notdir $@) || (./scripts/tools/install/go-tool.sh github.com/bluemir/watcher)
 

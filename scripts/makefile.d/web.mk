@@ -37,11 +37,11 @@ build/static/js/%: $(JS_SOURCES) $(WEB_LIBS) build/yarn-updated
 	#--external:/config.js \
 	#--minify \
 
-STATICS += build/static/css/all.css 
+STATICS += build/static/css/page.css build/static/css/element.css
 build/static/css/%.css: $(CSS_SOURCES) $(WEB_LIBS)
 	@$(MAKE) build/tools/npx
 	@mkdir -p $(dir $@)
-	npx esbuild $(@:build/static/css/%=assets/css/bundle/%) --outdir=$(dir $@) \
+	npx esbuild $(@:build/static/%=assets/%) --outdir=$(dir $@) \
 		--bundle --sourcemap \
 		$(OPTIONAL_WEB_BUILD_ARGS)
 
