@@ -1,6 +1,6 @@
 @import "../common/color.css";
 
-wikinote-viewer-markdown {
+wikinote-viewer-markdown, main > article {
 	/* headers */
 	h1 {
 		font-size: 2rem;

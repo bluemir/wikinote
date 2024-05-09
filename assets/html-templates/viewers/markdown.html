@@ -5,13 +5,17 @@
 	{{ template "snippet/header.html"}}
 </head>
 <body>
-	<wikinote-page>
-		<wikinote-viewer-markdown>
+
+	<wikinote-header></wikinote-header>
+	<main>
+		<article>
 			{{ .content }}
-		</wikinote-viewer-markdown>
-		{{ range .footers }}
-		<wikinote-plugin-footer>{{.}}</wikinote-plugin-footer>
-		{{ end }}
-	</wikinote-page>
+		</article>
+		<section>
+			{{ range .footers }}
+				<article>{{ . }}</article>
+			{{ end }}
+		</section>
+	</main>
 </body>
 </html>

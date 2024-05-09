@@ -16,3 +16,23 @@ body {
     overflow-y: scroll;
 }
 
+
+
+/* layout */
+
+wikinote-header::part(wrapper), main {
+    padding: 0 2rem;
+    max-width: 1200px; /* todo maake breakpoints */
+    margin: 0 auto;
+}
+
+wikinote-header {
+    position: sticky;
+    top: 0;
+    width: 100%;
+}
+
+main {
+    padding: 2rem;
+    background: var(--contents-bg-color);
+}
