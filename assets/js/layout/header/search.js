@@ -1,9 +1,14 @@
 import * as $ from "bm.js/bm.module.js";
 import {html, render} from 'lit-html';
+import {css} from "common.js";
 
 var tmpl = (app) => html`
 	<style>
-		@import url("/-/static/css/color.css");
+		${css}
+
+		:host {
+			
+		}
 
 	</style>
 	<form action="/-/search">

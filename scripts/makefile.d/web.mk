@@ -14,7 +14,7 @@ build/docker-image: $(JS_SOURCES) $(CSS_SOURCES) $(WEB_LIBS) $(HTML_SOURCES)
 STATICS :=
 
 ## common static files
-STATICS += $(CSS_SOURCES:assets/%=build/static/%)
+#STATICS += $(CSS_SOURCES:assets/%=build/static/%)
 STATICS += $(WEB_LIBS:assets/%=build/static/%)
 STATICS += $(IMAGES:assets/%=build/static/%)
 #STATICS += $(WEB_META:assets/%=build/static/%)
@@ -36,6 +36,14 @@ build/static/js/%: $(JS_SOURCES) $(WEB_LIBS) build/yarn-updated
 		$(OPTIONAL_WEB_BUILD_ARGS)
 	#--external:/config.js \
 	#--minify \
+
+STATICS += build/static/css/all.css 
+build/static/css/%.css: $(CSS_SOURCES) $(WEB_LIBS)
+	@$(MAKE) build/tools/npx
+	@mkdir -p $(dir $@)
+	npx esbuild $(@:build/static/css/%=assets/css/bundle/%) --outdir=$(dir $@) \
+		--bundle --sourcemap \
+		$(OPTIONAL_WEB_BUILD_ARGS)
 
 .PHONY: build-web
 build-web: $(STATICS) ## Build web-files. (bundle, minify, transpile, etc.)

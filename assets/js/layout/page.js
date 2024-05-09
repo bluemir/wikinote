@@ -1,27 +1,25 @@
 import * as $ from "bm.js/bm.module.js";
 import {html, render} from 'lit-html';
 import {shortcut} from "shortcut.js";
+import {css} from "common.js";
 
 var tmpl = (app) => html`
 	<style>
-		@import url("/-/static/css/color.css");
+		${css}
 
 		:host {
-			position: fixed;
-			display: grid;
-			grid-template-rows: auto 1fr;
-			width: 100%;
-			height: 100%;
+			overflow-y: scroll;
 		}
 		wikinote-header::part(wrapper), main {
 			padding: 0 2rem;
 			max-width: 1200px;
 			margin: 0 auto;
 		}
-		section {
-			overflow-y: scroll;
 
-			background: var(--contents-padding-bg-color);
+		wikinote-header {
+			position: sticky;
+			top: 0;
+			width: 100%;
 		}
 
 		main {
@@ -30,11 +28,10 @@ var tmpl = (app) => html`
 		}
 	</style>
 	<wikinote-header></wikinote-header>
-	<section>
-		<main>
-			<slot></slot>
-		</main>
-	</section>
+	<main>
+		<slot></slot>
+	</main>
+
 `;
 
 class CustomElement extends $.CustomElement {

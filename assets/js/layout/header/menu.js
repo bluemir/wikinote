@@ -1,10 +1,11 @@
 import * as $ from "bm.js/bm.module.js";
 import {html, render} from 'lit-html';
 import {me, can} from "api.js";
+import {css} from "common.js";
 
 var tmpl = (elem) => html`
 	<style>
-		@import url("/-/static/css/color.css");
+		${css}
 
 		:host {
 			display: flex;
