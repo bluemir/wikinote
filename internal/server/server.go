@@ -3,27 +3,22 @@ package server
 import (
 	"context"
 	"net/http"
-	"os"
 
 	"github.com/gin-contrib/location"
-	"github.com/gin-gonic/autotls"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/crypto/acme/autocert"
 
 	"github.com/bluemir/wikinote/internal/backend"
+	"github.com/bluemir/wikinote/internal/server/graceful"
 	"github.com/bluemir/wikinote/internal/server/injector"
 	auth_middleware "github.com/bluemir/wikinote/internal/server/middleware/auth"
 	error_middleware "github.com/bluemir/wikinote/internal/server/middleware/errors"
 )
 
 type Config struct {
-	Bind         string
-	FrontPage    string
-	EnableHttps  bool
-	HttpsDomain  string
-	AutoTLSCache string
+	Bind      string
+	FrontPage string
 }
 
 func NewConfig() *Config {
@@ -79,23 +74,12 @@ func Run(ctx context.Context, b *backend.Backend, conf *Config) error {
 	// Register Routing
 	server.route(app, app.NoRoute, b.Plugin)
 
-	if conf.EnableHttps {
-		cacheDir := conf.AutoTLSCache
-		if cacheDir == "" {
-			cacheDir = b.ConfigPath("cert-cache")
-		}
-		os.MkdirAll(cacheDir, 0700)
+	logrus.Infof("Run Server on %s", conf.Bind)
 
-		logrus.Infof("Run Server with AutoTLS")
-		return autotls.RunWithManager(app, &autocert.Manager{
-			Prompt:     autocert.AcceptTOS,
-			HostPolicy: autocert.HostWhitelist(conf.HttpsDomain),
-			Cache:      autocert.DirCache(cacheDir),
-		})
-	} else {
-		logrus.Infof("Run Server on %s", conf.Bind)
-		return app.Run(conf.Bind)
-	}
+	return graceful.Run(ctx, &http.Server{
+		Addr:    conf.Bind,
+		Handler: app,
+	})
 }
 func NotFound(c *gin.Context) {
 	c.String(http.StatusNotFound, "Not Found")
