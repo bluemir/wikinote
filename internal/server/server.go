@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"net/http"
 	"os"
 
@@ -33,7 +34,7 @@ type Server struct {
 	frontPage string
 }
 
-func Run(b *backend.Backend, conf *Config) error {
+func Run(ctx context.Context, b *backend.Backend, conf *Config) error {
 	server := &Server{
 		frontPage: conf.FrontPage,
 	}

@@ -1,6 +1,10 @@
 package server
 
 import (
+	"context"
+	"os/signal"
+	"syscall"
+
 	"github.com/alecthomas/kingpin/v2"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -35,11 +39,17 @@ func Register(cmd *kingpin.CmdClause, conf *config.Config) {
 			return errors.Errorf("Bind option will be ignored")
 		}
 
-		b, err := backend.New(conf.Backend.Wikipath, conf.Backend.AdminUsers)
+		ctx, stop := signal.NotifyContext(context.Background(),
+			syscall.SIGTERM,
+			syscall.SIGINT,
+		)
+		defer stop()
+
+		b, err := backend.New(ctx, conf.Backend.Wikipath, conf.Backend.AdminUsers)
 		if err != nil {
 			logrus.Fatalf("%+v", err)
 			return err
 		}
-		return server.Run(b, &conf.Server)
+		return server.Run(ctx, b, &conf.Server)
 	})
 }

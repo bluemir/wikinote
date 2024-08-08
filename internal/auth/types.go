@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/expr-lang/expr/vm"
 	"golang.org/x/exp/maps"
 )
 
@@ -26,12 +27,12 @@ type Token struct {
 	ExpiredAt *time.Time
 }
 type Role struct {
-	Name  string
 	Rules []Rule `yaml:"rules" gorm:"type:bytes;serializer:gob"`
 }
 type Rule struct {
-	Verbs     []Verb          `yaml:"verbs"`
-	Resources []ResourceMatch `yaml:"resources"`
+	Verbs      []Verb          `yaml:"verbs"`
+	Resources  []ResourceMatch `yaml:"resources"`
+	Conditions []*vm.Program   `yaml:"conditions"` // TODO make serializer
 }
 type Resource interface {
 	Get(key string) string

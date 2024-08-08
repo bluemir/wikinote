@@ -36,7 +36,7 @@ type Backend struct {
 	db *gorm.DB
 }
 
-func New(wikipath string, users map[string]string) (*Backend, error) {
+func New(ctx context.Context, wikipath string, users map[string]string) (*Backend, error) {
 	// Load config file
 	conf, err := loadConfigFile(wikipath)
 	if err != nil {
