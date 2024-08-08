@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bluemir/wikinote/internal/server/injector"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
@@ -36,7 +37,10 @@ func filetype(path string) (string, string) {
 		return "", ""
 	}
 }
-func (handler *Handler) View(c *gin.Context) {
+func View(c *gin.Context) {
+
+	backend := injector.Backend(c)
+
 	logrus.Trace("view handler")
 	category, subtype := filetype(c.Request.URL.Path)
 	logrus.Tracef("category: %s, subtype: %s", category, subtype)
@@ -45,20 +49,20 @@ func (handler *Handler) View(c *gin.Context) {
 	case "text":
 		switch subtype {
 		case "markdown":
-			data, err := handler.backend.FileRead(c.Request.URL.Path)
+			data, err := backend.FileRead(c.Request.URL.Path)
 			if err != nil {
 				logrus.Warnf("md file not found, %s", err)
 				c.HTML(http.StatusNotFound, PageErrNotFound, gin.H{})
 				return
 			}
-			renderedData, err := handler.backend.Render(data)
+			renderedData, err := backend.Render(data)
 			if err != nil {
 				c.Error(err)
 				c.HTML(http.StatusInternalServerError, PageErrInternalServerError, gin.H{})
 				return
 			}
 
-			footerData, err := handler.backend.Plugin.GetWikiFooter(c.Request.URL.Path)
+			footerData, err := backend.Plugin.GetWikiFooter(c.Request.URL.Path)
 			if err != nil {
 				logrus.Warn(err)
 				c.Error(err)
@@ -89,11 +93,12 @@ func (handler *Handler) View(c *gin.Context) {
 	}
 }
 
-func (handler *Handler) Raw(c *gin.Context) {
+func Raw(c *gin.Context) {
 	logrus.Infof("[View] serve raw file: '%s'", c.Request.URL.Path)
+	backend := injector.Backend(c)
 	// TODO serve partial content
 
-	rs, err := handler.backend.FileReadStream(c.Request.URL.Path)
+	rs, err := backend.FileReadStream(c.Request.URL.Path)
 	if err != nil {
 		c.Status(http.StatusNotFound)
 		return
@@ -105,12 +110,14 @@ func (handler *Handler) Raw(c *gin.Context) {
 	http.ServeContent(c.Writer, c.Request, "", time.Time{}, rs)
 	//c.Data(http.StatusOK, http.DetectContentType(buf), buf)
 }
-func (handler *Handler) EditForm(c *gin.Context) {
+func EditForm(c *gin.Context) {
+	backend := injector.Backend(c)
+
 	category, _ := filetype(c.Request.URL.Path)
 
 	switch category {
 	case "text":
-		data, err := handler.backend.FileRead(c.Request.URL.Path)
+		data, err := backend.FileRead(c.Request.URL.Path)
 		c.HTML(http.StatusOK, PageEditor, gin.H{
 			"data":  template.HTML(data),
 			"path":  c.Request.URL.Path,
@@ -122,7 +129,9 @@ func (handler *Handler) EditForm(c *gin.Context) {
 		})
 	}
 }
-func (handler *Handler) UpdateWithForm(c *gin.Context) {
+func UpdateWithForm(c *gin.Context) {
+	backend := injector.Backend(c)
+
 	p := c.Request.URL.Path
 	req := &struct {
 		Data string `form:"data"`
@@ -135,21 +144,22 @@ func (handler *Handler) UpdateWithForm(c *gin.Context) {
 
 	logrus.Tracef("data: %s", req.Data)
 
-	if err := handler.backend.FileWrite(p, []byte(req.Data)); err != nil {
+	if err := backend.FileWrite(p, []byte(req.Data)); err != nil {
 		c.HTML(http.StatusInternalServerError, PageErrInternalServerError, gin.H{})
 		c.Abort()
 		return
 	}
 	c.Redirect(http.StatusSeeOther, p)
 }
-func (handler *Handler) Update(c *gin.Context) {
+func Update(c *gin.Context) {
+	backend := injector.Backend(c)
 	p := c.Request.URL.Path
 	data, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	if err := handler.backend.FileWrite(p, data); err != nil {
+	if err := backend.FileWrite(p, data); err != nil {
 		c.HTML(http.StatusInternalServerError, PageErrInternalServerError, gin.H{})
 		c.Abort()
 		return
@@ -158,13 +168,14 @@ func (handler *Handler) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
-func (handler *Handler) Files(c *gin.Context) {
+func Files(c *gin.Context) {
+	backend := injector.Backend(c)
 	path := c.Request.URL.Path
 	if strings.HasSuffix(path, ".md") {
 		c.Redirect(http.StatusSeeOther, strings.TrimSuffix(path, ".md")+"?files")
 		return
 	}
-	files, err := handler.backend.FileList(path)
+	files, err := backend.FileList(path)
 	if err != nil && !os.IsNotExist(err) {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -174,26 +185,28 @@ func (handler *Handler) Files(c *gin.Context) {
 		"files": files,
 	})
 }
-func (handler *Handler) Delete(c *gin.Context) {
+func Delete(c *gin.Context) {
+	backend := injector.Backend(c)
 	if c.GetHeader("X-Confirm") != path.Base(c.Request.URL.Path) {
 		c.HTML(http.StatusBadRequest, PageErrBadRequest, gin.H{})
 		return
 	}
 
-	err := handler.backend.FileDelete(c.Request.URL.Path)
+	err := backend.FileDelete(c.Request.URL.Path)
 	if err != nil {
 		c.HTML(http.StatusInternalServerError, PageErrInternalServerError, gin.H{})
 		return
 	}
 	c.Status(http.StatusNoContent)
 }
-func (handler *Handler) Preview(c *gin.Context) {
+func Preview(c *gin.Context) {
+	backend := injector.Backend(c)
 	data, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	renderedData, err := handler.backend.Render(data)
+	renderedData, err := backend.Render(data)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}

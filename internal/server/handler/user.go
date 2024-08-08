@@ -10,7 +10,8 @@ import (
 	"github.com/bluemir/wikinote/internal/server/injector"
 )
 
-func (handler *Handler) Login(c *gin.Context) {
+func Login(c *gin.Context) {
+
 	u, err := User(c)
 	if errors.Is(err, auth.ErrUnauthorized) {
 		c.Error(err)
@@ -79,7 +80,8 @@ func Profile(c *gin.Context) {
 	})
 }
 
-func (handler *Handler) Me(c *gin.Context) {
+func Me(c *gin.Context) {
+	//backend := injector.Backend(c)
 	user, err := User(c)
 	if errors.Is(err, auth.ErrUnauthorized) {
 		c.Error(err)

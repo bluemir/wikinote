@@ -68,7 +68,8 @@ func Can(verb auth.Verb, getResource ResourceGetter) gin.HandlerFunc {
 	}
 }
 
-func (handler *Handler) CanAPI(c *gin.Context) {
+func CanAPI(c *gin.Context) {
+	backend := injector.Backend(c)
 	user, err := User(c)
 	if err != nil {
 		c.Error(err)
@@ -81,7 +82,7 @@ func (handler *Handler) CanAPI(c *gin.Context) {
 
 	logrus.WithField("verb", verb).WithField("kind", kind).Trace("API called")
 
-	if err := handler.backend.Auth.Can(user, auth.Verb(verb), auth.KeyValues{"kind": kind}); err != nil {
+	if err := backend.Auth.Can(user, auth.Verb(verb), auth.KeyValues{"kind": kind}); err != nil {
 		c.Error(err)
 		c.Abort()
 		return

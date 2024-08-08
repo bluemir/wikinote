@@ -3,11 +3,13 @@ package handler
 import (
 	"net/http"
 
+	"github.com/bluemir/wikinote/internal/server/injector"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
 
-func (handler *Handler) Messages(c *gin.Context) {
+func Messages(c *gin.Context) {
+	backend := injector.Backend(c)
 
 	user, err := User(c)
 	if err != nil {
@@ -15,7 +17,7 @@ func (handler *Handler) Messages(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	messages, err := handler.backend.GetMessages("user/" + user.Name)
+	messages, err := backend.GetMessages("user/" + user.Name)
 	if err != nil {
 		c.Error(err)
 		c.Abort()

@@ -12,7 +12,6 @@ import (
 	"golang.org/x/crypto/acme/autocert"
 
 	"github.com/bluemir/wikinote/internal/backend"
-	"github.com/bluemir/wikinote/internal/server/handler"
 	"github.com/bluemir/wikinote/internal/server/injector"
 	auth_middleware "github.com/bluemir/wikinote/internal/server/middleware/auth"
 	error_middleware "github.com/bluemir/wikinote/internal/server/middleware/errors"
@@ -31,20 +30,11 @@ func NewConfig() *Config {
 }
 
 type Server struct {
-	*backend.Backend
-	handler   *handler.Handler
 	frontPage string
 }
 
 func Run(b *backend.Backend, conf *Config) error {
-	h, err := handler.New(b)
-	if err != nil {
-		return err
-	}
-
 	server := &Server{
-		Backend:   b,
-		handler:   h,
 		frontPage: conf.FrontPage,
 	}
 
@@ -80,13 +70,13 @@ func Run(b *backend.Backend, conf *Config) error {
 		app.SetHTMLTemplate(html)
 	}
 
-	app.Use(auth_middleware.Middleware(server.Backend.Auth))
+	app.Use(auth_middleware.Middleware(b.Auth))
 
 	// favicon
 	app.GET("/favicon.ico", NotFound)
 
 	// Register Routing
-	server.route(app, app.NoRoute)
+	server.route(app, app.NoRoute, b.Plugin)
 
 	if conf.EnableHttps {
 		cacheDir := conf.AutoTLSCache
