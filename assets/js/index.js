@@ -1,21 +1,30 @@
-//import "./components/index.js";
-import "bm.js/components/index.js";
-
-import "./layout/page.js";
-import "./layout/header.js";
-import "./layout/header/logo.js";
-import "./layout/header/search.js";
-import "./layout/header/menu.js";
-
-import "./viewers/markdown.js";
-import "./viewers/image.js";
-import "./viewers/video.js";
-
+import "./api.js";
+import "./common.js";
+import "./components/go-back.js";
+import "./components/input/key-value.js";
+import "./components/input/list.js";
+import "./components/link-tab/tabs.js";
+import "./components/popover/popover.js";
+import "./components/slider/range.js";
+import "./components/slider/slider.js";
+import "./components/switch/switch.js";
+import "./components/textarea/textarea.js";
 import "./editor.js";
-import "./search.js";
-import "./profile.js";
+import "./elements/auth/register.js";
+import "./elements/iam/groups/list.js";
+import "./elements/iam/roles/list.js";
+import "./elements/iam/users/list.js";
 import "./files.js";
-import "./plugin-footer.js";
+import "./layout/header/logo.js";
+import "./layout/header/menu.js";
+import "./layout/header/search.js";
+import "./layout/header.js";
+import "./layout/page.js";
 import "./messages.js";
-
-import "./elements/auth/register.js"
+import "./plugin-footer.js";
+import "./profile.js";
+import "./search.js";
+import "./shortcut.js";
+import "./viewers/image.js";
+import "./viewers/markdown.js";
+import "./viewers/video.js";

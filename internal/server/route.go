@@ -27,14 +27,18 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc)) {
 		api := app.Group("/-/api", markAPI)
 		api.POST("/preview", server.handler.Preview) // render body
 		api.GET("/me", server.handler.Me)
-		api.GET("auth/can/:verb/*kind", server.handler.Can)
+		api.GET("auth/can/:verb/*kind", server.handler.CanAPI)
 
 		{
 			v1 := api.Group("/v1")
 
 			v1.GET("/me", server.handler.Me)
-			v1.GET("/can/:verb/*kind", server.handler.Can)
+			v1.GET("/can/:verb/*kind", server.handler.CanAPI)
 			v1.POST("/users", handler.Register)
+
+			v1.GET("/iam/users", handler.ListUsers)
+			v1.GET("/iam/groups", handler.ListGroups)
+			v1.GET("/iam/roles", handler.ListRoles)
 
 			//v1.GET("/events", handler.StreamEvents)
 		}
@@ -56,6 +60,9 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc)) {
 
 		special.GET("/admin", can(verb.Get, resource.AdminPage), html("admin/index.html"))
 		special.GET("/admin/users", can(verb.Get, resource.AdminPage), html("admin/users.html"))
+		special.GET("/admin/iam/users", can(verb.List, resource.Users), html("admin/iam/users.html"))
+		special.GET("/admin/iam/groups", can(verb.List, resource.Users), html("admin/iam/groups.html"))
+		special.GET("/admin/iam/roles", can(verb.List, resource.Roles), html("admin/iam/roles.html"))
 	}
 
 	// plugins

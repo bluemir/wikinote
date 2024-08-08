@@ -2,7 +2,6 @@ package handler
 
 import (
 	"github.com/bluemir/wikinote/internal/backend"
-	"github.com/bluemir/wikinote/internal/server/middleware/auth"
 )
 
 func New(backend *backend.Backend) (*Handler, error) {
@@ -15,6 +14,9 @@ type Handler struct {
 	backend *backend.Backend
 }
 
-var (
-	User = auth.User
-)
+type ListResponse[T any] struct {
+	Items    []T  `json:"items"`
+	Continue bool `json:"continue,omitempty"`
+	Page     int  `json:"page,omitempty"`
+	PerPage  int  `json:"per_page,omitempty"`
+}

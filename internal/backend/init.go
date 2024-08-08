@@ -34,6 +34,9 @@ func initDB(wikipath string) (*gorm.DB, error) {
 }
 
 func initAuth(db *gorm.DB, salt string, conf *auth.Config) (*auth.Manager, error) {
+	if conf.Roles == nil {
+		conf.Roles = map[string]auth.Role{}
+	}
 	// wikinote internal role: admin, it could not change
 	conf.Roles["admin"] = auth.Role{
 		Rules: []auth.Rule{

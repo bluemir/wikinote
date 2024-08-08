@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Wikinote / IAM / Groups</title>
+	{{ template "snippet/header.html"}}
+</head>
+<body>
+	<wikinote-page>
+		<c-link-tabs>
+			<a href="/-/admin/iam/users"  >Users</a>
+			<a href="/-/admin/iam/groups" >Groups</a>
+			<a href="/-/admin/iam/roles"  >Roles</a>
+		</c-link-tabs>
+		<groups-list endpoint="/-/api/v1/iam/groups"></groups-list>
+	</wikinote-page>
+</body>
+</html>

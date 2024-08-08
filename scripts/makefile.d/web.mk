@@ -25,17 +25,26 @@ build/static/%: assets/%
 	cp $< $@
 
 ## esbuild
-STATICS += build/static/js/index.js # entrypoint
+
+## js import helper
+build/static/js/index.js: assets/js/index.js
+assets/js/index.js: $(JS_SOURCES) scripts/tools/import-helper/*
+	go run ./scripts/tools/import-helper > $@
+OPTIONAL_CLEAN += assets/js/index.js
+
+## esbuild
+STATICS += build/static/js/index.js # entrypoints
 build/static/js/%: export NODE_PATH=assets/js:assets/lib
-build/static/js/%: $(JS_SOURCES) $(WEB_LIBS) build/yarn-updated
+build/static/js/%: $(JS_SOURCES) package.json package-lock.json
 	@$(MAKE) build/tools/npx
 	@mkdir -p $(dir $@)
 	npx esbuild $(@:build/static/%=assets/%) --outdir=$(dir $@) \
-		--bundle --sourcemap --format=esm \
 		--external:lit-html \
+		--bundle --sourcemap --format=esm \
 		$(OPTIONAL_WEB_BUILD_ARGS)
-	#--external:/config.js \
 	#--minify \
+	#--external:/config.js
+
 
 STATICS += build/static/css/page.css build/static/css/element.css
 build/static/css/%.css: $(CSS_SOURCES) $(WEB_LIBS)
@@ -60,16 +69,16 @@ build/static:
 ## resolve depandancy
 OPTIONAL_CLEAN += node_modules
 
-build/$(APP_NAME): build/yarn-updated
-build/yarn-updated: package.json
-	@$(MAKE) build/tools/yarn
+build/$(APP_NAME): package-lock.json
+package-lock.json: package.json
+	@$(MAKE) build/tools/npm
 	@mkdir -p $(dir $@)
-	yarn install
+	npm install
 	touch $@
 
 build/docker-image: package.json
 
-build-tools: build/tools/npm build/tools/yarn build/tools/npx
+build-tools: build/tools/npm build/tools/npx
 build/tools/npm:
 	@which $(notdir $@)
 build/tools/npx:

@@ -3,10 +3,8 @@ package handler
 import (
 	"errors"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/internal/auth"
 	"github.com/bluemir/wikinote/internal/server/injector"
@@ -80,27 +78,7 @@ func Profile(c *gin.Context) {
 		User: user,
 	})
 }
-func (handler *Handler) Can(c *gin.Context) {
-	user, err := User(c)
-	if err != nil {
-		c.Error(err)
-		c.Abort()
-		return
-	}
 
-	verb := c.Param("verb")
-	kind := strings.TrimPrefix(c.Param("kind"), "/")
-
-	logrus.WithField("verb", verb).WithField("kind", kind).Trace("API called")
-
-	if err := handler.backend.Auth.Can(user, auth.Verb(verb), auth.KeyValues{"kind": kind}); err != nil {
-		c.Error(err)
-		c.Abort()
-		return
-	}
-
-	c.Status(http.StatusOK)
-}
 func (handler *Handler) Me(c *gin.Context) {
 	user, err := User(c)
 	if errors.Is(err, auth.ErrUnauthorized) {
@@ -109,4 +87,35 @@ func (handler *Handler) Me(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, user)
+}
+
+func ListUsers(c *gin.Context) {
+	backend := injector.Backend(c)
+
+	users, err := backend.Auth.ListUsers()
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	c.JSON(http.StatusOK, ListResponse[auth.User]{Items: users})
+}
+func ListGroups(c *gin.Context) {
+	backend := injector.Backend(c)
+
+	groups, err := backend.Auth.ListGroups()
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	c.JSON(http.StatusOK, ListResponse[auth.Group]{Items: groups})
+}
+func ListRoles(c *gin.Context) {
+	backend := injector.Backend(c)
+
+	roles, err := backend.Auth.ListRoles()
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	c.JSON(http.StatusOK, ListResponse[auth.Role]{Items: roles})
 }

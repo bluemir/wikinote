@@ -1,5 +1,13 @@
 package auth
 
+func (m *Manager) ListRoles() ([]Role, error) {
+	roles := []Role{}
+	if err := m.db.Find(&roles).Error; err != nil {
+		return nil, err
+	}
+	return roles, nil
+}
+
 func (role *Role) IsAllow(resource Resource, verb Verb) bool {
 	for _, rule := range role.Rules {
 		if rule.isMatch(verb, resource) {

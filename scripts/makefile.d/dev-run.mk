@@ -9,16 +9,24 @@ run: build/$(APP_NAME) ## Run web app
 dev-run: ## Run dev server. If detect file change, automatically rebuild&restart server
 	@$(MAKE) build/tools/watcher
 	while true; do \
-		watcher -vv \
+		watcher \
 			--include "go.mod" \
 			--include "go.sum" \
+			--include "**.go" \
+			--include "internal/**" \
 			--include "package.json" \
 			--include "yarn.lock" \
-			--include "Makefile" \
-			--include "scripts/makefile.d/**.mk" \
 			--include "assets/**" \
-			--include "**.go" \
-			--include "runtime/.app/config.yaml" \
+			--include "api/proto/**" \
+			--include "Makefile" \
+			--include "scripts/makefile.d/*.mk" \
+			--include "runtime/init-data.yaml" \
+			--include "runtime/config.yaml" \
+			--exclude "build/**" \
+			--exclude "**.sw*" \
+			--exclude "internal/swagger/**" \
+			--exclude "assets/js/index.js" \
+			--debounce=1s \
 			-- \
 		$(MAKE) test run ;  \
 		echo "hit ^C again to quit" && sleep 1 \

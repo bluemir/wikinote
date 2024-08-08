@@ -26,7 +26,8 @@ type Token struct {
 	ExpiredAt *time.Time
 }
 type Role struct {
-	Rules []Rule `yaml:"rules"`
+	Name  string
+	Rules []Rule `yaml:"rules" gorm:"type:bytes;serializer:gob"`
 }
 type Rule struct {
 	Verbs     []Verb          `yaml:"verbs"`

@@ -37,6 +37,13 @@ func (m *Manager) GetUser(username string) (*User, bool, error) {
 	}
 	return user, true, nil
 }
+func (m *Manager) ListUsers() ([]User, error) {
+	users := []User{}
+	if err := m.db.Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
+}
 func (m *Manager) UpdateUser(user *User) error {
 	if user.ID == 0 {
 		return errors.Errorf("user ID not found")

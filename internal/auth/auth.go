@@ -23,6 +23,8 @@ type Config struct {
 func New(db *gorm.DB, salt string, config *Config) (*Manager, error) {
 	if err := db.AutoMigrate(
 		&User{},
+		&Group{},
+		&Role{},
 		&Token{},
 	); err != nil {
 		return nil, err

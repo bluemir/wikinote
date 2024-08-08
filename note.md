@@ -57,4 +57,11 @@
 - [ ] Accept 에 따라서 API 와 아닌것 구분 하기
 - [ ] js map(ECMA script)
 - [ ] error handling with `c.Error()`
-
+- [ ] 최초 실행시 data dir 이 없으면 생성
+- [ ] Admin 비밀번호는 표준 입력등으로 노출 되지 않도록
+	- Setup 용 Token 등을 사용 하는 방안도 고려 해볼수 있음.
+	- 최초 실행후 initialize 마법사가 필요..
+- [ ] Admin 용 IAM Page(RBAC)
+- [ ] 대부분 config 는 file 대신 db에 저장.
+	- UI 에서 수정을 지원
+	- yaml로 encoding 을 할수는 있음.

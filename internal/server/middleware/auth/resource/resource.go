@@ -22,3 +22,20 @@ func AdminPage(c *gin.Context) (auth.Resource, error) {
 		"kind": "admin",
 	}, nil
 }
+func Users(c *gin.Context) (auth.Resource, error) {
+	return auth.KeyValues{
+		"kind": "user",
+	}, nil
+}
+
+func Roles(c *gin.Context) (auth.Resource, error) {
+	return auth.KeyValues{
+		"kind": "role",
+	}, nil
+}
+
+func Assigns(c *gin.Context) (auth.Resource, error) {
+	return auth.KeyValues{
+		"kind": "assign",
+	}, nil
+}
