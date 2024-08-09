@@ -37,10 +37,9 @@ func Run() error {
 		Default(os.ExpandEnv("$HOME/wiki")).
 		PlaceHolder("$HOME/wiki").
 		StringVar(&conf.Backend.Wikipath)
-	app.Flag("admin-user", "admin user").
-		StringMapVar(&conf.Backend.AdminUsers)
-
-	// server flags
+	app.Flag("volatile-database", "enable").
+		Default("false").
+		BoolVar(&conf.Backend.VolatileDatabase)
 
 	serverCmd.Register(app.Command("server", "server"), conf)
 	//clientCmd.Register(app.Command("client", "client"))

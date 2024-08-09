@@ -1,0 +1,27 @@
+roles:
+  - name: admin
+    rules:
+    - verbs: # allow all rule
+  - name: viewer
+    rules:
+    - verbs:
+      - get
+      resources:
+      - kind: "page"
+      - kind: "metadata"
+  #   resources:
+  #   - key: value
+  #     key2: ^regexp$
+  #   - url: ^something/like/this
+  - name: banned
+    rules: # deny all request
+# group automatically bind role having same name
+assigns:
+- subject:
+    kind: guest
+  roles:
+  - viewer
+  #- subject:
+  #    kind: group
+  #    name: viewer
+  #  role:

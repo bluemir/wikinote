@@ -31,7 +31,6 @@ var tmpl = (app) => html`
 	<main>
 		<slot></slot>
 	</main>
-
 `;
 
 class CustomElement extends $.CustomElement {

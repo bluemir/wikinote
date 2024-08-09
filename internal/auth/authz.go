@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"context"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -13,16 +15,16 @@ func (manager *Manager) Can(user *User, verb Verb, resource Resource) error {
 	logrus.Tracef("resource: %#v", resource)
 	logrus.Tracef("verb: %s", verb)
 
-	roles, err := manager.getBindingRoles(user)
+	roles, err := manager.getAssignedRoles(context.Background(), user)
 	if err != nil {
 		return err
 	}
 
 	logrus.Tracef("binding roles: %#v", roles)
 
-	for name, role := range roles {
+	for _, role := range roles {
 		if role.IsAllow(resource, verb) {
-			logrus.Debugf("Allow with role '%s'", name)
+			logrus.Debugf("Allow with role '%s'", role.Name)
 			return nil
 		}
 	}
@@ -31,36 +33,4 @@ func (manager *Manager) Can(user *User, verb Verb, resource Resource) error {
 	} else {
 		return ErrUnauthorized
 	}
-}
-func (manager *Manager) getBindingRoles(user *User) (map[string]Role, error) {
-	roles := map[string]struct{}{}
-	x := struct{}{}
-
-	if user != nil {
-		for _, role := range manager.Binding["user/"+user.Name] {
-			roles[role] = x
-		}
-		for group := range user.Groups {
-			roles[group] = x
-			for _, role := range manager.Binding["group/"+group] {
-				roles[role] = x
-			}
-		}
-	} else {
-		roles[manager.Group.Unauthorized] = x
-		for _, role := range manager.Binding["group/"+manager.Group.Unauthorized] {
-			roles[role] = x
-		}
-	}
-
-	logrus.Tracef("roles: %#v", roles)
-
-	result := map[string]Role{}
-	for name := range roles {
-		if role, ok := manager.Roles[name]; ok {
-			result[name] = role
-		}
-	}
-
-	return result, nil
 }

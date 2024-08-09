@@ -28,7 +28,7 @@ var tmpl = (elem) => html`
 		menu[dropdown] {
 			[role=dropdown] {
 				display: none;
-				
+
 				position: absolute;
 				background: var(--gray-800);
 			}
@@ -72,6 +72,6 @@ class CustomElement extends $.CustomElement {
 
 		this.render();
 	}
-	
+
 }
 customElements.define("wikinote-header-menu", CustomElement);

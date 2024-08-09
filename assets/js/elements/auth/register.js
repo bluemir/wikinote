@@ -1,15 +1,16 @@
 import * as $ from "bm.js/bm.module.js";
 import {html, render} from 'lit-html';
+import {css} from "common.js";
 
 var tmpl = (elem) => html`
 	<style>
-		@import url("/-/static/css/system/grid.css");
+		${css}
 
 		:host {
 			display: block;
 		}
 		c-input, section {
-			display: block;	
+			display: block;
 		}
 	</style>
 

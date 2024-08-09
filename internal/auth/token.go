@@ -6,11 +6,33 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
+	"golang.org/x/net/context"
 	"gorm.io/gorm"
 )
 
-func (m *Manager) IssueToken(username, unhashedKey string, opts ...TokenOpt) (*Token, error) {
-	_, ok, err := m.GetUser(username)
+type Token struct {
+	Id        uint   `gorm:"primary_key" json:"id,omitempty"`
+	Username  string `json:"username,omitempty"`
+	HashedKey string `json:"-,omitempty"`
+	RevokeKey string `json:"revoke_key,omitempty"`
+	ExpiredAt *time.Time
+}
+type TokenOpt func(*Token)
+
+func ExpiredAt(t time.Time) func(*Token) {
+	return func(token *Token) {
+		token.ExpiredAt = &t
+	}
+}
+func ExpiredAfter(d time.Duration) func(*Token) {
+	return func(token *Token) {
+		t := time.Now().Add(d)
+		token.ExpiredAt = &t
+	}
+}
+
+func (m *Manager) IssueToken(ctx context.Context, username, unhashedKey string, opts ...TokenOpt) (*Token, error) {
+	_, ok, err := m.GetUser(ctx, username)
 	if err != nil {
 		return nil, err
 	}
@@ -27,16 +49,16 @@ func (m *Manager) IssueToken(username, unhashedKey string, opts ...TokenOpt) (*T
 	for _, fn := range opts {
 		fn(token)
 	}
-	if err := m.db.Create(token).Error; err != nil {
+	if err := m.db.WithContext(ctx).Create(token).Error; err != nil {
 		return nil, err
 	}
 	return token, nil
 }
 
-func (m *Manager) GenerateToken(username string, opts ...TokenOpt) (*Token, string, error) {
+func (m *Manager) GenerateToken(ctx context.Context, username string, opts ...TokenOpt) (*Token, string, error) {
 	newKey := hash(xid.New().String(), "__salt__") // TODO Salt
 
-	token, err := m.IssueToken(username, newKey, opts...)
+	token, err := m.IssueToken(ctx, username, newKey, opts...)
 	if err != nil {
 		return nil, "", err
 	}
@@ -54,7 +76,7 @@ func (m *Manager) RevokeToken(username, unhashedKey string) error {
 
 	token := &Token{
 		Username:  username,
-		HashedKey: hash(unhashedKey, user.Salt, m.salt),
+		HashedKey: hash(unhashedKey, user.Salt, m.conf.Salt),
 	}
 	/*
 		XXX has bug. see https://github.com/go-gorm/gorm/issues/4879

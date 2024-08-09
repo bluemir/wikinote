@@ -1,57 +1,33 @@
 package metadata
 
 import (
-	"github.com/pkg/errors"
+	"context"
+
+	"gorm.io/gorm"
 )
 
 type Store interface {
+	//FindByPath(path string) ([]Item, error)
+	//FindByKey(key string) ([]Item, error)
 	Take(path, key string) (string, error)
 	Save(path, key, value string) error
 	Delete(path, key string) error
 }
 
+var _ Store = &GormStore{}
+
+type Item struct {
+	Path  string
+	Key   string
+	Value string
+}
+
 type Config struct {
-	File          *FileStoreConfig
-	ObjectStorage *struct {
-		Prefix string
-	}
-	Gorm *GormStoreConfig
 }
 
-func New(conf *Config) (Store, error) {
-	//validation
-	if count(
-		conf.File != nil,
-		conf.ObjectStorage != nil,
-		conf.Gorm != nil,
-	) > 1 {
-		return nil, errors.New("multiple option exist")
+func New(ctx context.Context, db *gorm.DB) (Store, error) {
+	if err := db.AutoMigrate(&GormEntry{}); err != nil {
+		return nil, err
 	}
-
-	switch {
-	case conf.File != nil:
-		if conf.File.Path == "" {
-			return nil, errors.New("metadata config invaild. file.path is empty")
-		}
-		return &FileStore{conf.File}, nil
-	case conf.ObjectStorage != nil:
-		return &ObjectStorageStore{}, nil
-	case conf.Gorm != nil:
-		if err := conf.Gorm.DB.AutoMigrate(&GormEntry{}); err != nil {
-			return nil, err
-		}
-		return &GormStore{conf.Gorm.DB}, nil
-	default:
-		return nil, errors.New("there is no option")
-	}
-}
-
-func count(bs ...bool) int {
-	i := 0
-	for _, b := range bs {
-		if b {
-			i++
-		}
-	}
-	return i
+	return &GormStore{db}, nil
 }

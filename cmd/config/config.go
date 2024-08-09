@@ -5,21 +5,15 @@ import (
 )
 
 type Config struct {
-	Backend   BackendCLIOptions
+	Backend struct {
+		Wikipath         string
+		VolatileDatabase bool
+	}
 	Server    server.Config
 	LogLevel  int
 	LogFormat string
 }
 
 func NewConfig() *Config {
-	return &Config{
-		Backend: BackendCLIOptions{
-			AdminUsers: map[string]string{},
-		},
-	}
-}
-
-type BackendCLIOptions struct {
-	Wikipath   string
-	AdminUsers map[string]string
+	return &Config{}
 }

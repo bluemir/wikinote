@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"encoding/base64"
 	"net/http"
 	"strings"
@@ -55,7 +56,7 @@ func split2(str string, sep string) (string, string) {
 	return arr[0], arr[1]
 }
 
-func (m *Manager) NewHTTPToken(username string, expireAt time.Time) (string, error) {
+func (m *Manager) NewHTTPToken(ctx context.Context, username string, expireAt time.Time) (string, error) {
 	user := &User{}
 	if err := m.db.Where(&User{Name: username}).Take(user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -66,7 +67,7 @@ func (m *Manager) NewHTTPToken(username string, expireAt time.Time) (string, err
 
 	newKey := hash(xid.New().String(), user.Salt)
 
-	if _, err := m.IssueToken(username, newKey, ExpiredAt(expireAt)); err != nil {
+	if _, err := m.IssueToken(ctx, username, newKey, ExpiredAt(expireAt)); err != nil {
 		return "", err
 	}
 

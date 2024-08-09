@@ -5,17 +5,13 @@ import (
 	"path/filepath"
 
 	"github.com/pkg/errors"
-	"github.com/rs/xid"
-	"github.com/sirupsen/logrus"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
-	"github.com/bluemir/wikinote/internal/auth"
 	"github.com/bluemir/wikinote/internal/backend/files"
 )
 
-func initDB(wikipath string) (*gorm.DB, error) {
-	dbPath := filepath.Join(wikipath, ".app/wikinote.db")
+func initDB(dbPath string) (*gorm.DB, error) {
 
 	if err := os.MkdirAll(filepath.Dir(dbPath), 0755); err != nil {
 		return nil, err
@@ -31,56 +27,6 @@ func initDB(wikipath string) (*gorm.DB, error) {
 	}
 
 	return db, nil
-}
-
-func initAuth(db *gorm.DB, salt string, conf *auth.Config) (*auth.Manager, error) {
-	if conf.Roles == nil {
-		conf.Roles = map[string]auth.Role{}
-	}
-	// wikinote internal role: admin, it could not change
-	conf.Roles["admin"] = auth.Role{
-		Rules: []auth.Rule{
-			{},
-		},
-	}
-
-	return auth.New(db, salt, conf)
-}
-
-func initAdminUser(authm *auth.Manager, users map[string]string) error {
-	for name, key := range users {
-		if key == "" {
-			key = xid.New().String()
-			logrus.Warnf("generate key: '%s' '%s'", name, key)
-		}
-		// ensure user
-		user, ok, err := authm.GetUser(name)
-		if err != nil {
-			return errors.WithStack(err)
-		}
-		if !ok {
-			err := authm.CreateUser(&auth.User{
-				Name:   name,
-				Groups: map[string]struct{}{"admin": {}},
-			})
-			if err != nil {
-				return errors.WithStack(err)
-			}
-		} else {
-			user.AddGroup("admin")
-			if err := authm.UpdateUser(user); err != nil {
-				return err
-			}
-		}
-
-		if err := authm.RevokeTokenAll(name); err != nil {
-			return err
-		}
-		if _, err := authm.IssueToken(name, key); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 func initFileStore(wikipath string) (*files.FileStore, error) {

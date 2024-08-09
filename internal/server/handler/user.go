@@ -49,20 +49,22 @@ func Register(c *gin.Context) {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	if err := backend.Auth.CreateUser(&auth.User{
+	user, err := backend.Auth.CreateUser(c.Request.Context(), &auth.User{
 		Name: req.Username,
 		Labels: auth.Labels{
 			"wikinote.io/email": req.Email,
 		},
-	}); err != nil {
+	})
+	if err != nil {
 		c.Error(err)
 		return
 	}
-	if _, err := backend.Auth.IssueToken(req.Username, req.Password); err != nil {
+	if _, err := backend.Auth.IssueToken(c.Request.Context(), req.Username, req.Password); err != nil {
 		c.Error(err)
 		return
 	}
-	c.Status(http.StatusOK)
+
+	c.JSON(http.StatusOK, user)
 }
 
 func Profile(c *gin.Context) {
@@ -83,18 +85,20 @@ func Profile(c *gin.Context) {
 func Me(c *gin.Context) {
 	//backend := injector.Backend(c)
 	user, err := User(c)
-	if errors.Is(err, auth.ErrUnauthorized) {
+	if err != nil {
+
 		c.Error(err)
 		c.Abort()
 		return
 	}
+
 	c.JSON(http.StatusOK, user)
 }
 
 func ListUsers(c *gin.Context) {
 	backend := injector.Backend(c)
 
-	users, err := backend.Auth.ListUsers()
+	users, err := backend.Auth.ListUsers(c.Request.Context())
 	if err != nil {
 		c.Error(err)
 		return
@@ -104,7 +108,7 @@ func ListUsers(c *gin.Context) {
 func ListGroups(c *gin.Context) {
 	backend := injector.Backend(c)
 
-	groups, err := backend.Auth.ListGroups()
+	groups, err := backend.Auth.ListGroups(c.Request.Context())
 	if err != nil {
 		c.Error(err)
 		return
@@ -114,7 +118,7 @@ func ListGroups(c *gin.Context) {
 func ListRoles(c *gin.Context) {
 	backend := injector.Backend(c)
 
-	roles, err := backend.Auth.ListRoles()
+	roles, err := backend.Auth.ListRoles(c.Request.Context())
 	if err != nil {
 		c.Error(err)
 		return

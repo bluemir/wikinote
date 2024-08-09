@@ -30,7 +30,7 @@ func Register(cmd *kingpin.CmdClause, conf *config.Config) {
 		)
 		defer stop()
 
-		b, err := backend.New(ctx, conf.Backend.Wikipath, conf.Backend.AdminUsers)
+		b, err := backend.New(ctx, conf.Backend.Wikipath, conf.Backend.VolatileDatabase)
 		if err != nil {
 			logrus.Fatalf("%+v", err)
 			return err

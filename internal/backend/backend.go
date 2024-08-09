@@ -7,7 +7,6 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v3"
 	"gorm.io/gorm"
 
 	"github.com/bluemir/wikinote/internal/auth"
@@ -36,45 +35,36 @@ type Backend struct {
 	db *gorm.DB
 }
 
-func New(ctx context.Context, wikipath string, users map[string]string) (*Backend, error) {
-	// Load config file
-	conf, err := loadConfigFile(wikipath)
+func New(ctx context.Context, wikipath string, volatileDatabase bool) (*Backend, error) {
+	dbPath := filepath.Join(wikipath, ".app/wikinote.db")
+	if volatileDatabase {
+		dbPath = ":memory:"
+	}
+
+	db, err := initDB(dbPath)
 	if err != nil {
 		return nil, err
 	}
 
-	buf, _ := yaml.Marshal(conf)
-	logrus.Debugf("config:\n%s", buf)
-
-	db, err := initDB(wikipath)
-	if err != nil {
-		return nil, err
-	}
-
-	if conf.Metadata.File != nil && conf.Metadata.File.Path == "" {
-		conf.Metadata.File.Path = wikipath
-	}
-	if conf.Metadata.Gorm != nil {
-		conf.Metadata.Gorm.DB = db
-	}
-	mdstore, err := metadata.New(&conf.Metadata)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to init metadata module")
-	}
-
-	auth, err := initAuth(db, conf.Salt, &conf.Auth)
+	auth, err := auth.New(ctx, db)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to init auth module")
 	}
 
-	if err := initAdminUser(auth, users); err != nil {
-		return nil, errors.Wrap(err, "failed to init admin user")
+	mdstore, err := metadata.New(ctx, db)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to init metadata module")
 	}
+
 	store, err := initFileStore(wikipath)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to init file store")
 	}
-	plugin, err := plugins.New(conf.Plugins, mdstore)
+
+	conf := []plugins.PluginConfig{}
+	// TODO Load plugin configs
+
+	plugin, err := plugins.New(conf, mdstore)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to init plugins")
 	}
@@ -92,7 +82,6 @@ func New(ctx context.Context, wikipath string, users map[string]string) (*Backen
 
 	backend := &Backend{
 		wikipath: wikipath,
-		Config:   conf,
 		db:       db,
 		Metadata: mdstore,
 		Auth:     auth,

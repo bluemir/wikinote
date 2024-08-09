@@ -3,7 +3,7 @@
 
 .PHONY: run
 run: build/$(APP_NAME) ## Run web app
-	$< -vv server --admin-user root=1234 --admin-user bluemir=1234 --wiki-path=runtime
+	$< -vv server --wiki-path=runtime --volatile-database
 
 .PHONY: dev-run
 dev-run: ## Run dev server. If detect file change, automatically rebuild&restart server
