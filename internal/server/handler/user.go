@@ -11,7 +11,6 @@ import (
 )
 
 func Login(c *gin.Context) {
-
 	u, err := User(c)
 	if errors.Is(err, auth.ErrUnauthorized) {
 		c.Error(err)
@@ -19,14 +18,14 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	if u != nil {
-		if c.Query("exclude") == "" {
-			// logined, but first try.
+	exclude, exist := c.GetQuery("exclude")
+	if u != nil && exist {
+		if exclude == "" {
+			// logined, try to login other id.
 			c.Redirect(http.StatusTemporaryRedirect, "/-/auth/login?exclude="+u.Name)
 			return
 		}
-
-		if u.Name == c.Query("exclude") {
+		if u.Name == exclude {
 			// logined, but try to login same id
 			c.Error(auth.ErrUnauthorized)
 			c.Abort()
@@ -86,42 +85,10 @@ func Me(c *gin.Context) {
 	//backend := injector.Backend(c)
 	user, err := User(c)
 	if err != nil {
-
 		c.Error(err)
 		c.Abort()
 		return
 	}
 
 	c.JSON(http.StatusOK, user)
-}
-
-func ListUsers(c *gin.Context) {
-	backend := injector.Backend(c)
-
-	users, err := backend.Auth.ListUsers(c.Request.Context())
-	if err != nil {
-		c.Error(err)
-		return
-	}
-	c.JSON(http.StatusOK, ListResponse[auth.User]{Items: users})
-}
-func ListGroups(c *gin.Context) {
-	backend := injector.Backend(c)
-
-	groups, err := backend.Auth.ListGroups(c.Request.Context())
-	if err != nil {
-		c.Error(err)
-		return
-	}
-	c.JSON(http.StatusOK, ListResponse[auth.Group]{Items: groups})
-}
-func ListRoles(c *gin.Context) {
-	backend := injector.Backend(c)
-
-	roles, err := backend.Auth.ListRoles(c.Request.Context())
-	if err != nil {
-		c.Error(err)
-		return
-	}
-	c.JSON(http.StatusOK, ListResponse[auth.Role]{Items: roles})
 }

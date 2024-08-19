@@ -11,13 +11,10 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/bluemir/wikinote/internal/buildinfo"
+	"github.com/bluemir/wikinote/internal/server/handler"
 )
 
-func html(path string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.HTML(http.StatusOK, path, c)
-	}
-}
+var html = handler.HTML
 
 func initEtag() string {
 	hashed := crypto.SHA512.New()

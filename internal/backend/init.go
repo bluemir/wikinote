@@ -12,7 +12,6 @@ import (
 )
 
 func initDB(dbPath string) (*gorm.DB, error) {
-
 	if err := os.MkdirAll(filepath.Dir(dbPath), 0755); err != nil {
 		return nil, err
 	}

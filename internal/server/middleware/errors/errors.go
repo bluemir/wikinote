@@ -63,6 +63,11 @@ func Middleware(c *gin.Context) {
 	}
 	c.String(code, "%#v", c.Errors)
 }
+
+type HttpError interface {
+	Code() int
+}
+
 func code(err *gin.Error) int {
 	logrus.Tracef("%T", err.Err)
 
@@ -87,6 +92,11 @@ func code(err *gin.Error) int {
 		default:
 			return http.StatusNotImplemented
 		}
+	}
+
+	// try to call code function
+	if e, ok := err.Err.(HttpError); ok {
+		return e.Code()
 	}
 
 	// finally check string match

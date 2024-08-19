@@ -1,6 +1,8 @@
 @import "./common/reset.css";
 @import "./common/color.css";
+@import "./system/grid.css";
 @import "./pages/markdown.css";
+
 
 *:not(:defined) {
     display:none;

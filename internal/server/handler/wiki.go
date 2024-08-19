@@ -70,10 +70,14 @@ func View(c *gin.Context) {
 				return
 			}
 
-			c.HTML(http.StatusOK, PageMarkdown, gin.H{
+			//c.HTML(http.StatusOK, PageMarkdown, gin.H{
+			//	"content": template.HTML(renderedData),
+			//	"footers": footerData,
+			//})
+			c.HTML(http.StatusOK, PageMarkdown, renderData(c, KeyValues{
 				"content": template.HTML(renderedData),
 				"footers": footerData,
-			})
+			}))
 			return
 		}
 	case "image":

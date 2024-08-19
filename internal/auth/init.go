@@ -37,7 +37,6 @@ func initializeConfig(db *gorm.DB) func(ctx context.Context) error {
 var defaultPolicy []byte
 
 func initializeDefaultRole(db *gorm.DB) func(ctx context.Context) error {
-
 	return func(ctx context.Context) error {
 		txn := db.WithContext(ctx).Begin()
 		defer txn.Rollback()

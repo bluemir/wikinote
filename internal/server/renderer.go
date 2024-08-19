@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bytes"
 	"encoding/json"
 	"html/template"
 	"io/fs"
@@ -19,6 +20,18 @@ func NewRenderer() (*template.Template, error) {
 		"join": strings.Join,
 		"json": json.Marshal,
 		"toString": func(buf []byte) string {
+			return string(buf)
+		},
+		"encode": func(v any) string {
+			buf, err := json.Marshal(v)
+			if err != nil {
+				logrus.Warn(err)
+				return ""
+			}
+			if bytes.Equal(buf, []byte("null")) { // it is 'null'
+				return ""
+			}
+
 			return string(buf)
 		},
 	})
@@ -48,7 +61,7 @@ func NewRenderer() (*template.Template, error) {
 		}
 		return nil
 	}); err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	for _, t := range tmpl.Templates() {

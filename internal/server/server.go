@@ -6,14 +6,12 @@ import (
 
 	"github.com/gin-contrib/location"
 	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/internal/backend"
 	"github.com/bluemir/wikinote/internal/server/graceful"
 	"github.com/bluemir/wikinote/internal/server/injector"
-	auth_middleware "github.com/bluemir/wikinote/internal/server/middleware/auth"
-	error_middleware "github.com/bluemir/wikinote/internal/server/middleware/errors"
+	"github.com/bluemir/wikinote/internal/server/middleware/errors"
 )
 
 type Config struct {
@@ -44,29 +42,27 @@ func Run(ctx context.Context, b *backend.Backend, conf *Config) error {
 	app.Use(gin.LoggerWithWriter(writer))
 
 	// Error Handling
-	app.Use(error_middleware.Middleware)
+	app.Use(errors.Middleware)
 
 	// Recovery
-	//app.Use(gin.Recovery())
-	app.Use(gin.CustomRecovery(func(c *gin.Context, recovered interface{}) {
-		if err, ok := recovered.(string); ok {
-			c.Error(errors.New(err))
-			c.Abort()
-			return
-		}
-		c.AbortWithStatus(http.StatusInternalServerError)
-	}))
+	app.Use(gin.Recovery())
+	//app.Use(gin.CustomRecovery(func(c *gin.Context, recovered interface{}) {
+	//	if err, ok := recovered.(string); ok {
+	//		c.Error(errors.New(err))
+	//		c.Abort()
+	//		return
+	//	}
+	//	c.AbortWithStatus(http.StatusInternalServerError)
+	//}))
 
 	app.Use(location.Default(), fixURL)
 
 	// add template
 	if html, err := NewRenderer(); err != nil {
-		return errors.WithStack(err)
+		return err
 	} else {
 		app.SetHTMLTemplate(html)
 	}
-
-	app.Use(auth_middleware.Middleware(b.Auth))
 
 	// favicon
 	app.GET("/favicon.ico", NotFound)

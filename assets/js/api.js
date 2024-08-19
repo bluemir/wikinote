@@ -7,7 +7,7 @@ export async function me() {
         return cache.get("me");
     }
 
-    let res = await $.request("GET", `/-/api/v1/me`);
+    let res = await $.request("GET", `/-/api/v1/me`, {withCredentials: true});
 
 	cache.set("me", res.json);
 
@@ -26,7 +26,7 @@ export async function can(verb, kind) {
 
     // not error
 	cache.set(key, true);
-    
+
     return true;
 }
 

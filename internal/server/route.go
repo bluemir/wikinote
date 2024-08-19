@@ -2,7 +2,6 @@ package server
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -11,13 +10,12 @@ import (
 	"github.com/bluemir/wikinote/internal/plugins"
 	queryrouter "github.com/bluemir/wikinote/internal/query-router"
 	"github.com/bluemir/wikinote/internal/server/handler"
-	"github.com/bluemir/wikinote/internal/server/middleware/auth"
-	"github.com/bluemir/wikinote/internal/server/middleware/auth/resource"
-	"github.com/bluemir/wikinote/internal/server/middleware/auth/verb"
+	"github.com/bluemir/wikinote/internal/server/handler/auth/resource"
+	"github.com/bluemir/wikinote/internal/server/handler/auth/verb"
 )
 
 var (
-	can = auth.Can
+	can = handler.Can
 )
 
 func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), plugins *plugins.Manager) {
@@ -26,51 +24,53 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 	{
 		// APIs
 		api := app.Group("/-/api", markAPI)
-		api.POST("/preview", handler.Preview) // render body
-		api.GET("/me", handler.Me)
-		api.GET("auth/can/:verb/*kind", handler.CanAPI)
 
 		{
 			v1 := api.Group("/v1")
 
-			v1.GET("/me", handler.Me)
 			v1.GET("/can/:verb/*kind", handler.CanAPI)
-			v1.POST("/users", handler.Register)
+			v1.GET("/me", handler.Me)
 
-			v1.GET("/iam/users", handler.ListUsers)
-			v1.GET("/iam/groups", handler.ListGroups)
-			v1.GET("/iam/roles", handler.ListRoles)
+			v1.GET("/preview", handler.Preview) // render body
 
-			v1.GET("/config")
+			//v1.POST("/users", handler.Register)
+
+			//v1.GET("/iam/users", handler.ListUsers)
+			//v1.GET("/iam/groups", handler.ListGroups)
+			//v1.GET("/iam/roles", handler.ListRoles)
+
+			//v1.GET("/config")
 
 			//v1.GET("/events", handler.StreamEvents)
 		}
 	}
 	{
-		// special pages
-		special := app.Group("/-")
-		special.Group("/static", staticCache).StaticFS("/", http.FS(assets.Static))
+		// system pages
+		system := app.Group("/-", markHTML)
+		system.Group("/static", staticCache).StaticFS("/", http.FS(assets.Static))
 
-		special.GET("/welcome", html("welcome.html"))
+		system.GET("/welcome", html("welcome.html"))
 
-		special.GET("/auth/login", handler.Login)
-		special.GET("/auth/profile", handler.Profile)
+		system.GET("/auth/login", html("login.html"))
+		system.POST("/auth/login", handler.Login)
+		system.GET("/auth/profile", handler.Profile)
 
-		special.GET("/auth/register", html("register.html"))
+		system.GET("/auth/register", html("register.html"))
+		system.POST("/auth/register", handler.Register)
 
-		special.GET("/messages", handler.Messages)
-		special.GET("/search", can(verb.Search, resource.Global), handler.Search)
+		system.GET("/messages", handler.Messages)
+		system.GET("/search", can(verb.Search, resource.Global), handler.Search)
 
-		special.GET("/admin", can(verb.Get, resource.AdminPage), html("admin/index.html"))
-		special.GET("/admin/users", can(verb.Get, resource.AdminPage), html("admin/users.html"))
-		special.GET("/admin/iam/users", can(verb.List, resource.Users), html("admin/iam/users.html"))
-		special.GET("/admin/iam/groups", can(verb.List, resource.Users), html("admin/iam/groups.html"))
-		special.GET("/admin/iam/roles", can(verb.List, resource.Roles), html("admin/iam/roles.html"))
+		system.GET("/admin", can(verb.Get, resource.AdminPage), html("admin/index.html"))
+		system.GET("/admin/iam/users", can(verb.List, resource.Users), handler.ListUsers)
+		system.GET("/admin/iam/groups", can(verb.List, resource.Users), handler.ListGroups)
+		system.GET("/admin/iam/roles", can(verb.List, resource.Roles), handler.ListRoles)
 	}
 
 	// plugins
 	plugins.RouteHook(app.Group("/~"))
 
+	app.GET("/.app/*path", notFound)
 	{
 		// normal pages
 		// - GET            render file or render functional page
@@ -92,17 +92,27 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 		pages.PUT("*", can(verb.Update, resource.Page), handler.Update)
 		pages.DELETE("*", can(verb.Delete, resource.Page), handler.Delete)
 
-		noRoute(rejectDotApp, pages.Handler)
+		//app.Any("/*path", pages.Handler)
+		noRoute(pages.Handler)
 	}
+
 }
 func (server *Server) redirectToFrontPage(c *gin.Context) {
 	logrus.Debugf("redirect to front page: %s", server.frontPage)
 	c.Redirect(http.StatusTemporaryRedirect, "/"+server.frontPage)
 	c.Abort()
 }
-func rejectDotApp(c *gin.Context) {
-	if strings.HasPrefix(c.Request.URL.Path, "/.app") {
-		c.Abort()
-		return
-	}
+
+type NotFoundError string
+
+func (e NotFoundError) Error() string {
+	return string(e)
+}
+func (e NotFoundError) Code() int {
+	return http.StatusNotFound
+}
+func notFound(c *gin.Context) {
+	// TODO return not found error
+	c.Error(NotFoundError(c.FullPath() + " not found"))
+	c.Abort()
 }

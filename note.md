@@ -24,8 +24,13 @@
 	- RBAC
 
 ## 기타 고려사항
+
 - cookie free
-	- basic auth
+	- Basic Auth(포기)
+		- https://wikinote.bluemir.me/devlog/2024/8.md
+- Server rendering
+	- API call을 줄일수 있다.
+	- JS 를 상대적으로 적게 써도 동작을 보장할수 있다.
 - Web 표준
 
 ## TODO
@@ -64,4 +69,4 @@
 - [ ] Admin 용 IAM Page(RBAC)
 - [ ] 대부분 config 는 file 대신 db에 저장.
 	- UI 에서 수정을 지원
-	- yaml로 encoding 을 할수는 있음.
+	- yaml로 encoding 을 할수는 있음
