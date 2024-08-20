@@ -24,7 +24,6 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 	{
 		// APIs
 		api := app.Group("/-/api", markAPI)
-
 		{
 			v1 := api.Group("/v1")
 

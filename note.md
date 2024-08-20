@@ -32,6 +32,10 @@
 	- API call을 줄일수 있다.
 	- JS 를 상대적으로 적게 써도 동작을 보장할수 있다.
 - Web 표준
+- https service
+	- 실질적으로 설정 해야할 이유가 떨어짐
+	- 대부분은 ingress(nginx) 뒤에 있게 됨
+	- https를 설정할 경우 대부분은 Domain 설정등이 필요해서 추가 설정을 해야 하므로 굳이 간단한 실행을 제공해야 할 이유가 떨어진다.
 
 ## TODO
 - [ ] UI 구조개선
@@ -52,12 +56,7 @@
 - [ ] Forbidden page...
 - [ ] git plugin
 - [ ] html templates 의 not found Error handling
-- [ ] http2
-- [x] auto TLS
-- [x] cli options for http/https
-	- validation
-- [ ] change embed
-- [ ] http redirect to https
+- [x] change embed
 - [x] TLS cache
 - [ ] Accept 에 따라서 API 와 아닌것 구분 하기
 - [ ] js map(ECMA script)

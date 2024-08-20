@@ -5,13 +5,14 @@
 	{{ template "snippet/header.html"}}
 </head>
 <body>
-	<wikinote-page>
+	<wikinote-header></wikinote-header>
+	<main>
 		<form method="post">
 			<c-input label="username"          name="username" type="text"     placeholder="your nickname. eg) bluemir" ></c-input>
 			<c-input label="password"          name="password" type="password" placeholder="min-length: 6" ></c-input>
 			<c-button><button>Login</button></c-button>
 			<a href="/-/auth/register">Register</a>
 		</form>
-	</wikinote-page>
+	</main>
 </body>
 </html>

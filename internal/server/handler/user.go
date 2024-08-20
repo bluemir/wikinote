@@ -48,7 +48,7 @@ func Register(c *gin.Context) {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	user, err := backend.Auth.CreateUser(c.Request.Context(), &auth.User{
+	_, err := backend.Auth.CreateUser(c.Request.Context(), &auth.User{
 		Name: req.Username,
 		Labels: auth.Labels{
 			"wikinote.io/email": req.Email,
@@ -63,7 +63,7 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	c.Redirect(http.StatusSeeOther, "/-/welcome") // must use GET method
 }
 
 func Profile(c *gin.Context) {

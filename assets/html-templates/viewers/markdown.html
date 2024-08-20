@@ -5,7 +5,8 @@
 	{{ template "snippet/header.html"}}
 </head>
 <body>
-	<wikinote-page user="{{ call .user | encode }}">
+	<wikinote-header></wikinote-header>
+	<main user="{{ call .user | encode }}">
 		<main>
 			<article>
 				{{ .data.content }}
@@ -16,6 +17,6 @@
 				{{ end }}
 			</section>
 		</main>
-	</wikinote-page>
+	</main>
 </body>
 </html>

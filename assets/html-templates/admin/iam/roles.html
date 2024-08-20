@@ -5,13 +5,14 @@
 	{{ template "snippet/header.html"}}
 </head>
 <body>
-	<wikinote-page>
+	<wikinote-header></wikinote-header>
+	<main>
 		<c-link-tabs>
 			<a href="/-/admin/iam/users"  >Users</a>
 			<a href="/-/admin/iam/groups" >Groups</a>
 			<a href="/-/admin/iam/roles"  >Roles</a>
 		</c-link-tabs>
 		<roles-list endpoint="/-/api/v1/iam/roles"></roles-list>
-	</wikinote-page>
+	</main>
 </body>
 </html>
