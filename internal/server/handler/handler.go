@@ -39,7 +39,7 @@ func (rd *RenderData) Can(verb auth.Verb, resource string) bool {
 	return err != nil
 }
 
-func with(c *gin.Context, data any) *RenderData {
+func With(c *gin.Context, data any) *RenderData {
 	return &RenderData{
 		Context: c,
 		Data:    data,
@@ -48,6 +48,6 @@ func with(c *gin.Context, data any) *RenderData {
 
 func HTML(path string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.HTML(http.StatusOK, path, with(c, KeyValues{}))
+		c.HTML(http.StatusOK, path, With(c, KeyValues{}))
 	}
 }

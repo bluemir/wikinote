@@ -14,6 +14,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/bluemir/wikinote/internal/auth"
+	"github.com/bluemir/wikinote/internal/server/handler"
 )
 
 func Middleware(c *gin.Context) {
@@ -54,7 +55,7 @@ func Middleware(c *gin.Context) {
 			if code == http.StatusUnauthorized {
 				c.Header(auth.LoginHeader(c.Request))
 			}
-			c.HTML(code, htmlName(code, err), c.Errors)
+			c.HTML(code, htmlName(code, err), handler.With(c, handler.KeyValues{"errors": c.Errors}))
 			return
 		case "text/plain":
 			c.String(code, "%#v", c.Errors)

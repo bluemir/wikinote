@@ -16,7 +16,7 @@ func ListUsers(c *gin.Context) {
 		return
 	}
 
-	c.HTML(http.StatusOK, "admin/iam/users.html", with(c, KeyValues{
+	c.HTML(http.StatusOK, "admin/iam/users.html", With(c, KeyValues{
 		"users": users,
 	}))
 }
@@ -28,7 +28,7 @@ func ListGroups(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	c.HTML(http.StatusOK, "admin/iam/groups.html", with(c, KeyValues{
+	c.HTML(http.StatusOK, "admin/iam/groups.html", With(c, KeyValues{
 		"groups": groups,
 	}))
 }
@@ -40,7 +40,7 @@ func ListRoles(c *gin.Context) {
 		c.Error(err)
 		return
 	}
-	c.HTML(http.StatusOK, "admin/iam/roles.html", with(c, KeyValues{
+	c.HTML(http.StatusOK, "admin/iam/roles.html", With(c, KeyValues{
 		"roles": roles,
 	}))
 }

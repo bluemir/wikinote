@@ -74,7 +74,7 @@ func View(c *gin.Context) {
 			//	"content": template.HTML(renderedData),
 			//	"footers": footerData,
 			//})
-			c.HTML(http.StatusOK, PageMarkdown, with(c, KeyValues{
+			c.HTML(http.StatusOK, PageMarkdown, With(c, KeyValues{
 				"content": template.HTML(renderedData),
 				"footers": footerData,
 			}))
