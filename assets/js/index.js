@@ -1,5 +1,6 @@
 import "./api.js";
 import "./common.js";
+import "./components/dropdown/dropdown.js";
 import "./components/go-back.js";
 import "./components/input/key-value.js";
 import "./components/input/list.js";

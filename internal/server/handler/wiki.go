@@ -39,7 +39,7 @@ func filetype(path string) (string, string) {
 }
 func View(c *gin.Context) {
 
-	backend := injector.Backend(c)
+	backend := injector.Backends(c)
 
 	logrus.Trace("view handler")
 	category, subtype := filetype(c.Request.URL.Path)
@@ -74,7 +74,7 @@ func View(c *gin.Context) {
 			//	"content": template.HTML(renderedData),
 			//	"footers": footerData,
 			//})
-			c.HTML(http.StatusOK, PageMarkdown, renderData(c, KeyValues{
+			c.HTML(http.StatusOK, PageMarkdown, with(c, KeyValues{
 				"content": template.HTML(renderedData),
 				"footers": footerData,
 			}))
@@ -99,7 +99,7 @@ func View(c *gin.Context) {
 
 func Raw(c *gin.Context) {
 	logrus.Infof("[View] serve raw file: '%s'", c.Request.URL.Path)
-	backend := injector.Backend(c)
+	backend := injector.Backends(c)
 	// TODO serve partial content
 
 	rs, err := backend.FileReadStream(c.Request.URL.Path)
@@ -115,7 +115,7 @@ func Raw(c *gin.Context) {
 	//c.Data(http.StatusOK, http.DetectContentType(buf), buf)
 }
 func EditForm(c *gin.Context) {
-	backend := injector.Backend(c)
+	backend := injector.Backends(c)
 
 	category, _ := filetype(c.Request.URL.Path)
 
@@ -134,7 +134,7 @@ func EditForm(c *gin.Context) {
 	}
 }
 func UpdateWithForm(c *gin.Context) {
-	backend := injector.Backend(c)
+	backend := injector.Backends(c)
 
 	p := c.Request.URL.Path
 	req := &struct {
@@ -156,7 +156,7 @@ func UpdateWithForm(c *gin.Context) {
 	c.Redirect(http.StatusSeeOther, p)
 }
 func Update(c *gin.Context) {
-	backend := injector.Backend(c)
+	backend := injector.Backends(c)
 	p := c.Request.URL.Path
 	data, err := io.ReadAll(c.Request.Body)
 	if err != nil {
@@ -173,7 +173,7 @@ func Update(c *gin.Context) {
 }
 
 func Files(c *gin.Context) {
-	backend := injector.Backend(c)
+	backend := injector.Backends(c)
 	path := c.Request.URL.Path
 	if strings.HasSuffix(path, ".md") {
 		c.Redirect(http.StatusSeeOther, strings.TrimSuffix(path, ".md")+"?files")
@@ -190,7 +190,7 @@ func Files(c *gin.Context) {
 	})
 }
 func Delete(c *gin.Context) {
-	backend := injector.Backend(c)
+	backend := injector.Backends(c)
 	if c.GetHeader("X-Confirm") != path.Base(c.Request.URL.Path) {
 		c.HTML(http.StatusBadRequest, PageErrBadRequest, gin.H{})
 		return
@@ -204,7 +204,7 @@ func Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 func Preview(c *gin.Context) {
-	backend := injector.Backend(c)
+	backend := injector.Backends(c)
 	data, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)

@@ -8,7 +8,7 @@ import (
 )
 
 func Search(c *gin.Context) {
-	backend := injector.Backend(c)
+	backend := injector.Backends(c)
 	query := c.Query("q")
 
 	result, err := backend.FileSearch(query)
@@ -16,7 +16,7 @@ func Search(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
-	c.HTML(http.StatusOK, PageSearch, renderData(c, KeyValues{
+	c.HTML(http.StatusOK, PageSearch, with(c, KeyValues{
 		"result": result,
 	}))
 }

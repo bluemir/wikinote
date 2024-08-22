@@ -5,14 +5,16 @@
 	{{ template "snippet/header.html"}}
 </head>
 <body>
-	<wikinote-header></wikinote-header>
+	{{ template "snippet/navigation-bar.html" . }}
 	<main>
-		<form method="post">
-			<c-input label="username"          name="username" type="text"     placeholder="your nickname. eg) bluemir" ></c-input>
-			<c-input label="password"          name="password" type="password" placeholder="min-length: 6" ></c-input>
-			<c-button><button>Login</button></c-button>
-			<a href="/-/auth/register">Register</a>
-		</form>
+		<section page>
+			<form method="post">
+				<c-input label="username" name="username" type="text"     placeholder="your nickname. eg) bluemir" ></c-input>
+				<c-input label="password" name="password" type="password" placeholder="min-length: 6" ></c-input>
+				<c-button><button>Login</button></c-button>
+				<a href="/-/auth/register">Register</a>
+			</form>
+		</section>
 	</main>
 </body>
 </html>

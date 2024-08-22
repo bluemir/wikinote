@@ -9,7 +9,7 @@ import (
 )
 
 func Messages(c *gin.Context) {
-	backend := injector.Backend(c)
+	backend := injector.Backends(c)
 
 	user, err := User(c)
 	if err != nil {

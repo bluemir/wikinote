@@ -2,39 +2,29 @@
 @import "./common/color.css";
 @import "./system/grid.css";
 @import "./pages/markdown.css";
+@import "./components/navigation-bar.css";
 
-
-*:not(:defined) {
-    display:none;
+[page] {
+    max-width: 1200px;
+    margin: auto;
+    padding: 0 1rem;
+    
 }
 
-html {
-    background: var(--contents-padding-bg-color);
-}
-html, body {
-    margin: 0;
-}
 body {
     overflow-y: scroll;
+
+    background: var(--contents-padding-bg-color);
 }
 
-
-
-/* layout */
-
-wikinote-header::part(wrapper), main {
-    padding: 0 2rem;
-    max-width: 1200px; /* todo maake breakpoints */
-    margin: 0 auto;
+header {
+    z-index: 1;
 }
-
-wikinote-header {
-    position: sticky;
-    top: 0;
-    width: 100%;
-}
-
 main {
-    padding: 2rem;
-    background: var(--contents-bg-color);
+    section[page] {
+        background: var(--contents-bg-color);
+        min-height: 30rem;
+        padding-top: 1rem;
+    }
 }
+

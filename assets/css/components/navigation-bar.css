@@ -1,0 +1,55 @@
+@import "../common/color.css";
+
+
+header {
+
+	background-color: var(--header-bg-color);
+	position: sticky;
+
+	section {
+		display: grid;
+
+	
+		/* layouts */
+		grid-template: auto 1fr auto / auto 1fr auto;
+	
+		wikinote-header-logo {
+			grid-row: 1 / 2;
+		}
+		c-breadcrumbs {
+			grid-row: 3 / 4;
+		}
+		wikinote-header-search {
+			grid-column: 3 / 4;
+			grid-row: 1 / 2;
+		}
+		menu {
+			grid-column: 3 / 4;
+			grid-row: 2 / 4;
+		}
+		/* breadcrumbs */
+		c-breadcrumbs {
+			padding: 0.5rem 0;
+		}
+	
+		/* menu */
+		menu {
+			padding: 0;
+			margin: 0;
+			
+			display: flex;
+
+			& > a {
+				display: block;
+				padding: 0.5rem;
+				color: var(--header-fg-color);
+				text-decoration: none;
+	
+				&:hover {
+					background-color: var(--menu-hover-bg-color);
+				}
+			}
+		}
+	}
+	
+}

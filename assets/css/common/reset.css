@@ -1,7 +1,13 @@
-/* Pre-styling unregistered elements */ 
+/* Pre-styling unregistered elements */
 /* prevent FOUC */
 *:not(:defined) {
     display:none;
+}
+
+/* remove default padding */
+html, body {
+	padding: 0;
+	margin: 0;
 }
 
 /* Box sizing rules */

@@ -14,6 +14,6 @@ func Inject(b *backend.Backend) gin.HandlerFunc {
 		c.Set(keyBackend, b)
 	}
 }
-func Backend(c *gin.Context) *backend.Backend {
+func Backends(c *gin.Context) *backend.Backend {
 	return c.MustGet(keyBackend).(*backend.Backend)
 }

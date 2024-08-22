@@ -17,7 +17,7 @@ const (
 )
 
 func User(c *gin.Context) (*auth.User, error) {
-	backend := injector.Backend(c)
+	backend := injector.Backends(c)
 	// 1. try to get user from context
 	if u, ok := c.Get(ContextKeyUser); ok {
 		logrus.Debug(u)
@@ -58,7 +58,7 @@ func Can(verb auth.Verb, getResource ResourceGetter) gin.HandlerFunc {
 			return
 		}
 
-		backend := injector.Backend(c)
+		backend := injector.Backends(c)
 
 		if err := backend.Auth.Can(user, verb, resource); err != nil {
 			c.Error(err)
@@ -69,7 +69,7 @@ func Can(verb auth.Verb, getResource ResourceGetter) gin.HandlerFunc {
 }
 
 func CanAPI(c *gin.Context) {
-	backend := injector.Backend(c)
+	backend := injector.Backends(c)
 	user, err := User(c)
 	if err != nil {
 		c.Error(err)

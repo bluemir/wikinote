@@ -1,0 +1,32 @@
+<header>
+	<section page> 
+		<wikinote-header-logo></wikinote-header-logo>
+		<wikinote-header-search></wikinote-header-search>
+		<!-- if system page disable breadcrumb -->
+		{{ if not .IsSystemPage }}
+		<c-breadcrumbs></c-breadcrumbs>
+		{{ end }}
+		<menu>
+			{{ if not .IsSystemPage }}
+			<a href="?edit">Edit</a>
+			{{ end }}
+			<c-dropdown name="more">
+				{{ if not .IsSystemPage }}
+				<a href="?files">Files</a>
+				<hr />
+				{{ end }}
+				{{ if .User }}
+				<a href="/-/auth/profile">Profile</a>
+				<a href="/-/auth/login?exclude=${elem.me.name}">Logout</a>
+				<a href="/-/messages">Messages</a>
+				{{ else }}
+				<a href="/-/auth/login">Login</a>
+				<a href="/-/auth/register">Register</a>
+				{{ end }}
+				{{ if .Can "get" "page.admin"}}
+				<a href="/-/admin">Admin</a>
+				{{ end }}
+			</c-dropdown>
+		</menu>
+	</section>
+</header>

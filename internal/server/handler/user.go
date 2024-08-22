@@ -36,7 +36,7 @@ func Login(c *gin.Context) {
 }
 
 func Register(c *gin.Context) {
-	backend := injector.Backend(c)
+	backend := injector.Backends(c)
 
 	req := &struct {
 		Username string `form:"username"  validate:"required,min=4"`

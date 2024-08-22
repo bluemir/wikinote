@@ -5,18 +5,18 @@
 	{{ template "snippet/header.html"}}
 </head>
 <body>
-	<wikinote-header></wikinote-header>
-	<main user="{{ call .user | encode }}">
-		<main>
+	{{ template "snippet/navigation-bar.html" . }}
+	<main>
+		<section page>
 			<article>
-				{{ .data.content }}
+				{{ .Data.content }}
 			</article>
 			<section>
-				{{ range .data.footers }}
+				{{ range .Data.footers }}
 					<article>{{ . }}</article>
 				{{ end }}
 			</section>
-		</main>
+		</section>
 	</main>
 </body>
 </html>
