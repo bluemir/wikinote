@@ -5,11 +5,13 @@
 	{{ template "snippet/header.html"}}
 </head>
 <body>
-	<wikinote-header></wikinote-header>
+	{{ template "snippet/navigation-bar.html" . }}
 	<main>
-		<wikinote-messages>
-			<c-data>{{.messages | json | toString}}</c-data>
-		</wikinote-messages>
+		<section page>
+			<wikinote-messages>
+				<c-data>{{.messages | json | toString}}</c-data>
+			</wikinote-messages>
+		</section>
 	</main>
 </body>
 </html>

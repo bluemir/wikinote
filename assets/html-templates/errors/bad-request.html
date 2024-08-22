@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Wikinote</title>
+	<title>Wikinote > Error: Bad Request</title>
 	{{ template "snippet/header.html"}}
 </head>
 <body>
-	<wikinote-header></wikinote-header>
+	{{ template "snippet/navigation-bar.html" . }}
 	<main>
-        <h1>Bad Request</h1>
-        {{.message}}>
+		<section page>
+			<h1>Bad Request</h1>
+			{{.message}}
+		</section>
 	</main>
 </body>
 </html>

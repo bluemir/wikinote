@@ -5,10 +5,11 @@
 		{{ template "snippet/header.html"}}
 	</head>
 	<body>
-		<wikinote-header></wikinote-header>
+		{{ template "snippet/navigation-bar.html" . }}
 		<main>
-			<wikinote-viewer-image url="{{.path}}?raw">
-            </wikinote-viewer-image>
+			<section page>
+				<wikinote-viewer-image url="{{.path}}?raw"></wikinote-viewer-image>
+			</section>
 		</main>
 	</body>
 </html>

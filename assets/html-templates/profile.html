@@ -5,12 +5,14 @@
 	{{ template "snippet/header.html"}}
 </head>
 <body>
-	<wikinote-header></wikinote-header>
+	{{ template "snippet/navigation-bar.html" . }}
 	<main>
-        <wikinote-profile user="{{ .User.Name }}">
-			<!-- TODO info here -->
-			<c-data>{{ .User | json | toString }}</c-data>
-		</wikinote-profile>
+		<section page>
+			<wikinote-profile user="{{ .User.Name }}">
+				<!-- TODO info here -->
+				<c-data>{{ .User | json | toString }}</c-data>
+			</wikinote-profile>
+		</section>
 	</main>
 </body>
 </html>

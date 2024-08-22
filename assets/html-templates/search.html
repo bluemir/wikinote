@@ -5,10 +5,14 @@
 	{{ template "snippet/header.html"}}
 </head>
 <body>
-	<wikinote-page>
-        <wikinote-search>
-			<c-data>{{ .result | json | toString}}</c-data>
-		</wikinote-search>
-	</wikinote-page>
+	{{ template "snippet/navigation-bar.html" . }}
+	<main>
+		<section page>
+			<h1>Search Result</h1>
+			<wikinote-search>
+				<c-data>{{ .result | json | toString}}</c-data>
+			</wikinote-search>
+		</section>
+	</main>
 </body>
 </html>

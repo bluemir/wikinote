@@ -5,9 +5,11 @@
 	{{ template "snippet/header.html"}}
 </head>
 <body>
-	<wikinote-header></wikinote-header>
+	{{ template "snippet/navigation-bar.html" . }}
 	<main>
-        <h1>Forbidden</h1>
+		<section page>
+			<h1>Forbidden</h1>
+		</section>
 	</main>
 </body>
 </html>

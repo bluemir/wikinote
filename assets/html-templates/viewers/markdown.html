@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Wikinote</title>
+	<title>Wikinote - {{ .Context.Request.URL.Path }}</title>
 	{{ template "snippet/header.html"}}
 </head>
 <body>
 	{{ template "snippet/navigation-bar.html" . }}
 	<main>
 		<section page>
-			<article>
+			<article view="markdown">
 				{{ .Data.content }}
 			</article>
 			<section>

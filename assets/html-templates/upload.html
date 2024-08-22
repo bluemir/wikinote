@@ -5,8 +5,11 @@
 	{{ template "snippet/header.html"}}
 </head>
 <body>
-	<wikinote-page>
-        <wikinote-upload path="{{.path}}"></wikinote-upload>
-	</wikinote-page>
+	{{ template "snippet/navigation-bar.html" . }}
+	<main>
+		<section page>
+			<wikinote-upload path="{{.path}}"></wikinote-upload>
+		</section>
+	</main>
 </body>
 </html>

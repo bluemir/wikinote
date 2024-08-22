@@ -6,9 +6,11 @@
 	<style>@import url("/-/static/css/markdown.css");</style>
 </head>
 <body>
-	<wikinote-header></wikinote-header>
+	{{ template "snippet/navigation-bar.html" . }}
 	<main>
-		<wikinote-viewer-video url="{{.path}}?raw"></wikinote-viewer-video>
+		<section page>
+			<wikinote-viewer-video url="{{.path}}?raw"></wikinote-viewer-video>
+		</section>
 	</main>
 </body>
 </html>

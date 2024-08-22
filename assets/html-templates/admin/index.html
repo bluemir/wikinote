@@ -5,10 +5,12 @@
 	{{ template "snippet/header.html"}}
 </head>
 <body>
-	<wikinote-header></wikinote-header>
+	{{ template "snippet/navigation-bar.html" . }}
 	<main>
-		<a href="/-/admin/iam/users">Users</a>
-		<a href="/-/admin/plugins">Plugins</a>
+		<section page>
+			<a href="/-/admin/iam/users">Users</a>
+			<a href="/-/admin/plugins">Plugins</a>
+		</section>
 	</main>
 </body>
 </html>

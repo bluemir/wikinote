@@ -5,13 +5,15 @@
 	{{ template "snippet/header.html"}}
 </head>
 <body>
-	<wikinote-header></wikinote-header>
+	{{ template "snippet/navigation-bar.html" . }}
 	<main>
-		<c-link-tabs>
-			<a href="/-/admin/iam/users"  >Users</a>
-			<a href="/-/admin/iam/groups" >Groups</a>
-			<a href="/-/admin/iam/roles"  >Roles</a>
-		</c-link-tabs>
+		<section page>
+			<c-link-tabs>
+				<a href="/-/admin/iam/users"  >Users</a>
+				<a href="/-/admin/iam/groups" >Groups</a>
+				<a href="/-/admin/iam/roles"  >Roles</a>
+			</c-link-tabs>
+		</section>
 	</main>
 </body>
 </html>

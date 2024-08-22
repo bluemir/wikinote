@@ -25,6 +25,7 @@ main {
         background: var(--contents-bg-color);
         min-height: 30rem;
         padding-top: 1rem;
+        padding-bottom: 1rem;
     }
 }
 

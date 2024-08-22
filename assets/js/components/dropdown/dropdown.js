@@ -17,6 +17,8 @@ class CustomElement extends $.CustomElement {
 				}
 
 				[dropdown] {
+					position: relative;
+
 					& > a {
 						color: white;
 						text-decoration: none;
@@ -31,18 +33,23 @@ class CustomElement extends $.CustomElement {
 						display: block;
 						position: absolute;
 						background: gray;
+						right: 0;
 					}
-					
 				}
+				/* menu item */
+				/* TODO color */
 				::slotted(a) {
 					color: white;
 					display: block;
 					text-decoration: none;
 					padding: 0.5rem;
 				}
+				::slotted(a:hover) {
+					background: lightgray;
+				}
 			</style>
 			<section dropdown>
-				<a href="#">${title}</a>
+				<a href="#" part="anchor">${title}</a>
 				<section>
 					<slot></slot>
 				</section>
