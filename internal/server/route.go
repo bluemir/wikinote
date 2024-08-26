@@ -19,6 +19,9 @@ var (
 )
 
 func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), plugins *plugins.Manager) {
+	// favicon
+	app.GET("/favicon.ico", handler.NotFound)
+
 	app.GET("/", server.redirectToFrontPage)
 
 	{
@@ -27,20 +30,10 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 		{
 			v1 := api.Group("/v1")
 
-			v1.GET("/can/:verb/*kind", handler.CanAPI)
-			v1.GET("/me", handler.Me)
+			//v1.GET("/can/:verb/*kind", handler.CanAPI)
+			//v1.GET("/me", handler.Me)
 
 			v1.GET("/preview", handler.Preview) // render body
-
-			//v1.POST("/users", handler.Register)
-
-			//v1.GET("/iam/users", handler.ListUsers)
-			//v1.GET("/iam/groups", handler.ListGroups)
-			//v1.GET("/iam/roles", handler.ListRoles)
-
-			//v1.GET("/config")
-
-			//v1.GET("/events", handler.StreamEvents)
 		}
 	}
 	{
@@ -52,6 +45,7 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 
 		system.GET("/auth/login", html("login.html"))
 		system.POST("/auth/login", handler.Login)
+		system.GET("/auth/logout", handler.Logout)
 		system.GET("/auth/profile", handler.Profile)
 
 		system.GET("/auth/register", html("register.html"))
@@ -64,12 +58,16 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 		system.GET("/admin/iam/users", can(verb.List, resource.Users), handler.ListUsers)
 		system.GET("/admin/iam/groups", can(verb.List, resource.Users), handler.ListGroups)
 		system.GET("/admin/iam/roles", can(verb.List, resource.Roles), handler.ListRoles)
+
+		system.GET("/initialize", handler.RequestInitialize)
+		system.GET("/initialize/:code", handler.Initialze)
+		system.POST("/initialize/:code", handler.InitialzeAccept)
 	}
 
 	// plugins
 	plugins.RouteHook(app.Group("/~"))
 
-	app.GET("/.app/*path", notFound)
+	app.GET("/.app/*path", handler.NotFound)
 	{
 		// normal pages
 		// - GET            render file or render functional page
@@ -99,19 +97,5 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 func (server *Server) redirectToFrontPage(c *gin.Context) {
 	logrus.Debugf("redirect to front page: %s", server.frontPage)
 	c.Redirect(http.StatusTemporaryRedirect, "/"+server.frontPage)
-	c.Abort()
-}
-
-type NotFoundError string
-
-func (e NotFoundError) Error() string {
-	return string(e)
-}
-func (e NotFoundError) Code() int {
-	return http.StatusNotFound
-}
-func notFound(c *gin.Context) {
-	// TODO return not found error
-	c.Error(NotFoundError(c.FullPath() + " not found"))
 	c.Abort()
 }

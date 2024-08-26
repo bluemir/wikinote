@@ -5,7 +5,10 @@ import (
 	"net/http"
 
 	"github.com/gin-contrib/location"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"github.com/rs/xid"
 	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/internal/backend"
@@ -46,15 +49,6 @@ func Run(ctx context.Context, b *backend.Backend, conf *Config) error {
 
 	// Recovery
 	app.Use(gin.Recovery())
-	//app.Use(gin.CustomRecovery(func(c *gin.Context, recovered interface{}) {
-	//	if err, ok := recovered.(string); ok {
-	//		c.Error(errors.New(err))
-	//		c.Abort()
-	//		return
-	//	}
-	//	c.AbortWithStatus(http.StatusInternalServerError)
-	//}))
-
 	app.Use(location.Default(), fixURL)
 
 	// add template
@@ -64,19 +58,17 @@ func Run(ctx context.Context, b *backend.Backend, conf *Config) error {
 		app.SetHTMLTemplate(html)
 	}
 
-	// favicon
-	app.GET("/favicon.ico", NotFound)
+	store := cookie.NewStore(xid.New().Bytes())
+	store.Options(sessions.Options{
+		Path: "/",
+	})
+	app.Use(sessions.Sessions("wikinote_session", store))
 
 	// Register Routing
 	server.route(app, app.NoRoute, b.Plugin)
-
-	logrus.Infof("Run Server on %s", conf.Bind)
 
 	return graceful.Run(ctx, &http.Server{
 		Addr:    conf.Bind,
 		Handler: app,
 	})
-}
-func NotFound(c *gin.Context) {
-	c.String(http.StatusNotFound, "Not Found")
 }

@@ -19,7 +19,7 @@ func Global(c *gin.Context) (auth.Resource, error) {
 }
 func AdminPage(c *gin.Context) (auth.Resource, error) {
 	return auth.KeyValues{
-		"kind": "admin",
+		"kind": "page.admin",
 	}, nil
 }
 func Users(c *gin.Context) (auth.Resource, error) {

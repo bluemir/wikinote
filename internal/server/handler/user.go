@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -9,31 +8,6 @@ import (
 	"github.com/bluemir/wikinote/internal/auth"
 	"github.com/bluemir/wikinote/internal/server/injector"
 )
-
-func Login(c *gin.Context) {
-	u, err := User(c)
-	if errors.Is(err, auth.ErrUnauthorized) {
-		c.Error(err)
-		c.Abort()
-		return
-	}
-
-	exclude, exist := c.GetQuery("exclude")
-	if u != nil && exist {
-		if exclude == "" {
-			// logined, try to login other id.
-			c.Redirect(http.StatusTemporaryRedirect, "/-/auth/login?exclude="+u.Name)
-			return
-		}
-		if u.Name == exclude {
-			// logined, but try to login same id
-			c.Error(auth.ErrUnauthorized)
-			c.Abort()
-			return
-		}
-	}
-	c.Redirect(http.StatusTemporaryRedirect, "/")
-}
 
 func Register(c *gin.Context) {
 	backend := injector.Backends(c)
@@ -62,6 +36,8 @@ func Register(c *gin.Context) {
 		c.Error(err)
 		return
 	}
+
+	// TODO admin이 없으면 Admin 등록 링크를 console에 띄우고 welcome 에서 알려준다.셔
 
 	c.Redirect(http.StatusSeeOther, "/-/welcome") // must use GET method
 }

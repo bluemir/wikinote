@@ -8,6 +8,7 @@ import (
 	"github.com/bluemir/wikinote/internal/datastruct"
 	"github.com/bluemir/wikinote/internal/server/injector"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type ListResponse[T any] struct {
@@ -26,6 +27,8 @@ type RenderData struct {
 
 func (rd *RenderData) User() *auth.User {
 	u, _ := User(rd.Context)
+
+	logrus.Trace(u)
 	return u
 }
 func (rd *RenderData) IsSystemPage() bool {

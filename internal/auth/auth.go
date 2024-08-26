@@ -43,8 +43,8 @@ type IManager interface {
 	DeleteRole(ctx context.Context, name string) error
 
 	// Assign
-	AssignRole(ctx context.Context, subject Subject, role Role) error
-	DiscardRole(ctx context.Context, subject Subject, role Role) error
+	AssignRole(ctx context.Context, subject Subject, roles ...string) error
+	DiscardRole(ctx context.Context, subject Subject, roles ...string) error
 }
 
 var _ IManager = &Manager{}

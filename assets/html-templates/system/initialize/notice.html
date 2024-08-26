@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Wikinote</title>
+	{{ template "snippet/header.html"}}
+</head>
+<body>
+	{{ template "snippet/navigation-bar.html" . }}
+	<main>
+		<section page>
+            <h2>Initial Setup</h2>
+            <p>Wikinot의 admin을 등록할 수 있습니다.</p>
+            <p></p>
+			<form method="post">
+				<c-input label="username" name="username" type="text"     placeholder="your nickname. eg) bluemir" ></c-input>
+				<button>Add user to admin group</button>
+			</form>
+		</section>
+	</main>
+</body>
+</html>

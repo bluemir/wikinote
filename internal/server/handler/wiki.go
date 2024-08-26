@@ -185,9 +185,9 @@ func Files(c *gin.Context) {
 		return
 	}
 
-	c.HTML(http.StatusOK, PageFiles, gin.H{
+	c.HTML(http.StatusOK, PageFiles, With(c, KeyValues{
 		"files": files,
-	})
+	}))
 }
 func Delete(c *gin.Context) {
 	backend := injector.Backends(c)

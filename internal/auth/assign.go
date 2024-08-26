@@ -25,11 +25,24 @@ const (
 	KindGuest Kind = "guest"
 )
 
-func (m *Manager) AssignRole(ctx context.Context, subject Subject, role Role) error {
-	return ErrNotImplements
+func (m *Manager) AssignRole(ctx context.Context, subject Subject, roles ...string) error {
+	assign := &Assign{
+		Subject: subject,
+		Roles:   Set{},
+	}
+	if err := m.db.WithContext(ctx).FirstOrCreate(&assign).Error; err != nil {
+		return err
+	}
+	assign.Roles.Add(roles...)
+
+	if err := m.db.WithContext(ctx).Save(assign).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (m *Manager) DiscardRole(ctx context.Context, subject Subject, role Role) error {
+func (m *Manager) DiscardRole(ctx context.Context, subject Subject, roles ...string) error {
 	return ErrNotImplements
 }
 

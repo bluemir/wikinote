@@ -52,9 +52,11 @@ func Middleware(c *gin.Context) {
 			})
 			return
 		case "text/html", "*/*":
-			if code == http.StatusUnauthorized {
-				c.Header(auth.LoginHeader(c.Request))
-			}
+			/*
+				if code == http.StatusUnauthorized {
+					c.Header(auth.LoginHeader(c.Request)) // for basic auth
+				}
+			*/
 			c.HTML(code, htmlName(code, err), handler.With(c, handler.KeyValues{"errors": c.Errors}))
 			return
 		case "text/plain":
