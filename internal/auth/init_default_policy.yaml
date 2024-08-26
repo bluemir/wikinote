@@ -9,10 +9,6 @@ roles:
       resources:
       - kind: "page"
       - kind: "metadata"
-  #   resources:
-  #   - key: value
-  #     key2: ^regexp$
-  #   - url: ^something/like/this
   - name: banned
     rules: # deny all request
 # group automatically bind role having same name
@@ -21,7 +17,7 @@ assigns:
     kind: guest
   roles:
   - viewer
-  #- subject:
-  #    kind: group
-  #    name: viewer
-  #  role:
+#- subject:
+#    kind: group
+#    name: viewer
+#  role:

@@ -102,7 +102,9 @@ func (m *Manager) findRoles(ctx context.Context, roleNames Set) ([]Role, error) 
 		role := Role{
 			Name: roleName,
 		}
-		if err := m.db.WithContext(ctx).Find(&role).Error; err != nil {
+		if err := m.db.WithContext(ctx).Where(Role{
+			Name: roleName,
+		}).Take(&role).Error; err != nil {
 			return nil, err
 		}
 

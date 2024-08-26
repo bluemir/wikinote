@@ -3,9 +3,11 @@ package auth
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/bluemir/wikinote/internal/initializer"
 	"github.com/pkg/errors"
+	"github.com/rs/xid"
 	"gorm.io/gorm"
 )
 
@@ -56,9 +58,8 @@ type Manager struct {
 type Config struct {
 	Salt  string
 	Group struct {
-		Unauthorized string
-		Newcomer     []string
-	} `gorm:"type:bytes;serializer:gob"`
+		Newcomer []string
+	}
 }
 
 func New(ctx context.Context, db *gorm.DB) (*Manager, error) {
@@ -68,28 +69,46 @@ func New(ctx context.Context, db *gorm.DB) (*Manager, error) {
 		&Role{},
 		&Token{},
 		&Assign{},
-		&Config{},
 	); err != nil {
 		return nil, errors.WithStack(err)
 	}
 	// check initialized
 	// if not, manager
 
-	if err := initializer.EnsureInitialize(
-		ctx, db, "auth",
-		initializeConfig(db),
-		initializeDefaultRole(db),
+	conf := Config{
+		/* Initial Config */
+		Salt: hash(
+			xid.New().String(),
+			"wikinote",
+			time.Now().String(),
+		),
+		Group: struct {
+			Newcomer []string
+		}{
+			Newcomer: []string{"user"},
+		},
+	}
+
+	if err := initializer.LoadOrInit(
+		ctx, db, "auth", &conf,
+		//initializeConfig(db),
+		initializeDefaultObject(db),
 	); err != nil {
 		return nil, err
 	}
 
-	conf, err := loadConfigFromDB(ctx, db)
-	if err != nil {
-		return nil, err
-	}
+	/*
+		store := NewConfigStore()
+		if err := store.Load(ctx, "auth", AuthConfig{}, InitializeFunc); err != nil {
+			return err
+		}
+		if err := store.Save(ctx, "auth", AuthConfig{}); err != nil {
+			return err
+		}
+	*/
 
 	return &Manager{
-		conf: conf,
+		conf: &conf,
 		db:   db,
 	}, nil
 }

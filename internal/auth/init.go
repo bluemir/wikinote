@@ -3,40 +3,17 @@ package auth
 import (
 	"context"
 	_ "embed"
-	"time"
 
 	"github.com/pkg/errors"
-	"github.com/rs/xid"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 	"gorm.io/gorm"
 )
 
-// Initialize Config on first run
-func initializeConfig(db *gorm.DB) func(ctx context.Context) error {
-	return func(ctx context.Context) error {
-		conf := Config{
-			Salt: hash(
-				xid.New().String(),
-				"wikinote",
-				time.Now().String(),
-			),
-			Group: struct {
-				Unauthorized string
-				Newcomer     []string
-			}{
-				Unauthorized: "guest",
-				Newcomer:     []string{"user"},
-			},
-		}
-		return errors.WithStack(db.WithContext(ctx).Create(&conf).Error)
-	}
-}
-
 //go:embed init_default_policy.yaml
 var defaultPolicy []byte
 
-func initializeDefaultRole(db *gorm.DB) func(ctx context.Context) error {
+func initializeDefaultObject(db *gorm.DB) func(ctx context.Context) error {
 	return func(ctx context.Context) error {
 		txn := db.WithContext(ctx).Begin()
 		defer txn.Rollback()
