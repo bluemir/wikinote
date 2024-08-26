@@ -52,12 +52,3 @@ func initializeDefaultObject(db *gorm.DB) func(ctx context.Context) error {
 		return txn.Commit().Error
 	}
 }
-
-func loadConfigFromDB(ctx context.Context, db *gorm.DB) (*Config, error) {
-	conf := Config{}
-	if err := db.WithContext(ctx).Take(&conf).Error; err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	return &conf, nil
-}
