@@ -31,10 +31,14 @@ func Middleware(c *gin.Context) {
 	}
 
 	// Last one is most important
-	err := c.Errors.Last()
+	err := c.Errors.Last().Err
 	code := code(err)
 
-	logrus.Tracef("%T %#v, %d", err, err, code)
+	logrus.Tracef("%T %+v, %d", err, err, code)
+
+	if code >= 500 {
+		logrus.Warnf("Server Error. code: %d, %s", code, err)
+	}
 
 	// with header or without header, or other processer/ maybe hook? depend on error type? or just code
 	for _, accept := range strings.Split(c.Request.Header.Get("Accept"), ",") {
@@ -57,7 +61,10 @@ func Middleware(c *gin.Context) {
 					c.Header(auth.LoginHeader(c.Request)) // for basic auth
 				}
 			*/
-			c.HTML(code, htmlName(code, err), handler.With(c, handler.KeyValues{"errors": c.Errors}))
+			c.HTML(code, htmlName(code, err), handler.With(c, handler.KeyValues{
+				"message": err.Error(),
+				"errors":  c.Errors,
+			}))
 			return
 		case "text/plain":
 			c.String(code, "%#v", c.Errors)
@@ -71,8 +78,8 @@ type HttpError interface {
 	Code() int
 }
 
-func code(err *gin.Error) int {
-	logrus.Tracef("%T", err.Err)
+func code(err error) int {
+	logrus.Tracef("%T", err)
 
 	// errors.Is check same value, but errors.As check only its type.
 	switch {
@@ -98,7 +105,7 @@ func code(err *gin.Error) int {
 	}
 
 	// try to call code function
-	if e, ok := err.Err.(HttpError); ok {
+	if e, ok := err.(HttpError); ok {
 		return e.Code()
 	}
 
@@ -112,7 +119,7 @@ func code(err *gin.Error) int {
 
 	return http.StatusInternalServerError
 }
-func htmlName(code int, err *gin.Error) string {
+func htmlName(code int, err error) string {
 	switch {
 	//override
 	case errors.Is(err, validator.ValidationErrors{}):

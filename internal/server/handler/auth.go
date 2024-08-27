@@ -119,6 +119,13 @@ type ResourceGetter func(c *gin.Context) (auth.Resource, error)
 
 func Can(verb auth.Verb, getResource ResourceGetter) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		resource, err := getResource(c)
+		if err != nil {
+			c.Error(err)
+			c.Abort()
+			return
+		}
+
 		user, err := User(c)
 		if err != nil && !errors.Is(err, auth.ErrUnauthorized) {
 			c.Error(err)
@@ -126,13 +133,6 @@ func Can(verb auth.Verb, getResource ResourceGetter) gin.HandlerFunc {
 			return
 		}
 		// at this point, user can be nil(it means not logined user)
-
-		resource, err := getResource(c)
-		if err != nil {
-			c.Error(err)
-			c.Abort()
-			return
-		}
 
 		backend := injector.Backends(c)
 

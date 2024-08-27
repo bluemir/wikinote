@@ -14,17 +14,22 @@ func Page(c *gin.Context) (auth.Resource, error) {
 		"path": c.Request.URL.Path,
 	}, nil
 }
-func Global(c *gin.Context) (auth.Resource, error) {
-	return auth.KeyValues{}, nil
-}
+
 func AdminPage(c *gin.Context) (auth.Resource, error) {
 	return auth.KeyValues{
 		"kind": "page.admin",
+		"path": c.Request.URL.Path,
 	}, nil
 }
 func Users(c *gin.Context) (auth.Resource, error) {
 	return auth.KeyValues{
 		"kind": "user",
+	}, nil
+}
+
+func Groups(c *gin.Context) (auth.Resource, error) {
+	return auth.KeyValues{
+		"kind": "group",
 	}, nil
 }
 

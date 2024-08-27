@@ -1,9 +1,8 @@
 package initializer
 
 import (
-	"bytes"
 	"context"
-	"encoding/gob"
+	"encoding/json"
 	"time"
 
 	"github.com/pkg/errors"
@@ -17,47 +16,44 @@ type Config struct {
 }
 
 func Save(ctx context.Context, db *gorm.DB, key string, config any) error {
-	gob.Register(config)
-
-	buf := bytes.NewBuffer(nil)
-	if err := gob.NewEncoder(buf).Encode(config); err != nil {
-		return err
+	buf, err := json.Marshal(config)
+	if err != nil {
+		return errors.WithStack(err)
 	}
 
 	if err := db.WithContext(ctx).Save(Config{
 		Key:    key,
 		At:     time.Now(),
-		Config: buf.Bytes(),
+		Config: buf,
 	}).Error; err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 	return nil
 }
 func LoadOrInit(ctx context.Context, db *gorm.DB, key string, config any, initFuncs ...func(context.Context) error) error {
-	gob.Register(config)
 	if err := db.AutoMigrate(&Config{}); err != nil {
 		return errors.WithStack(err)
 	}
 
-	buf := bytes.NewBuffer(nil)
-	if err := gob.NewEncoder(buf).Encode(config); err != nil {
-		return err
+	buf, err := json.Marshal(config)
+	if err != nil {
+		return errors.WithStack(err)
 	}
 
 	status := Config{
 		Key:    key,
-		Config: buf.Bytes(),
+		Config: buf,
 	}
-	if err := db.WithContext(ctx).FirstOrInit(&status).Error; err != nil {
-		return err
+	if err := db.WithContext(ctx).Where(Config{
+		Key: key,
+	}).FirstOrInit(&status).Error; err != nil {
+		return errors.WithStack(err)
 	}
 
 	if !status.At.IsZero() {
 		// already has config
-		buf := bytes.NewBuffer(status.Config)
-
-		if err := gob.NewDecoder(buf).Decode(config); err != nil {
-			return err
+		if err := json.Unmarshal(status.Config, config); err != nil {
+			return errors.WithStack(err)
 		}
 		return nil
 	}
@@ -71,7 +67,7 @@ func LoadOrInit(ctx context.Context, db *gorm.DB, key string, config any, initFu
 	}
 
 	if err := db.WithContext(ctx).Create(&status).Error; err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 	return nil
 }

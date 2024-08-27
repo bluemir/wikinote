@@ -52,13 +52,13 @@ func View(c *gin.Context) {
 			data, err := backend.FileRead(c.Request.URL.Path)
 			if err != nil {
 				logrus.Warnf("md file not found, %s", err)
-				c.HTML(http.StatusNotFound, PageErrNotFound, gin.H{})
+				c.HTML(http.StatusNotFound, PageErrNotFound, With(c, nil))
 				return
 			}
 			renderedData, err := backend.Render(data)
 			if err != nil {
 				c.Error(err)
-				c.HTML(http.StatusInternalServerError, PageErrInternalServerError, gin.H{})
+				c.HTML(http.StatusInternalServerError, PageErrInternalServerError, With(c, nil))
 				return
 			}
 
@@ -66,7 +66,7 @@ func View(c *gin.Context) {
 			if err != nil {
 				logrus.Warn(err)
 				c.Error(err)
-				c.HTML(http.StatusInternalServerError, PageErrInternalServerError, gin.H{})
+				c.HTML(http.StatusInternalServerError, PageErrInternalServerError, With(c, nil))
 				return
 			}
 

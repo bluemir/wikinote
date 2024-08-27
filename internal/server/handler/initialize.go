@@ -23,7 +23,7 @@ func RequestInitialize(c *gin.Context) {
 func Initialze(c *gin.Context) {
 	// Admin 만 등록 할수 있으면 될것 같다.
 	if c.Param("code") != code {
-		c.Error(ForbiddenError("code not matched"))
+		c.Error(HttpError{code: http.StatusForbidden, message: "code not matched"})
 		return
 	}
 	c.HTML(http.StatusOK, "system/initialize/notice.html", With(c, KeyValues{}))
@@ -54,7 +54,8 @@ func InitialzeAccept(c *gin.Context) {
 	}
 
 	if user == nil {
-		c.Error(errors.New("user not found"))
+		c.Error(HttpError{code: http.StatusBadRequest, message: "user not found"})
+		//c.Error(errors.New("user not found"))
 		return
 	}
 
@@ -69,5 +70,5 @@ func InitialzeAccept(c *gin.Context) {
 		return
 	}
 
-	c.Redirect(http.StatusSeeOther, "/-/initialize?done")
+	c.HTML(http.StatusOK, "system/initialize/done.html", With(c, nil))
 }

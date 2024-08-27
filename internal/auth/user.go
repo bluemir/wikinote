@@ -39,7 +39,7 @@ func (m *Manager) GetUser(ctx context.Context, username string) (*User, bool, er
 		if err == gorm.ErrRecordNotFound {
 			return nil, false, nil
 		}
-		return nil, false, err
+		return nil, false, errors.WithStack(err)
 	}
 	return user, true, nil
 }

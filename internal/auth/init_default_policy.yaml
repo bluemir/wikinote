@@ -7,7 +7,7 @@ roles:
     - verbs:
       - get
       resources:
-      - kind: "page"
+      - kind: "^page$"
       - kind: "metadata"
   - name: banned
     rules: # deny all request
@@ -15,6 +15,11 @@ roles:
 assigns:
 - subject:
     kind: guest
+  roles:
+  - viewer
+- subject:
+    kind: group
+    name: user
   roles:
   - viewer
 #- subject:

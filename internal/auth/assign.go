@@ -2,8 +2,9 @@ package auth
 
 import (
 	"context"
-	"errors"
 
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/exp/maps"
 	"gorm.io/gorm"
 )
@@ -90,13 +91,14 @@ func (m *Manager) getAssign(ctx context.Context, subject Subject) (*Assign, erro
 		Subject: subject,
 	}).Take(&assign).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 	}
 	return &assign, nil
 }
 
 func (m *Manager) findRoles(ctx context.Context, roleNames Set) ([]Role, error) {
+
 	roles := []Role{}
 	for roleName := range roleNames {
 		role := Role{
@@ -105,7 +107,11 @@ func (m *Manager) findRoles(ctx context.Context, roleNames Set) ([]Role, error) 
 		if err := m.db.WithContext(ctx).Where(Role{
 			Name: roleName,
 		}).Take(&role).Error; err != nil {
-			return nil, err
+			if !errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil, errors.Wrapf(err, "find role failed: %s", roleName)
+			}
+			logrus.Tracef("role not found. skip '%s' role", roleName)
+			continue // role not found. skip this role. may be group's default role(same as group name).
 		}
 
 		roles = append(roles, role)
