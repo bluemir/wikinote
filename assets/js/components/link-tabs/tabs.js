@@ -28,7 +28,10 @@ class CustomElement extends $.CustomElement {
 	}
 	onConnected() {
 		$.all(this, "a").
-			filter((elem) => elem.hasAttribute("exact") ? elem.attr("href") == location.pathname : location.pathname.startsWith(elem.attr("href"))).
+			forEach(elem => console.log(elem.pathname))
+		$.all(this, "a").
+			filter((elem) => elem.hasAttribute("exact") ? elem.pathname == location.pathname : location.pathname.startsWith(elem.pathname)).
+			filter((elem) => elem.hasAttribute("exact") ? elem.search == location.search: true). // TODO check only pathname?
 			forEach(elem => elem.classList.add("selected"));
 	}
 

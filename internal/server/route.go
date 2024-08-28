@@ -2,7 +2,6 @@ package server
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -68,9 +67,10 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 	// plugins
 	plugins.RouteHook(app.Group("/~"))
 
-	//
+	// reject url
 	app.GET("/.app/*path", handler.NotFound)
-	//app.GET("/-/*path", handler.NotFound)
+	app.Use(handler.NotFoundWithPrefix("/-/")) //app.GET("/-/", handler.NotFound)
+
 	{
 		// normal pages
 		// - GET            render file or render functional page
@@ -89,11 +89,12 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 		pages.GET("files", can(verb.Update, resource.Page), handler.Files)
 		pages.GET("*", can(verb.Get, resource.Page), handler.View)
 		pages.POST("*", can(verb.Update, resource.Page), handler.UpdateWithForm)
-		pages.PUT("*", can(verb.Update, resource.Page), handler.Update)
+		pages.PUT("*", can(verb.Update, resource.Page), handler.Upload)
 		pages.DELETE("*", can(verb.Delete, resource.Page), handler.Delete)
 
 		//app.Any("/*path", pages.Handler)
-		noRoute(returnNotFoundOnSystemPage, pages.Handler)
+		//noRoute(handler.NotFoundWithPrefix("/-/"), pages.Handler)
+		noRoute(pages.Handler)
 	}
 
 }
@@ -101,12 +102,4 @@ func (server *Server) redirectToFrontPage(c *gin.Context) {
 	logrus.Debugf("redirect to front page: %s", server.frontPage)
 	c.Redirect(http.StatusTemporaryRedirect, "/"+server.frontPage)
 	c.Abort()
-}
-func returnNotFoundOnSystemPage(c *gin.Context) {
-	if strings.HasPrefix(c.Request.URL.Path, "/-/") {
-		c.HTML(http.StatusNotFound, handler.PageErrNotFound, handler.With(c, nil))
-		//c.Error(notfound) // TODO
-		c.Abort()
-		return
-	}
 }

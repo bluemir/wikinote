@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 
 	"github.com/bluemir/wikinote/internal/auth"
@@ -22,7 +23,7 @@ func Register(c *gin.Context) {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	_, err := backend.Auth.CreateUser(c.Request.Context(), &auth.User{
+	user, err := backend.Auth.CreateUser(c.Request.Context(), &auth.User{
 		Name: req.Username,
 		Labels: auth.Labels{
 			"wikinote.io/email": req.Email,
@@ -37,7 +38,13 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	// TODO admin이 없으면 Admin 등록 링크를 console에 띄우고 welcome 에서 알려준다.셔
+	session := sessions.Default(c)
+	session.Set(SessionKeyUser, user)
+
+	if err := session.Save(); err != nil {
+		c.Error(err)
+		return
+	}
 
 	c.Redirect(http.StatusSeeOther, "/-/welcome") // must use GET method
 }

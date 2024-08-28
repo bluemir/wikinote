@@ -8,9 +8,15 @@
 	{{ template "snippet/navigation-bar.html" . }}
 	<main>
 		<section page>
-			<wikinote-editor>
-				<c-data>{{. | json | toString }}</c-data>
-			</wikinote-editor>
+			<c-link-tabs>
+				<a href="{{ .Path }}?edit"   exact>Edit</a>
+				<a href="{{ .Path }}?files"  exact>Files</a>
+				<a href="{{ .Path }}?delete" exact>Delete</a>
+			</c-link-tabs>
+			<form method="post" >
+				<textarea name="data">{{ .Data.data }}</textarea>
+				<button>Save</button>
+			</form>
 		</section>
 	</main>
 </body>

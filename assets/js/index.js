@@ -4,7 +4,7 @@ import "./components/dropdown/dropdown.js";
 import "./components/go-back.js";
 import "./components/input/key-value.js";
 import "./components/input/list.js";
-import "./components/link-tab/tabs.js";
+import "./components/link-tabs/tabs.js";
 import "./components/popover/popover.js";
 import "./components/slider/range.js";
 import "./components/slider/slider.js";

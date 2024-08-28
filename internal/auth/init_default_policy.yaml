@@ -9,6 +9,11 @@ roles:
       resources:
       - kind: "^page$"
       - kind: "metadata"
+  - name: editor
+    rules:
+    - verbs: [ create, read, update ]
+      resources:
+      - kind: "^page$"
   - name: banned
     rules: # deny all request
 # group automatically bind role having same name
@@ -17,6 +22,7 @@ assigns:
     kind: guest
   roles:
   - viewer
+  #- editor # for dev
 - subject:
     kind: group
     name: user

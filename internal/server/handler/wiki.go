@@ -52,13 +52,12 @@ func View(c *gin.Context) {
 			data, err := backend.FileRead(c.Request.URL.Path)
 			if err != nil {
 				logrus.Warnf("md file not found, %s", err)
-				c.HTML(http.StatusNotFound, PageErrNotFound, With(c, nil))
+				c.Error(HttpError{code: http.StatusNotFound, message: "md file not found"})
 				return
 			}
 			renderedData, err := backend.Render(data)
 			if err != nil {
 				c.Error(err)
-				c.HTML(http.StatusInternalServerError, PageErrInternalServerError, With(c, nil))
 				return
 			}
 
@@ -66,14 +65,9 @@ func View(c *gin.Context) {
 			if err != nil {
 				logrus.Warn(err)
 				c.Error(err)
-				c.HTML(http.StatusInternalServerError, PageErrInternalServerError, With(c, nil))
 				return
 			}
 
-			//c.HTML(http.StatusOK, PageMarkdown, gin.H{
-			//	"content": template.HTML(renderedData),
-			//	"footers": footerData,
-			//})
 			c.HTML(http.StatusOK, PageMarkdown, With(c, KeyValues{
 				"content": template.HTML(renderedData),
 				"footers": footerData,
@@ -104,7 +98,7 @@ func Raw(c *gin.Context) {
 
 	rs, err := backend.FileReadStream(c.Request.URL.Path)
 	if err != nil {
-		c.Status(http.StatusNotFound)
+		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 	defer rs.Close()
@@ -122,15 +116,14 @@ func EditForm(c *gin.Context) {
 	switch category {
 	case "text":
 		data, err := backend.FileRead(c.Request.URL.Path)
-		c.HTML(http.StatusOK, PageEditor, gin.H{
+		c.HTML(http.StatusOK, PageEditor, With(c, KeyValues{
 			"data":  template.HTML(data),
-			"path":  c.Request.URL.Path,
 			"isNew": err != nil,
-		})
+		}))
 	default:
-		c.HTML(http.StatusOK, PageUpload, gin.H{
+		c.HTML(http.StatusOK, PageUpload, With(c, KeyValues{
 			"path": c.Request.URL.Path,
-		})
+		}))
 	}
 }
 func UpdateWithForm(c *gin.Context) {
@@ -155,21 +148,22 @@ func UpdateWithForm(c *gin.Context) {
 	}
 	c.Redirect(http.StatusSeeOther, p)
 }
-func Update(c *gin.Context) {
+func Upload(c *gin.Context) {
 	backend := injector.Backends(c)
 	p := c.Request.URL.Path
 	data, err := io.ReadAll(c.Request.Body)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		c.Error(err)
+		c.Abort()
 		return
 	}
 	if err := backend.FileWrite(p, data); err != nil {
-		c.HTML(http.StatusInternalServerError, PageErrInternalServerError, gin.H{})
+		c.Error(err)
 		c.Abort()
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{})
+	c.Status(http.StatusAccepted)
 }
 
 func Files(c *gin.Context) {

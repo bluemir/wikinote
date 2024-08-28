@@ -39,7 +39,10 @@ func (rd *RenderData) Can(verb auth.Verb, resource string) bool {
 	err := injector.Backends(rd.Context).Auth.Can(u, verb, datastruct.KeyValues{
 		"kind": resource,
 	})
-	return err != nil
+	return err == nil
+}
+func (rd *RenderData) Path() string {
+	return rd.Context.Request.URL.Path
 }
 
 func With(c *gin.Context, data any) *RenderData {

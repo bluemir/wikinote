@@ -5,6 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
@@ -51,8 +52,9 @@ func (m *Manager) ListUsers(ctx context.Context) ([]User, error) {
 	return users, nil
 }
 func (m *Manager) UpdateUser(ctx context.Context, user *User) error {
+	logrus.Tracef("update user: %+v", user)
 
-	return m.db.WithContext(ctx).Save(user).Error
+	return errors.WithStack(m.db.WithContext(ctx).Save(user).Error)
 }
 
 func (m *Manager) DeleteUser(ctx context.Context, name string) error {

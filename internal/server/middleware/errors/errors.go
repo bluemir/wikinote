@@ -26,13 +26,20 @@ func Middleware(c *gin.Context) {
 	}
 
 	if c.Writer.Written() && c.Writer.Size() > 0 {
-		logrus.Tracef("response already written: %s", c.Errors.String())
+		logrus.Tracef("response already written: %d, %s", c.Writer.Status(), c.Errors.String())
 		return // skip. already written
 	}
 
+	logrus.Tracef("%d", c.Writer.Status())
+
 	// Last one is most important
 	err := c.Errors.Last().Err
+
 	code := code(err)
+	if c.Writer.Written() {
+		logrus.Debugf("Response code already written, expected '%d', but it was '%d'", code, c.Writer.Status())
+		code = c.Writer.Status()
+	}
 
 	logrus.Tracef("%T %+v, %d", err, err, code)
 
@@ -61,6 +68,7 @@ func Middleware(c *gin.Context) {
 					c.Header(auth.LoginHeader(c.Request)) // for basic auth
 				}
 			*/
+			c.Writer.Status()
 			c.HTML(code, htmlName(code, err), handler.With(c, handler.KeyValues{
 				"message": err.Error(),
 				"errors":  c.Errors,

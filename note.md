@@ -37,6 +37,14 @@
 	- 대부분은 ingress(nginx) 뒤에 있게 됨
 	- https를 설정할 경우 대부분은 Domain 설정등이 필요해서 추가 설정을 해야 하므로 굳이 간단한 실행을 제공해야 할 이유가 떨어진다.
 
+## QA List
+
+- '/' 로 접근 하면 front-page 로 redirect
+- 확장자가 없는 path 로 접근 하면, ".md" suffix 가 붙은 Path 로 redirect
+- 최초 실행시
+	- Guest 는 wiki를 볼수 있음
+- Editor에서 변경 후 Save 시 변경 내용이 저장 된다.
+
 ## TODO
 - [ ] UI 구조개선
 	- CustomElement(not React)
@@ -62,10 +70,15 @@
 - [ ] js map(ECMA script)
 - [ ] error handling with `c.Error()`
 - [ ] 최초 실행시 data dir 이 없으면 생성
-- [ ] Admin 비밀번호는 표준 입력등으로 노출 되지 않도록
+- [x] Admin 비밀번호는 표준 입력등으로 노출 되지 않도록
 	- Setup 용 Token 등을 사용 하는 방안도 고려 해볼수 있음.
 	- 최초 실행후 initialize 마법사가 필요..
 - [ ] Admin 용 IAM Page(RBAC)
 - [ ] 대부분 config 는 file 대신 db에 저장.
 	- UI 에서 수정을 지원
 	- yaml로 encoding 을 할수는 있음
+- [ ] User의 Group이 바뀌면 Logout 후 Login 해야 적용됨
+	- user의 Group 정보가 Session(secure cookie)에 들어가기 때문임
+	- user의 정보를 직접 넣는 대신 필요할떄 마다 DB 에서 가져다 쓰는 구조로 바뀌어야 할수 있음.
+- [ ] 가입 가능 여부를 설정 할수 있으면 좋겠다.
+
