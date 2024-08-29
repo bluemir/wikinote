@@ -56,8 +56,11 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 
 		system.GET("/admin", can(verb.Get, resource.AdminPage), html("admin/index.html"))
 		system.GET("/admin/iam/users", can(verb.List, resource.Users), handler.ListUsers)
+		system.GET("/admin/iam/users/:username", can(verb.Get, resource.Users), handler.GetUser)
+		system.POST("/admin/iam/users/:username", can(verb.Get, resource.Users), handler.UpdateUser)
 		system.GET("/admin/iam/groups", can(verb.List, resource.Users), handler.ListGroups)
 		system.GET("/admin/iam/roles", can(verb.List, resource.Roles), handler.ListRoles)
+		system.GET("/admin/iam/assigns", can(verb.List, resource.Assigns), handler.ListAssigns)
 
 		system.GET("/initialize", handler.RequestInitialize)
 		system.GET("/initialize/:code", handler.Initialze)

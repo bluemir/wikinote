@@ -3,6 +3,7 @@ package auth
 import (
 	"encoding/json"
 	"regexp"
+	"strings"
 
 	"github.com/bluemir/wikinote/internal/datastruct"
 	"golang.org/x/exp/maps"
@@ -66,4 +67,14 @@ func (s Set) Add(vs ...string) {
 }
 func (s Set) MarshalJSON() ([]byte, error) {
 	return json.Marshal(maps.Keys(s))
+}
+func (s Set) ToArray() []string {
+	result := []string{}
+	for k, _ := range s {
+		result = append(result, k)
+	}
+	return result
+}
+func (s Set) String() string {
+	return strings.Join(s.ToArray(), ",")
 }

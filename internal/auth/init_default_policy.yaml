@@ -22,13 +22,9 @@ assigns:
     kind: guest
   roles:
   - viewer
-  #- editor # for dev
 - subject:
     kind: group
     name: user
   roles:
   - viewer
-#- subject:
-#    kind: group
-#    name: viewer
-#  role:
+  - admin #XXX for dev

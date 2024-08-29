@@ -9,11 +9,31 @@
 	<main>
 		<section page>
 			<c-link-tabs>
-				<a href="/-/admin/iam/users"  >Users</a>
-				<a href="/-/admin/iam/groups" >Groups</a>
-				<a href="/-/admin/iam/roles"  >Roles</a>
+				<a href="/-/admin/iam/users"    >Users</a>
+				<a href="/-/admin/iam/groups"   >Groups</a>
+				<a href="/-/admin/iam/roles"    >Roles</a>
+				<a href="/-/admin/iam/assigns"  >Assigns</a>
 			</c-link-tabs>
-			<users-list endpoint="/-/api/v1/iam/users"></users-list>
+			<table>
+				<thead>
+					<th>Name</th>
+					<th>Group</th>
+				</thead>
+				<tbody>
+					{{ range .Data.users }}
+						<tr>
+							<td>
+								<a href="/-/admin/iam/users/{{.Name}}">{{ .Name }}</a>
+							</td>
+							<td>{{ .Groups }}</td>
+							<td>
+								<a href="#">Delete</a>
+							</td>
+						</tr>
+					{{ end }}
+				</tbody>
+			</table>
+			
 		</section>
 	</main>
 </body>

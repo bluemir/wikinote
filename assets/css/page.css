@@ -37,4 +37,9 @@ main section[page] {
         resize: vertical;
     }
     
+    table {
+        th, td {
+            border: 1px solid gray;
+        }
+    }
 }

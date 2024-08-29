@@ -58,7 +58,7 @@ type Manager struct {
 type Config struct {
 	Salt  string
 	Group struct {
-		Newcomer []string
+		NewUserGroups []string
 	}
 }
 
@@ -83,9 +83,9 @@ func New(ctx context.Context, db *gorm.DB) (*Manager, error) {
 			time.Now().String(),
 		),
 		Group: struct {
-			Newcomer []string
+			NewUserGroups []string
 		}{
-			Newcomer: []string{"user"},
+			NewUserGroups: []string{"user"},
 		},
 	}
 

@@ -118,3 +118,11 @@ func (m *Manager) findRoles(ctx context.Context, roleNames Set) ([]Role, error) 
 	}
 	return roles, nil
 }
+
+func (m *Manager) ListAssigns(ctx context.Context) ([]Assign, error) {
+	assigns := []Assign{}
+	if err := m.db.Find(&assigns).Error; err != nil {
+		return nil, err
+	}
+	return assigns, nil
+}

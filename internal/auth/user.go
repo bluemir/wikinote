@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
@@ -10,20 +11,21 @@ import (
 )
 
 type User struct {
-	Name   string `gorm:"primary_key" json:"name"`
-	Groups Set    `gorm:"type:bytes;serializer:gob" json:"groups"`
-	Labels Labels `gorm:"type:bytes;serializer:gob" json:"labels" expr:"labels"`
-	Salt   string `json:"-"`
+	Name     string    `gorm:"primary_key" json:"name"`
+	CreateAt time.Time `json:"createAt"`
+	Groups   Set       `gorm:"type:bytes;serializer:gob" json:"groups"`
+	Labels   Labels    `gorm:"type:bytes;serializer:gob" json:"labels" expr:"labels"`
+	Salt     string    `json:"-"`
 }
 
 func (m *Manager) CreateUser(ctx context.Context, user *User) (*User, error) {
-
 	// overwrite salt
 	user.Salt = xid.New().String()
+	user.CreateAt = time.Now()
 
 	if len(user.Groups) == 0 {
 		user.Groups = map[string]struct{}{}
-		for _, group := range m.conf.Group.Newcomer {
+		for _, group := range m.conf.Group.NewUserGroups {
 			user.Groups.Add(group)
 		}
 	}

@@ -12,14 +12,24 @@ import (
 	"github.com/bluemir/wikinote/internal/assets"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v3"
 )
 
 func NewRenderer() (*template.Template, error) {
 	tmpl := template.New("__root__").Funcs(template.FuncMap{
 		"base": path.Base,
-		"join": strings.Join,
+		"join": func(sep string, arr []string) string {
+			return strings.Join(arr, sep)
+		},
 		"json": json.Marshal,
 		"toString": func(buf []byte) string {
+			return string(buf)
+		},
+		"yaml": func(v any) string {
+			buf, err := yaml.Marshal(v)
+			if err != nil {
+				logrus.Warn(err)
+			}
 			return string(buf)
 		},
 		"encode": func(v any) string {

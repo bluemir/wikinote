@@ -13,7 +13,20 @@
 				<a href="/-/admin/iam/groups" >Groups</a>
 				<a href="/-/admin/iam/roles"  >Roles</a>
 			</c-link-tabs>
-			<roles-list endpoint="/-/api/v1/iam/roles"></roles-list>
+			<table>
+				<thead>
+					<th>Name</th>
+					<th>Group</th>
+				</thead>
+				<tbody>
+					{{ range .Data.roles }}
+					<tr>
+						<td>{{ .Name }}</td>
+						<td><pre>{{ .Rules | yaml }}</pre></td>
+					</tr>
+					{{ end }}
+				</tbody>
+			</table>
 		</section>
 	</main>
 </body>

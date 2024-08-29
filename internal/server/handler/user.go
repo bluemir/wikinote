@@ -57,11 +57,11 @@ func Profile(c *gin.Context) {
 		return
 	}
 
-	c.HTML(http.StatusOK, PageProfile, struct {
+	c.HTML(http.StatusOK, PageProfile, With(c, struct {
 		User *auth.User
 	}{
 		User: user,
-	})
+	}))
 }
 
 func Me(c *gin.Context) {
