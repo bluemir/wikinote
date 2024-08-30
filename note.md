@@ -90,3 +90,5 @@
 - [ ] Editor
 	- [ ] Tab Key가 동작 하도록 만들기
 	- [ ] 저장단축키 적용
+- [ ] 적절한 font
+- [ ] h1~ h3 까지 horizontal line 적용하기

@@ -22,6 +22,7 @@ assigns:
     kind: guest
   roles:
   - viewer
+  #- editor #XXX for dev
 - subject:
     kind: group
     name: user

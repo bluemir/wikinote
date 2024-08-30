@@ -35,6 +35,8 @@ main section[page] {
         width: 100%;
         min-height: 20rem;
         resize: vertical;
+        tab-size: 4ch;
+        font-family: monospace;
     }
     
     table {

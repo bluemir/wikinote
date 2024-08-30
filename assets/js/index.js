@@ -9,6 +9,7 @@ import "./components/slider/range.js";
 import "./components/slider/slider.js";
 import "./components/switch/switch.js";
 import "./components/textarea/textarea.js";
+import "./editor.js";
 import "./layout/header/logo.js";
 import "./layout/header/search.js";
 import "./shortcut.js";
