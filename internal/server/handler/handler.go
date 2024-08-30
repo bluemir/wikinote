@@ -28,7 +28,7 @@ type RenderData struct {
 func (rd *RenderData) User() *auth.User {
 	u, _ := User(rd.Context)
 
-	logrus.Trace(u)
+	logrus.Tracef("%+v", u)
 	return u
 }
 func (rd *RenderData) IsSystemPage() bool {

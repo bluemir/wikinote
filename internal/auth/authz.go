@@ -20,7 +20,7 @@ func (manager *Manager) Can(user *User, verb Verb, resource Resource) error {
 		return err
 	}
 
-	logrus.Tracef("binding roles: %#v", roles)
+	logrus.Tracef("binding roles: %+v", roles)
 
 	for _, role := range roles {
 		if role.IsAllow(resource, verb) {

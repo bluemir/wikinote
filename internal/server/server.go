@@ -40,7 +40,7 @@ func Run(ctx context.Context, b *backend.Backend, conf *Config) error {
 	app.Use(injector.Inject(b))
 
 	// Log
-	writer := logrus.WithFields(logrus.Fields{}).WriterLevel(logrus.DebugLevel)
+	writer := logrus.WithFields(logrus.Fields{}).WriterLevel(logrus.InfoLevel)
 	defer writer.Close()
 	app.Use(gin.LoggerWithWriter(writer))
 

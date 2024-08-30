@@ -62,16 +62,21 @@ func InitialzeAccept(c *gin.Context) {
 
 	if err := backends.Auth.UpdateUser(c.Request.Context(), user); err != nil {
 		c.Error(err)
+		c.Abort()
 		return
 	}
 
 	// reset admin role
-	backends.Auth.UpdateRole(c.Request.Context(), &auth.Role{
+	if err := backends.Auth.UpdateRole(c.Request.Context(), &auth.Role{
 		Name: "admin",
 		Rules: []auth.Rule{
 			{}, // allow all
 		},
-	})
+	}); err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
 
 	c.HTML(http.StatusOK, "system/initialize/done.html", With(c, nil))
 }

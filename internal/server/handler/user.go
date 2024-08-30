@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
@@ -23,6 +24,11 @@ func Register(c *gin.Context) {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
+	if req.Password != req.Confirm {
+		c.AbortWithError(http.StatusBadRequest, errors.New("password & confirm password note matched"))
+		return
+	}
+
 	user, err := backend.Auth.CreateUser(c.Request.Context(), &auth.User{
 		Name: req.Username,
 		Labels: auth.Labels{

@@ -46,7 +46,7 @@ func (m *Manager) CreateUser(ctx context.Context, user *User) (*User, error) {
 }
 func (m *Manager) GetUser(ctx context.Context, username string) (*User, bool, error) {
 	user := &User{}
-	if err := m.db.WithContext(ctx).Where(&User{Name: username}).Take(user).Error; err != nil {
+	if err := m.db.WithContext(ctx).Preload("Groups").Where(&User{Name: username}).Take(user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, false, nil
 		}

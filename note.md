@@ -84,3 +84,7 @@
 - [ ] i18n
 	- 우선은 Page 만 적용
 	- Error message 등에는 적용하지 않음.
+- [x] nginx 뒤에 있는 server 의 경우에는 initialize link 가 제대로 표시 되지 않음.
+	- nginx 에 `proxy_set_header Host            $host;`를 설정 하면 됨
+- [ ] Access log 를 Info level 로 찍기
+- [ ] DB 의 Log 를 Debug Level 로 찍기

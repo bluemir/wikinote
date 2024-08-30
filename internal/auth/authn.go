@@ -7,7 +7,7 @@ import (
 func (m *Manager) Default(name, unhashedKey string) (*User, error) {
 	user := User{}
 
-	if err := m.db.Where(&User{
+	if err := m.db.Preload("Groups").Where(&User{
 		Name: name,
 	}).Take(&user).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
