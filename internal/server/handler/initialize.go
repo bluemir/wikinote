@@ -21,7 +21,6 @@ func RequestInitialize(c *gin.Context) {
 }
 
 func Initialze(c *gin.Context) {
-	// Admin 만 등록 할수 있으면 될것 같다.
 	if c.Param("code") != code {
 		c.Error(HttpError{code: http.StatusForbidden, message: "code not matched"})
 		return
@@ -47,6 +46,7 @@ func InitialzeAccept(c *gin.Context) {
 
 	backends := injector.Backends(c)
 
+	// Add admin to requested user
 	user, _, err := backends.Auth.GetUser(c.Request.Context(), req.Username)
 	if err != nil {
 		c.Error(err)
@@ -58,17 +58,20 @@ func InitialzeAccept(c *gin.Context) {
 		//c.Error(errors.New("user not found"))
 		return
 	}
-
-	if user.Groups == nil {
-		user.Groups = auth.Set{}
-	}
-
-	user.Groups.Add("admin")
+	user.AddGroup("admin")
 
 	if err := backends.Auth.UpdateUser(c.Request.Context(), user); err != nil {
 		c.Error(err)
 		return
 	}
+
+	// reset admin role
+	backends.Auth.UpdateRole(c.Request.Context(), &auth.Role{
+		Name: "admin",
+		Rules: []auth.Rule{
+			{}, // allow all
+		},
+	})
 
 	c.HTML(http.StatusOK, "system/initialize/done.html", With(c, nil))
 }

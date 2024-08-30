@@ -25,10 +25,7 @@
 							<td>
 								<a href="/-/admin/iam/users/{{.Name}}">{{ .Name }}</a>
 							</td>
-							<td>{{ .Groups }}</td>
-							<td>
-								<a href="#">Delete</a>
-							</td>
+							<td>{{ range .Groups }}<span>{{.Name}}</span>{{end}}</td>
 						</tr>
 					{{ end }}
 				</tbody>

@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/bluemir/wikinote/internal/auth"
 	"github.com/bluemir/wikinote/internal/server/injector"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 func GetUser(c *gin.Context) {
@@ -51,9 +51,8 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
-	user.Groups = auth.Set{}
 	for _, group := range strings.Split(req.Groups, ",") {
-		user.Groups.Add(group)
+		user.AddGroup(group)
 	}
 
 	if err := backend.Auth.UpdateUser(c.Request.Context(), user); err != nil {
@@ -72,6 +71,20 @@ func ListGroups(c *gin.Context) {
 	}
 	c.HTML(http.StatusOK, "admin/iam/groups.html", With(c, KeyValues{
 		"groups": groups,
+	}))
+}
+func GetGroup(c *gin.Context) {
+	backend := injector.Backends(c)
+
+	group, err := backend.Auth.GetGroup(c.Request.Context(), c.Param("groupname"))
+	if err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+	logrus.Tracef("%+v", group)
+	c.HTML(http.StatusOK, "admin/iam/group.html", With(c, KeyValues{
+		"group": group,
 	}))
 }
 func ListRoles(c *gin.Context) {

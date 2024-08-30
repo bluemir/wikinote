@@ -9,8 +9,10 @@
 	<main>
 		<section page>
 			<h1>Unauthorized</h1>
+			<p>Login 하지 않았습니다.</p>
 			<a href="/">Front Page</a>
-			<a href="/-/auth/register">Register</a>
+			<a href="/-/auth/login?return={{.Path}}">Login</a>
+			<a href="/-/auth/register?return={{.Path}}">Register</a>
 		</section>
 	</main>
 </body>

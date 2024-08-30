@@ -70,17 +70,14 @@ func (m *Manager) getAssignedRoles(ctx context.Context, user *User) ([]Role, err
 	}
 	maps.Copy(roleNames, assign.Roles)
 
-	for group := range user.Groups {
-		assign, err := m.getAssign(ctx, Subject{
-			Kind: KindGroup,
-			Name: group,
-		})
+	for _, group := range user.Groups {
+		assign, err := m.getAssign(ctx, group.Subject())
 		if err != nil {
 			return nil, err
 		}
 		maps.Copy(roleNames, assign.Roles)
 
-		roleNames.Add(group)
+		roleNames.Add(group.Name)
 	}
 
 	return m.findRoles(ctx, roleNames)

@@ -13,9 +13,16 @@ import (
 type User struct {
 	Name     string    `gorm:"primary_key" json:"name"`
 	CreateAt time.Time `json:"createAt"`
-	Groups   Set       `gorm:"type:bytes;serializer:gob" json:"groups"`
+	Groups   []Group   `gorm:"many2many:members;" json:"groups"`
 	Labels   Labels    `gorm:"type:bytes;serializer:gob" json:"labels" expr:"labels"`
 	Salt     string    `json:"-"`
+}
+
+func (u User) Subject() Subject {
+	return Subject{
+		Kind: KindUser,
+		Name: u.Name,
+	}
 }
 
 func (m *Manager) CreateUser(ctx context.Context, user *User) (*User, error) {
@@ -24,9 +31,10 @@ func (m *Manager) CreateUser(ctx context.Context, user *User) (*User, error) {
 	user.CreateAt = time.Now()
 
 	if len(user.Groups) == 0 {
-		user.Groups = map[string]struct{}{}
 		for _, group := range m.conf.Group.NewUserGroups {
-			user.Groups.Add(group)
+			user.Groups = append(user.Groups, Group{
+				Name: group,
+			})
 		}
 	}
 
@@ -48,7 +56,7 @@ func (m *Manager) GetUser(ctx context.Context, username string) (*User, bool, er
 }
 func (m *Manager) ListUsers(ctx context.Context) ([]User, error) {
 	users := []User{}
-	if err := m.db.WithContext(ctx).Find(&users).Error; err != nil {
+	if err := m.db.WithContext(ctx).Preload("Groups").Find(&users).Error; err != nil {
 		return nil, err
 	}
 	return users, nil
@@ -66,24 +74,13 @@ func (m *Manager) DeleteUser(ctx context.Context, name string) error {
 }
 
 func (user *User) AddGroup(group string) {
-	user.Groups[group] = struct{}{}
+	user.Groups = append(user.Groups, Group{Name: group})
 }
 func (user *User) RemoveGroup(group string) {
-	delete(user.Groups, group)
-}
-func (m *Manager) GetMember(group string) ([]User, error) {
-	users := []User{}
-	if err := m.db.Find(&users).Error; err != nil {
-		return users, nil
-	}
-	ret := []User{}
-	for _, u := range users {
-		for g := range u.Groups {
-			if g == group {
-				ret = append(ret, u)
-				break
-			}
+	for i, g := range user.Groups {
+		if g.Name == group {
+			user.Groups = append(user.Groups[:i], user.Groups[i+1:]...)
+			return
 		}
 	}
-	return ret, nil
 }

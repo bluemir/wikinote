@@ -48,6 +48,12 @@ func (m *Manager) ListRoles(ctx context.Context) ([]Role, error) {
 	}
 	return roles, nil
 }
+func (m *Manager) UpdateRole(ctx context.Context, role *Role) error {
+	if err := m.db.Save(role).Error; err != nil {
+		return err
+	}
+	return nil
+}
 func (m *Manager) DeleteRole(ctx context.Context, name string) error {
 	if err := m.db.WithContext(ctx).Delete(Role{
 		Name: name,

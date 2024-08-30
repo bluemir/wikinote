@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Wikinote / IAM / Roles</title>
+	<title>Wikinote / IAM / Groups</title>
 	{{ template "snippet/header.html"}}
 </head>
 <body>
@@ -14,18 +14,19 @@
 				<a href="/-/admin/iam/roles"    >Roles</a>
 				<a href="/-/admin/iam/assigns"  >Assigns</a>
 			</c-link-tabs>
+			<h2>{{.Data.group.Name}}</h2>
+			<h3>Members</h3>
 			<table>
 				<thead>
 					<th>Name</th>
-					<th>Group</th>
+					<th></th>
 				</thead>
 				<tbody>
-					{{ range .Data.roles }}
+					{{ range .Data.group.Members }}
 					<tr>
 						<td>{{ .Name }}</td>
-						<td><pre>{{ .Rules | yaml }}</pre></td>
 					</tr>
-					{{ end }}
+					{{ end }}		
 				</tbody>
 			</table>
 		</section>

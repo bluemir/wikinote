@@ -9,10 +9,6 @@ import (
 	"golang.org/x/exp/maps"
 )
 
-type Group struct {
-	Name string `json:"name,omitempty"`
-}
-
 type Resource interface {
 	Get(key string) string
 	KeyValues() KeyValues
@@ -70,7 +66,7 @@ func (s Set) MarshalJSON() ([]byte, error) {
 }
 func (s Set) ToArray() []string {
 	result := []string{}
-	for k, _ := range s {
+	for k := range s {
 		result = append(result, k)
 	}
 	return result

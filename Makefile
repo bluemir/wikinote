@@ -12,6 +12,7 @@ export PATH:=${PATH}:./build/tools/
 OPTIONAL_BUILD_ARGS?=
 
 default: build
+	# `make help` for more information.
 
 # sub-makefiles
 # for build tools, docker build, deploy, static web files.

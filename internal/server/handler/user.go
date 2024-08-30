@@ -46,7 +46,7 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	c.Redirect(http.StatusSeeOther, "/-/welcome") // must use GET method
+	c.Redirect(http.StatusSeeOther, "/-/welcome?return="+c.Query("return")) // must use GET method
 }
 
 func Profile(c *gin.Context) {

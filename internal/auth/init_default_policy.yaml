@@ -27,4 +27,4 @@ assigns:
     name: user
   roles:
   - viewer
-  - admin #XXX for dev
+  #- admin #XXX for dev

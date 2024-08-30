@@ -8,10 +8,7 @@
 	{{ template "snippet/navigation-bar.html" . }}
 	<main>
 		<section page>
-			<wikinote-profile user="{{ .User.Name }}">
-				<!-- TODO info here -->
-				<c-data>{{ .User | json | toString }}</c-data>
-			</wikinote-profile>
+			<h2>User: {{ .Data.User.Name }}</h2>
 		</section>
 	</main>
 </body>

@@ -9,10 +9,28 @@
 	<main>
 		<section page>
 			<c-link-tabs>
-				<a href="/-/admin/iam/users"  >Users</a>
-				<a href="/-/admin/iam/groups" >Groups</a>
-				<a href="/-/admin/iam/roles"  >Roles</a>
+				<a href="/-/admin/iam/users"    >Users</a>
+				<a href="/-/admin/iam/groups"   >Groups</a>
+				<a href="/-/admin/iam/roles"    >Roles</a>
+				<a href="/-/admin/iam/assigns"  >Assigns</a>
 			</c-link-tabs>
+			<p>Group 은 기본적으로 같은 이름의 Role 에 Binding 되어 있습니다.</p>
+			<table>
+				<thead>
+					<th>Kind</th>
+					<th>Name</th>
+					<th>Roles</th>
+				</thead>
+				<tbody>
+					{{ range .Data.assigns }}
+					<tr>
+						<td>{{ .Subject.Kind }}</td>
+						<td>{{ .Subject.Name }}</td>
+						<td>{{ .Roles }}</td>
+					</tr>
+					{{ end }}		
+				</tbody>
+			</table>
 		</section>
 	</main>
 </body>

@@ -1,6 +1,7 @@
 package datastruct
 
 import (
+	"encoding/json"
 	"sync"
 )
 
@@ -70,4 +71,15 @@ func (s *Set[T]) List() []T {
 		list = append(list, item)
 	}
 	return list
+}
+
+func (s *Set[T]) MarshalJSON() ([]byte, error) {
+	return json.Marshal(s.ToArray())
+}
+func (s *Set[T]) ToArray() []T {
+	result := []T{}
+	for k := range s.m {
+		result = append(result, k)
+	}
+	return result
 }

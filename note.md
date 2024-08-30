@@ -81,4 +81,6 @@
 	- user의 Group 정보가 Session(secure cookie)에 들어가기 때문임
 	- user의 정보를 직접 넣는 대신 필요할떄 마다 DB 에서 가져다 쓰는 구조로 바뀌어야 할수 있음.
 - [ ] 가입 가능 여부를 설정 할수 있으면 좋겠다.
-
+- [ ] i18n
+	- 우선은 Page 만 적용
+	- Error message 등에는 적용하지 않음.
