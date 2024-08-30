@@ -37,7 +37,7 @@
 	- 대부분은 ingress(nginx) 뒤에 있게 됨
 	- https를 설정할 경우 대부분은 Domain 설정등이 필요해서 추가 설정을 해야 하므로 굳이 간단한 실행을 제공해야 할 이유가 떨어진다.
 
-## QA List
+## Feature  list
 
 - '/' 로 접근 하면 front-page 로 redirect
 - 확장자가 없는 path 로 접근 하면, ".md" suffix 가 붙은 Path 로 redirect
@@ -58,17 +58,16 @@
 - [x] image viewer max width
 - [x] video viewer
 - [x] Profile
-- [ ] Login with other username
 - [x] Unauthroized page
 - [x] Register Page
-- [ ] Forbidden page...
+- [x] Forbidden page...
 - [ ] git plugin
 - [ ] html templates 의 not found Error handling
 - [x] change embed
 - [x] TLS cache
 - [ ] Accept 에 따라서 API 와 아닌것 구분 하기
 - [ ] js map(ECMA script)
-- [ ] error handling with `c.Error()`
+- [x] error handling with `c.Error()`
 - [ ] 최초 실행시 data dir 이 없으면 생성
 - [x] Admin 비밀번호는 표준 입력등으로 노출 되지 않도록
 	- Setup 용 Token 등을 사용 하는 방안도 고려 해볼수 있음.
@@ -77,7 +76,7 @@
 - [ ] 대부분 config 는 file 대신 db에 저장.
 	- UI 에서 수정을 지원
 	- yaml로 encoding 을 할수는 있음
-- [ ] User의 Group이 바뀌면 Logout 후 Login 해야 적용됨
+- [x] User의 Group이 바뀌면 Logout 후 Login 해야 적용됨
 	- user의 Group 정보가 Session(secure cookie)에 들어가기 때문임
 	- user의 정보를 직접 넣는 대신 필요할떄 마다 DB 에서 가져다 쓰는 구조로 바뀌어야 할수 있음.
 - [ ] 가입 가능 여부를 설정 할수 있으면 좋겠다.
@@ -86,5 +85,8 @@
 	- Error message 등에는 적용하지 않음.
 - [x] nginx 뒤에 있는 server 의 경우에는 initialize link 가 제대로 표시 되지 않음.
 	- nginx 에 `proxy_set_header Host            $host;`를 설정 하면 됨
-- [ ] Access log 를 Info level 로 찍기
-- [ ] DB 의 Log 를 Debug Level 로 찍기
+- [x] Access log 를 Info level 로 찍기
+- [x] DB 의 Log 를 Debug Level 로 찍기
+- [ ] Editor
+	- [ ] Tab Key가 동작 하도록 만들기
+	- [ ] 저장단축키 적용

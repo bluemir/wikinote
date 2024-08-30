@@ -13,8 +13,8 @@
 				<a href="{{ .Path }}?files"  exact>Files</a>
 				<a href="{{ .Path }}?delete" exact>Delete</a>
 			</c-link-tabs>
-			<form method="post" >
-				<textarea name="data">{{ .Data.data }}</textarea>
+			<form method="post">
+				<textarea editor name="data">{{ .Data.data }}</textarea>
 				<button>Save</button>
 			</form>
 		</section>
