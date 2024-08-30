@@ -4,7 +4,6 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 
 	"github.com/bluemir/wikinote/internal/auth"
@@ -37,18 +36,18 @@ func Register(c *gin.Context) {
 	})
 	if err != nil {
 		c.Error(err)
+		c.Abort()
 		return
 	}
 	if _, err := backend.Auth.IssueToken(c.Request.Context(), req.Username, req.Password); err != nil {
 		c.Error(err)
+		c.Abort()
 		return
 	}
 
-	session := sessions.Default(c)
-	session.Set(SessionKeyUser, user)
-
-	if err := session.Save(); err != nil {
+	if err := saveUserToSession(c, user); err != nil {
 		c.Error(err)
+		c.Abort()
 		return
 	}
 

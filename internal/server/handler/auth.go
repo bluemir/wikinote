@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/gob"
-	"errors"
 	"net/http"
 	"strings"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/bluemir/wikinote/internal/server/injector"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -30,39 +30,49 @@ func init() {
 func User(c *gin.Context) (*auth.User, error) {
 	backend := injector.Backends(c)
 	// 1. try to get user from context
-	if u, ok := c.Get(ContextKeyUser); ok {
-		if user, ok := u.(*auth.User); ok {
-			return user, nil
+	{
+		if u, ok := c.Get(ContextKeyUser); ok {
+			if user, ok := u.(*auth.User); ok {
+				return user, nil
+			}
+			logrus.Tracef("found user in context but not matched type: %T", u)
 		}
-		logrus.Tracef("found user in context but not matched type: %T", u)
+
+		logrus.Trace("user not found in context")
 	}
 
-	logrus.Trace("user not found in context")
-
-	// 2. check session
-	session := sessions.Default(c)
-	u := session.Get(SessionKeyUser)
-	if u != nil {
-		if user, ok := u.(*auth.User); ok {
+	// 2. check session for username
+	{
+		user, err := loadUserFromSession(c)
+		if err != nil {
+			return nil, err
+		}
+		if user != nil {
 			c.Set(ContextKeyUser, user)
 			return user, nil
 		}
-		logrus.Tracef("found user in session but not matched type: %T", u)
-	}
 
-	logrus.Trace("user not found in session")
+		logrus.Trace("user not found in session")
+	}
 
 	// 3. check basic auth or token
-	user, err := backend.Auth.HTTP(c.Request)
-	if err != nil {
-		return nil, err
-	}
-	if u != nil {
-		// set user to context
-		c.Set(ContextKeyUser, user)
+	{
+		user, err := backend.Auth.HTTP(c.Request)
+		if err != nil {
+			return nil, err
+		}
+		if user != nil {
+			// set user to context
+			c.Set(ContextKeyUser, user)
+			return user, nil
+
+		}
+		logrus.Trace("user not found in Authroize header")
 	}
 
-	return user, nil
+	logrus.Trace("user not found. but not error. just unauthroized")
+
+	return nil, nil
 }
 
 func Login(c *gin.Context) {
@@ -82,11 +92,9 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	session := sessions.Default(c)
-	session.Set(SessionKeyUser, user)
-
-	if err := session.Save(); err != nil {
+	if err := saveUserToSession(c, user); err != nil {
 		c.Error(err)
+		c.Abort()
 		return
 	}
 
@@ -94,11 +102,13 @@ func Login(c *gin.Context) {
 
 	c.Redirect(http.StatusSeeOther, returnURL(c))
 }
-func Logout(c *gin.Context) {
-	session := sessions.Default(c)
-	session.Delete(SessionKeyUser)
-	session.Save()
 
+func Logout(c *gin.Context) {
+	if err := deleteUserFromSession(c); err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
 	c.Redirect(http.StatusSeeOther, returnURL(c))
 }
 
@@ -165,4 +175,36 @@ func CanAPI(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
+}
+
+func saveUserToSession(c *gin.Context, user *auth.User) error {
+	session := sessions.Default(c)
+	session.Set(SessionKeyUser, user.Name)
+	if err := session.Save(); err != nil {
+		return err
+	}
+	return errors.WithStack(session.Save())
+}
+func loadUserFromSession(c *gin.Context) (*auth.User, error) {
+	session := sessions.Default(c)
+	u := session.Get(SessionKeyUser)
+	if u == nil {
+		return nil, nil // just not exist
+	}
+	username, ok := u.(string)
+	if !ok {
+		return nil, nil // not matched type. just skip
+	}
+
+	user, _, err := injector.Backends(c).Auth.GetUser(c.Request.Context(), username)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+func deleteUserFromSession(c *gin.Context) error {
+	session := sessions.Default(c)
+	session.Delete(SessionKeyUser)
+	return errors.WithStack(session.Save())
 }
