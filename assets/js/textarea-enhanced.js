@@ -1,6 +1,7 @@
 import * as $ from "bm.js/bm.module.js";
 
-$.all("textarea[editor]").forEach(elem => elem.on("keydown", evt => {
+$.all("textarea[indent-by-tab]").map(elem => elem.on("keydown", evt => {
+    // handle indent, un-indent
     switch(evt.code) {
         case "Tab":
             evt.preventDefault();
@@ -39,3 +40,20 @@ $.all("textarea[editor]").forEach(elem => elem.on("keydown", evt => {
         //console.log(evt);
     }
 }))
+
+$.all("textarea[auto-resize]").map(elem => {
+    // use `field-sizing: content` when available
+    if (CSS.supports("field-sizing", "content")) {
+        elem.style.fieldSizing = "content"
+        return
+    }
+
+    // try old fashioned way.
+    elem.style.height = `${elem.scrollHeight+2}px`;
+    elem.on("input", evt => {
+        // resize textarea
+        let $textarea = evt.target;
+        $textarea.style.height = `auto`; // it's magic, shrink area to fit contents
+        $textarea.style.height = `${$textarea.scrollHeight+2}px`;
+    })
+})
