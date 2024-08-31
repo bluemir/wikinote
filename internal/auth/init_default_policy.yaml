@@ -11,7 +11,7 @@ roles:
       - kind: "metadata"
   - name: editor
     rules:
-    - verbs: [ create, read, update ]
+    - verbs: [ create, read, update, search ]
       resources:
       - kind: "^page$"
   - name: banned

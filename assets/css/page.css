@@ -31,6 +31,10 @@ main {
 
 /*****************************************/
 main section[page] {
+    /*word-break: break-word;*/
+    overflow-wrap: anywhere;
+    word-break: normal;
+
     textarea {
         width: 100%;
         min-height: 20rem;

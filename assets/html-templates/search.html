@@ -9,9 +9,26 @@
 	<main>
 		<section page>
 			<h1>Search Result</h1>
-			<wikinote-search>
-				<c-data>{{ .result | json | toString}}</c-data>
-			</wikinote-search>
+			<p>total: {{.Data.Total }}</p>
+			<table>
+				<thead>
+				</thead>
+				<tbody>
+					{{  range .Data.Files }}
+					<tr>
+						<td colspan="2">
+							<a href="{{.FileName}}">{{.FileName}}</a>
+						</td>
+					</tr>
+					{{ range .Items }}
+					<tr>
+						<th>{{.Line}}</th>
+						<td>{{.Text}}</td>
+					</tr>
+					{{ end }}
+					{{ end }}
+				</tbody>
+			</table>
 		</section>
 	</main>
 </body>

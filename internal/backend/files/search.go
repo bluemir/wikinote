@@ -9,13 +9,22 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type SearchResult struct {
+type SearchResultFile struct {
+	FileName string
+	Items    []SearchResultItem
+}
+
+type SearchResultItem struct {
 	Line int    `json:"line"`
 	Text string `json:"text"`
 }
+type SearchResult struct {
+	Files []SearchResultFile
+	Total int
+}
 
-func (fs *FileStore) Search(query string) (map[string][]SearchResult, error) {
-	result := map[string]([]SearchResult){}
+func (fs *FileStore) Search(query string) (*SearchResult, error) {
+	ret := SearchResult{}
 	err := filepath.Walk(fs.wikipath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -40,19 +49,24 @@ func (fs *FileStore) Search(query string) (map[string][]SearchResult, error) {
 			return nil
 		}
 
-		res, err := fileSearch(path, query)
+		items, err := fileSearch(path, query)
 		if err != nil {
 			return err
 		}
-		if len(res) != 0 {
-			result[path[len(fs.wikipath):]] = res
+		if len(items) != 0 {
+			ret.Files = append(ret.Files, SearchResultFile{
+				FileName: path[len(fs.wikipath):],
+				Items:    items,
+			})
+
+			ret.Total += len(items)
 		}
 		return nil
 	})
-	return result, err
+	return &ret, err
 }
-func fileSearch(path, query string) ([]SearchResult, error) {
-	result := []SearchResult{}
+func fileSearch(path, query string) ([]SearchResultItem, error) {
+	result := []SearchResultItem{}
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -66,7 +80,7 @@ func fileSearch(path, query string) ([]SearchResult, error) {
 		linenum++
 		// TODO ignore case
 		if strings.Contains(scanner.Text(), query) {
-			result = append(result, SearchResult{
+			result = append(result, SearchResultItem{
 				Line: linenum,
 				Text: scanner.Text(),
 			})

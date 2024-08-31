@@ -97,3 +97,4 @@
 	- [x] Resize on input
 - [ ] 적절한 font
 - [ ] h1~ h3 까지 horizontal line 적용하기
+- [x] search 기능 고치기
