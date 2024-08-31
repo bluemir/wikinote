@@ -4,40 +4,38 @@ $.all("textarea[editor]").forEach(elem => elem.on("keydown", evt => {
     switch(evt.code) {
         case "Tab":
             evt.preventDefault();
+            let $textarea = evt.target;
+            let start = $textarea.selectionStart;
+            let end = $textarea.selectionEnd;
+            let data = $textarea.value;
+
             if (evt.shiftKey) {
-                // TODO remove tab
+                // un-tab
+
+                let n = data.substring(0, start).lastIndexOf("\n")+1;
+
+                let lines = [data.substring(0, n), data.substring(n, end), data.substring(end)];
+                lines[1] = lines[1].split('\n').map(line => line.startsWith('\t')?line.substring(1): line).join('\n');
+
+                $textarea.value = lines.join("");
+
+                $textarea.selectionStart = start > 0 ? start-1: 0;
+                $textarea.selectionEnd   = lines[0].length + lines[1].length;
             } else {
-                let $textarea = evt.target;
-                var start = $textarea.selectionStart;
-                var end = $textarea.selectionEnd;
-                var data = $textarea.value;
+                // if (end-start > 0 ) { }// mean selection is not empty
 
-                if (end-start > 0 ) {
-                    // mean selection is not empty
-                    
-                    let lines = [data.substring(0, start), data.substring(start, end), data.substring(end)];
-                    
-                    // 
-                    let n = lines[0].lastIndexOf('\n');
-                    console.log(n, start)
-                    if (n > 0) {
-                        lines[0] = [lines[0].substring(0, n+1), lines[0].substring(n+1)].join("\t");
-                    }
-                    
-                    lines[1] = lines[1].split("\n").join("\n\t");
+                let n = data.substring(0, start).lastIndexOf("\n")+1;
+                let lines = [data.substring(0, n), data.substring(n, end), data.substring(end)];
 
-                    $textarea.value = lines.join("");
-                    $textarea.selectionStart = $textarea.selectionEnd = start + 1;
+                lines[1] = lines[1].split('\n').map(line => "\t" + line).join('\n');
 
-                    console.log(lines);
-                } else {
-                    $textarea.value = data.substring(0, start) + "\t" + data.substring(end);
-                    $textarea.selectionStart = $textarea.selectionEnd = start + 1;
-                }
-                // TODO indent selected line
+                $textarea.value = lines.join("");
+
+                $textarea.selectionStart = start + 1;
+                $textarea.selectionEnd   = lines[0].length + lines[1].length;
             }
             return
         default:
-            //console.log(evt);
+        //console.log(evt);
     }
 }))

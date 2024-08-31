@@ -88,7 +88,10 @@
 - [x] Access log 를 Info level 로 찍기
 - [x] DB 의 Log 를 Debug Level 로 찍기
 - [ ] Editor
-	- [ ] Tab Key가 동작 하도록 만들기
+	- [x] Tab Key가 동작 하도록 만들기
+		- indent 조정
 	- [ ] 저장단축키 적용
+	- [ ] Undo
+	- [ ] Redo
 - [ ] 적절한 font
 - [ ] h1~ h3 까지 horizontal line 적용하기
