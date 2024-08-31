@@ -90,8 +90,9 @@
 - [ ] Editor
 	- [x] Tab Key가 동작 하도록 만들기
 		- indent 조정
-	- [ ] 저장단축키 적용
+	- [x] 저장단축키 적용
 	- [ ] Undo
+		- 1s 정도의 간격으로 text의 변경사항을 추적하고, 100 개 정도의 변경사항을 기록하면 되지 않을까?
 	- [ ] Redo
 	- [x] Resize on input
 - [ ] 적절한 font

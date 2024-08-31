@@ -39,7 +39,7 @@ $.all("textarea[indent-by-tab]").map(elem => elem.on("keydown", evt => {
         default:
         //console.log(evt);
     }
-}))
+}));
 
 $.all("textarea[auto-resize]").map(elem => {
     // use `field-sizing: content` when available
@@ -56,4 +56,19 @@ $.all("textarea[auto-resize]").map(elem => {
         $textarea.style.height = `auto`; // it's magic, shrink area to fit contents
         $textarea.style.height = `${$textarea.scrollHeight+2}px`;
     })
-})
+});
+
+$.all("textarea[submit-shortcut]").map(textarea => {
+    textarea.on("keydown", async evt => {
+        if (!(evt.code == "KeyS" && evt.ctrlKey)) {
+            return // just skip
+        }
+        evt.preventDefault();
+
+        let $form = evt.target.closest("form");
+        let data = new FormData($form);
+        
+        let res = await $.request($form.method||"get", $form.action||location.pathname, {body: data});
+        // TODO show message
+    })
+});
