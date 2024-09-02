@@ -98,8 +98,9 @@
 - [ ] 적절한 font
 - [ ] h1~ h3 까지 horizontal line 적용하기
 - [x] search 기능 고치기
-- [ ] move 기능
+- [x] move 기능
 	- 옯겨갈 Path에 file 이 없으면
 	- 파일을 해당 path 에 복사하고
 	- 현재 위치에는 해당 Path 로 Link를 남김
 - [ ] delete 기능
+- [ ] files 고치기

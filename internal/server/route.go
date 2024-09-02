@@ -41,14 +41,14 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 		system := app.Group("/-", markHTML)
 		system.Group("/static", staticCache).StaticFS("/", http.FS(assets.Static))
 
-		system.GET("/welcome", html("welcome.html"))
+		system.GET("/welcome", html("system/welcome.html"))
 
-		system.GET("/auth/login", html("login.html"))
+		system.GET("/auth/login", html("system/login.html"))
 		system.POST("/auth/login", handler.Login)
 		system.GET("/auth/logout", handler.Logout)
 		system.GET("/auth/profile", handler.Profile)
 
-		system.GET("/auth/register", html("register.html"))
+		system.GET("/auth/register", html("system/register.html"))
 		system.POST("/auth/register", handler.Register)
 
 		system.GET("/messages", handler.Messages)
@@ -88,10 +88,10 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 		pages := queryrouter.New()
 
 		pages.GET("edit", can(verb.Update, resource.Page), handler.EditForm)
-		pages.GET("move", can(verb.Update, resource.Page), html("move.html"))
+		pages.GET("move", can(verb.Update, resource.Page), html("notes/move.html"))
 		pages.POST("move", can(verb.Update, resource.Page), handler.MoveNote)
 		pages.GET("raw", can(verb.Get, resource.Page), handler.Raw)
-		pages.GET("delete", can(verb.Delete, resource.Page), html("delete.html"))
+		pages.GET("delete", can(verb.Delete, resource.Page), html("notes/delete.html"))
 		pages.GET("files", can(verb.Update, resource.Page), handler.Files)
 		pages.GET("*", can(verb.Get, resource.Page), handler.View)
 		pages.POST("*", can(verb.Update, resource.Page), handler.UpdateWithForm)

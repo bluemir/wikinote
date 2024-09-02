@@ -62,7 +62,7 @@ func Profile(c *gin.Context) {
 		return
 	}
 
-	c.HTML(http.StatusOK, PageProfile, With(c, struct {
+	c.HTML(http.StatusOK, "system/user/register.html", With(c, struct {
 		User *auth.User
 	}{
 		User: user,

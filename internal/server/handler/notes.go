@@ -68,7 +68,7 @@ func View(c *gin.Context) {
 				return
 			}
 
-			c.HTML(http.StatusOK, PageMarkdown, With(c, KeyValues{
+			c.HTML(http.StatusOK, "notes/markdown.html", With(c, KeyValues{
 				"content": template.HTML(renderedData),
 				"footers": footerData,
 			}))
@@ -76,11 +76,11 @@ func View(c *gin.Context) {
 		}
 	case "image":
 		//handler.backend.FileExist(
-		c.HTML(http.StatusOK, PageImage, gin.H{
+		c.HTML(http.StatusOK, "notes/image.html", gin.H{
 			"path": c.Request.URL.Path,
 		})
 	case "video":
-		c.HTML(http.StatusOK, PageVideo, gin.H{
+		c.HTML(http.StatusOK, "notes/video.html", gin.H{
 			"path": c.Request.URL.Path,
 		})
 	default:
@@ -116,12 +116,12 @@ func EditForm(c *gin.Context) {
 	switch category {
 	case "text":
 		data, err := backend.FileRead(c.Request.URL.Path)
-		c.HTML(http.StatusOK, PageEditor, With(c, KeyValues{
+		c.HTML(http.StatusOK, "notes/editor.html", With(c, KeyValues{
 			"data":  template.HTML(data),
 			"isNew": err != nil,
 		}))
 	default:
-		c.HTML(http.StatusOK, PageUpload, With(c, KeyValues{
+		c.HTML(http.StatusOK, "notes/upload.html", With(c, KeyValues{
 			"path": c.Request.URL.Path,
 		}))
 	}
@@ -135,14 +135,14 @@ func UpdateWithForm(c *gin.Context) {
 	}{}
 
 	if err := c.ShouldBind(req); err != nil {
-		c.HTML(http.StatusBadRequest, PageErrBadRequest, gin.H{})
+		c.Error(err)
 		return
 	}
 
 	logrus.Tracef("data: %s", req.Data)
 
 	if err := backend.FileWrite(p, []byte(req.Data)); err != nil {
-		c.HTML(http.StatusInternalServerError, PageErrInternalServerError, gin.H{})
+		c.Error(err)
 		c.Abort()
 		return
 	}
@@ -197,20 +197,22 @@ func Files(c *gin.Context) {
 		return
 	}
 
-	c.HTML(http.StatusOK, PageFiles, With(c, KeyValues{
+	c.HTML(http.StatusOK, "notes/files.html", With(c, KeyValues{
 		"files": files,
 	}))
 }
 func Delete(c *gin.Context) {
 	backend := injector.Backends(c)
 	if c.GetHeader("X-Confirm") != path.Base(c.Request.URL.Path) {
-		c.HTML(http.StatusBadRequest, PageErrBadRequest, gin.H{})
+		c.Error(HttpError{code: http.StatusBadRequest, message: "not confirmed"})
+		c.Abort()
 		return
 	}
 
 	err := backend.FileDelete(c.Request.URL.Path)
 	if err != nil {
-		c.HTML(http.StatusInternalServerError, PageErrInternalServerError, gin.H{})
+		c.Error(err)
+		c.Abort()
 		return
 	}
 	c.Status(http.StatusNoContent)
