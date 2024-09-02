@@ -11,7 +11,7 @@ roles:
       - kind: "metadata"
   - name: editor
     rules:
-    - verbs: [ create, read, update, search ]
+    - verbs: [ create, read, update, delete, search ]
       resources:
       - kind: "^page$"
   - name: banned
@@ -22,7 +22,7 @@ assigns:
     kind: guest
   roles:
   - viewer
-  #- editor #XXX for dev
+  - editor #XXX for dev
 - subject:
     kind: group
     name: user

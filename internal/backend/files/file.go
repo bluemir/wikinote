@@ -20,10 +20,19 @@ func New(wikipath string) (*FileStore, error) {
 func (fs *FileStore) Read(path string) ([]byte, error) {
 	return os.ReadFile(fs.getFullPath(path))
 }
-func (fs *FileStore) ReadStream(path string) (io.ReadSeekCloser, error) {
+func (fs *FileStore) ReadStream(path string) (io.ReadSeekCloser, os.FileInfo, error) {
 	fullpath := fs.getFullPath(path)
 
-	return os.Open(fullpath)
+	fi, err := os.Stat(fullpath)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	file, err := os.Open(fullpath)
+	if err != nil {
+		return nil, nil, err
+	}
+	return file, fi, nil
 }
 func (fs *FileStore) Write(path string, data []byte) error {
 	fullpath := fs.getFullPath(path)
@@ -91,6 +100,10 @@ func (fs *FileStore) Move(oldPath, newPath string) error {
 	}
 	if err == nil {
 		return errors.New("target path already used.")
+	}
+
+	if err := os.MkdirAll(filepath.Dir(fs.getFullPath(newPath)), 0755); err != nil {
+		return errors.WithStack(err)
 	}
 
 	if err := os.Rename(fs.getFullPath(oldPath), fs.getFullPath(newPath)); err != nil {

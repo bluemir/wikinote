@@ -2,6 +2,7 @@ package backend
 
 import (
 	"io"
+	"io/fs"
 
 	"github.com/bluemir/wikinote/internal/backend/files"
 )
@@ -10,7 +11,7 @@ func (backend *Backend) FileRead(path string) ([]byte, error) {
 	// TODO post hook?
 	return backend.files.Read(path)
 }
-func (backend *Backend) FileReadStream(path string) (io.ReadSeekCloser, error) {
+func (backend *Backend) FileReadStream(path string) (io.ReadSeekCloser, fs.FileInfo, error) {
 	return backend.files.ReadStream(path)
 }
 

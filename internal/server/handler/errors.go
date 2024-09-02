@@ -2,7 +2,6 @@ package handler
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,16 +12,12 @@ func NotFound(c *gin.Context) {
 	c.Abort()
 }
 
-func NotFoundWithPrefix(prefixs ...string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		for _, prefix := range prefixs {
-			if strings.HasPrefix(c.Request.URL.Path, prefix) {
-				c.Error(HttpError{code: http.StatusNotFound, message: c.FullPath() + " not found"})
-				c.Abort()
-				return
-			}
-		}
+func RejectNotWritten(c *gin.Context) {
+	if c.Writer.Written() {
+		return
 	}
+	c.Error(HttpError{code: http.StatusNotFound, message: c.FullPath() + " not found"})
+	c.Abort()
 }
 
 type HttpError struct {

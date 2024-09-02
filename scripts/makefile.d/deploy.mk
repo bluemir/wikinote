@@ -7,6 +7,8 @@ deploy: build/docker-image.pushed ## Deploy webapp
 	#   cat deploy.yaml | DEPLOY_IMAGE=$(shell cat $<) envsubst | kubectl apply -f -
 	#   kubectl kustermize deploy | kubectl apply -f -
 
+install: build/$(APP_NAME) ## Install binary to local system 
+	cp $< $(HOME)/.local/bin
 
 tools: build/tools/kubectl
 build/tools/kubectl:

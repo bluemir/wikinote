@@ -16,5 +16,5 @@ func Search(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
-	c.HTML(http.StatusOK, "notes/search.md", With(c, result))
+	c.HTML(http.StatusOK, "notes/search.html", With(c, result))
 }

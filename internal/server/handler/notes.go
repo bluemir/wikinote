@@ -9,7 +9,6 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/bluemir/wikinote/internal/server/injector"
 	"github.com/gin-gonic/gin"
@@ -92,11 +91,11 @@ func View(c *gin.Context) {
 }
 
 func Raw(c *gin.Context) {
-	logrus.Infof("[View] serve raw file: '%s'", c.Request.URL.Path)
+	logrus.Tracef("[View] serve raw file: '%s'", c.Request.URL.Path)
 	backend := injector.Backends(c)
 	// TODO serve partial content
 
-	rs, err := backend.FileReadStream(c.Request.URL.Path)
+	rs, info, err := backend.FileReadStream(c.Request.URL.Path)
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
@@ -105,8 +104,7 @@ func Raw(c *gin.Context) {
 
 	// github.com/gabriel-vasile/mimetype
 	// mtype := mimetype.Detect(buf)
-	http.ServeContent(c.Writer, c.Request, "", time.Time{}, rs)
-	//c.Data(http.StatusOK, http.DetectContentType(buf), buf)
+	http.ServeContent(c.Writer, c.Request, filepath.Base(c.Request.URL.Path), info.ModTime(), rs)
 }
 func EditForm(c *gin.Context) {
 	backend := injector.Backends(c)
@@ -148,23 +146,6 @@ func UpdateWithForm(c *gin.Context) {
 	}
 	c.Redirect(http.StatusSeeOther, p)
 }
-func Upload(c *gin.Context) {
-	backend := injector.Backends(c)
-	p := c.Request.URL.Path
-	data, err := io.ReadAll(c.Request.Body)
-	if err != nil {
-		c.Error(err)
-		c.Abort()
-		return
-	}
-	if err := backend.FileWrite(p, data); err != nil {
-		c.Error(err)
-		c.Abort()
-		return
-	}
-
-	c.Status(http.StatusAccepted)
-}
 func MoveNote(c *gin.Context) {
 	req := struct {
 		Target string `form:"target"`
@@ -201,6 +182,50 @@ func Files(c *gin.Context) {
 		"files": files,
 	}))
 }
+func DeleteNote(c *gin.Context) {
+	backend := injector.Backends(c)
+
+	if err := backend.FileDelete(c.Request.URL.Path); err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+	c.Redirect(http.StatusSeeOther, c.Request.URL.Path)
+}
+
+// APIS
+
+func Preview(c *gin.Context) {
+	backend := injector.Backends(c)
+	data, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	renderedData, err := backend.Render(data)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+	}
+	c.Data(http.StatusOK, "text/html", renderedData)
+}
+
+func Upload(c *gin.Context) {
+	backend := injector.Backends(c)
+	p := c.Request.URL.Path
+	data, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+	if err := backend.FileWrite(p, data); err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+
+	c.Status(http.StatusAccepted)
+}
 func Delete(c *gin.Context) {
 	backend := injector.Backends(c)
 	if c.GetHeader("X-Confirm") != path.Base(c.Request.URL.Path) {
@@ -216,17 +241,4 @@ func Delete(c *gin.Context) {
 		return
 	}
 	c.Status(http.StatusNoContent)
-}
-func Preview(c *gin.Context) {
-	backend := injector.Backends(c)
-	data, err := io.ReadAll(c.Request.Body)
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	renderedData, err := backend.Render(data)
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-	}
-	c.Data(http.StatusOK, "text/html", renderedData)
 }

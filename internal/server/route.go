@@ -66,6 +66,9 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 		system.GET("/initialize", handler.RequestInitialize)
 		system.GET("/initialize/:code", handler.Initialze)
 		system.POST("/initialize/:code", handler.InitialzeAccept)
+
+		// reject other url
+		system.Use(handler.RejectNotWritten)
 	}
 
 	// plugins
@@ -73,8 +76,7 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 
 	// reject url
 	app.GET("/.app/*path", handler.NotFound)
-	app.Use(handler.NotFoundWithPrefix("/-/")) //app.GET("/-/", handler.NotFound)
-
+	app.GET("/.git/*path", handler.NotFound)
 	{
 		// normal pages
 		// - GET            render file or render functional page
@@ -92,6 +94,7 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 		pages.POST("move", can(verb.Update, resource.Page), handler.MoveNote)
 		pages.GET("raw", can(verb.Get, resource.Page), handler.Raw)
 		pages.GET("delete", can(verb.Delete, resource.Page), html("notes/delete.html"))
+		pages.POST("delete", can(verb.Delete, resource.Page), handler.DeleteNote)
 		pages.GET("files", can(verb.Update, resource.Page), handler.Files)
 		pages.GET("*", can(verb.Get, resource.Page), handler.View)
 		pages.POST("*", can(verb.Update, resource.Page), handler.UpdateWithForm)
