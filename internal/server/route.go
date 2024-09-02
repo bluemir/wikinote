@@ -43,12 +43,12 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 
 		system.GET("/welcome", html("system/welcome.html"))
 
-		system.GET("/auth/login", html("system/login.html"))
+		system.GET("/auth/login", html("system/user/login.html"))
 		system.POST("/auth/login", handler.Login)
 		system.GET("/auth/logout", handler.Logout)
 		system.GET("/auth/profile", handler.Profile)
 
-		system.GET("/auth/register", html("system/register.html"))
+		system.GET("/auth/register", html("system/user/register.html"))
 		system.POST("/auth/register", handler.Register)
 
 		system.GET("/messages", handler.Messages)
