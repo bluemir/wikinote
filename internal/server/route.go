@@ -88,6 +88,8 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 		pages := queryrouter.New()
 
 		pages.GET("edit", can(verb.Update, resource.Page), handler.EditForm)
+		pages.GET("move", can(verb.Update, resource.Page), html("move.html"))
+		pages.POST("move", can(verb.Update, resource.Page), handler.MoveNote)
 		pages.GET("raw", can(verb.Get, resource.Page), handler.Raw)
 		pages.GET("delete", can(verb.Delete, resource.Page), html("delete.html"))
 		pages.GET("files", can(verb.Update, resource.Page), handler.Files)

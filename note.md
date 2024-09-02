@@ -37,7 +37,7 @@
 	- 대부분은 ingress(nginx) 뒤에 있게 됨
 	- https를 설정할 경우 대부분은 Domain 설정등이 필요해서 추가 설정을 해야 하므로 굳이 간단한 실행을 제공해야 할 이유가 떨어진다.
 
-## Feature  list
+## Feature list
 
 - '/' 로 접근 하면 front-page 로 redirect
 - 확장자가 없는 path 로 접근 하면, ".md" suffix 가 붙은 Path 로 redirect
@@ -98,3 +98,8 @@
 - [ ] 적절한 font
 - [ ] h1~ h3 까지 horizontal line 적용하기
 - [x] search 기능 고치기
+- [ ] move 기능
+	- 옯겨갈 Path에 file 이 없으면
+	- 파일을 해당 path 에 복사하고
+	- 현재 위치에는 해당 Path 로 Link를 남김
+- [ ] delete 기능

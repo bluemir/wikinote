@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Wikinote</title>
+	{{ template "snippet/header.html"}}
+</head>
+<body>
+	{{ template "snippet/navigation-bar.html" . }}
+	<main>
+		<section page>
+			{{ template "snippet/editor/tabs.html" .}}
+			<h1>'{{.Path}}' Page를 이동하려 합니다.</h1>
+			<ul>
+				<li>옯겨갈 대상의 Page 가 없을떄 이동이 가능합니다.</li>
+				<li>Page 내부의 내용은 변경 되지 않습니다.</li>
+				<li>이동 후 원래의 Page 에는 새로운 Page에 접근 할수 있는 Link 가 내용으로 남습니다.</li>
+			</ul>
+			<form method="post">
+				<c-input label="target path" name="target"></c-input>
+				<button>Move</button>
+			</form>
+		</section>
+	</main>
+</body>
+</html>

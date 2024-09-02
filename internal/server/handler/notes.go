@@ -165,7 +165,25 @@ func Upload(c *gin.Context) {
 
 	c.Status(http.StatusAccepted)
 }
+func MoveNote(c *gin.Context) {
+	req := struct {
+		Target string `form:"target"`
+	}{}
 
+	if err := c.ShouldBind(&req); err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+
+	if err := injector.Backends(c).FileMove(c.Request.URL.Path, req.Target); err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+
+	c.Redirect(http.StatusSeeOther, req.Target)
+}
 func Files(c *gin.Context) {
 	backend := injector.Backends(c)
 	path := c.Request.URL.Path

@@ -1,9 +1,12 @@
 package files
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+
+	"github.com/pkg/errors"
 )
 
 type FileStore struct {
@@ -78,6 +81,27 @@ func (fs *FileStore) List(path string) ([]FileInfo, error) {
 	return ret, nil
 }
 func (fs *FileStore) Move(oldPath, newPath string) error {
+	if filepath.Ext(oldPath) != filepath.Ext(newPath) {
+		return errors.New("ext not matched")
+	}
+
+	_, err := os.Stat(fs.getFullPath(newPath))
+	if err != nil && err == os.ErrNotExist {
+		return errors.WithStack(err)
+	}
+	if err == nil {
+		return errors.New("target path already used.")
+	}
+
+	if err := os.Rename(fs.getFullPath(oldPath), fs.getFullPath(newPath)); err != nil {
+		return errors.WithStack(err)
+	}
+
+	msg := fmt.Sprintf("This page is moved to [%s](%s).", newPath, newPath)
+	if err := os.WriteFile(fs.getFullPath(oldPath), []byte(msg), 0664); err != nil {
+		return errors.WithStack(err)
+	}
+
 	return nil
 }
 
