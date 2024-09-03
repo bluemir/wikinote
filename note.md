@@ -62,13 +62,13 @@
 - [x] Register Page
 - [x] Forbidden page...
 - [ ] git plugin
-- [ ] html templates 의 not found Error handling
+- [x] html templates 의 not found Error handling
 - [x] change embed
 - [x] TLS cache
 - [ ] Accept 에 따라서 API 와 아닌것 구분 하기
 - [ ] js map(ECMA script)
 - [x] error handling with `c.Error()`
-- [ ] 최초 실행시 data dir 이 없으면 생성
+- [x] 최초 실행시 data dir 이 없으면 생성
 - [x] Admin 비밀번호는 표준 입력등으로 노출 되지 않도록
 	- Setup 용 Token 등을 사용 하는 방안도 고려 해볼수 있음.
 	- 최초 실행후 initialize 마법사가 필요..
@@ -102,7 +102,7 @@
 	- 옯겨갈 Path에 file 이 없으면
 	- 파일을 해당 path 에 복사하고
 	- 현재 위치에는 해당 Path 로 Link를 남김
-- [ ] delete 기능
+- [x] delete 기능
 - [ ] files 고치기
 - [ ] move 시 하위 Path 도 같이 이동
 	- 정책적으로 할것인지 말것인지를 결정 해야 함.

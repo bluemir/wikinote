@@ -3,6 +3,7 @@ package backend
 import (
 	"context"
 	"encoding/gob"
+	"os"
 	"path/filepath"
 
 	"github.com/pkg/errors"
@@ -36,6 +37,10 @@ type Backend struct {
 }
 
 func New(ctx context.Context, wikipath string, volatileDatabase bool) (*Backend, error) {
+	if err := os.MkdirAll(filepath.Join(wikipath, ".app"), 0755); err != nil {
+		return nil, errors.WithStack(err)
+	}
+
 	dbPath := filepath.Join(wikipath, ".app/wikinote.db")
 	if volatileDatabase {
 		dbPath = ":memory:"
