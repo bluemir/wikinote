@@ -8,7 +8,13 @@
 	{{ template "snippet/navigation-bar.html" . }}
 	<main>
 		<section page>
-			<wikinote-upload path="{{.path}}"></wikinote-upload>
+			<h2>Upload File</h2>
+			<p>You want <a href="{{.Path}}.md?edit">Editor</a>?</p>
+			<form method="post">
+				<input type="file" />
+				<button>Upload</button>
+			</form>
+			<wikinote-upload path="{{.Path}}"></wikinote-upload>
 		</section>
 	</main>
 </body>

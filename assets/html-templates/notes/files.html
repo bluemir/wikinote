@@ -8,9 +8,16 @@
 		{{ template "snippet/navigation-bar.html" . }}
 		<main>
 			<section page>
-				<wikinote-files>
-					<c-data>{{ .files | json | toString}}</c-data>
-				</wikinote-files>
+				{{ template "snippet/editor/tabs.html" .}}
+				<form>
+					<input type="file" />
+					<button>Upload</button>
+				</form>
+				<ul>
+					{{ range .Data.files }}
+					<li><a href="{{.Path}}">{{.Name}}</a></li>
+					{{ end }}
+				</ul>
 			</section>
 		</main>
 	</body>

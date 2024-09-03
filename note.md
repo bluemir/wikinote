@@ -106,3 +106,8 @@
 - [ ] files 고치기
 - [ ] move 시 하위 Path 도 같이 이동
 	- 정책적으로 할것인지 말것인지를 결정 해야 함.
+- [ ] Offline 지원을 위해서, lit-html 을 bundle에 넣기
+- [ ] Files, Upload 와 Directory 정책 정리하기
+	- `.md` 에서 files 를 누르면 현재는 Dir로 이동함
+	- editor 는 `.md` 에서 뜨고 그외에는 upload 가 뜸
+	- 즉, dir 이 아닌 경로에서 upload 하는것과 dir 인 경로에서 upload 하는것으로 사용성이 나뉘게 됨.

@@ -114,9 +114,13 @@ func EditForm(c *gin.Context) {
 	switch category {
 	case "text":
 		data, err := backend.FileRead(c.Request.URL.Path)
+		if err != nil {
+			c.Error(err)
+			c.Abort()
+			return
+		}
 		c.HTML(http.StatusOK, "notes/editor.html", With(c, KeyValues{
-			"data":  template.HTML(data),
-			"isNew": err != nil,
+			"data": template.HTML(data),
 		}))
 	default:
 		c.HTML(http.StatusOK, "notes/upload.html", With(c, KeyValues{
