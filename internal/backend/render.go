@@ -14,7 +14,8 @@ func (backend *Backend) Render(input []byte) ([]byte, error) {
 		parser.FencedCode |
 		parser.Autolink |
 		parser.AutoHeadingIDs |
-		parser.Tables
+		parser.Tables |
+		parser.Strikethrough
 
 	return markdown.Render(
 		parser.NewWithExtensions(extensions).Parse(input),

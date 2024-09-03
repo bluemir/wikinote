@@ -52,7 +52,7 @@ func Run(ctx context.Context, b *backend.Backend, conf *Config) error {
 	app.Use(location.Default(), fixURL)
 
 	// add template
-	if html, err := NewRenderer(); err != nil {
+	if html, err := NewHtmlRenderer(); err != nil {
 		return err
 	} else {
 		app.SetHTMLTemplate(html)

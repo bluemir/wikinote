@@ -44,3 +44,8 @@ func Assigns(c *gin.Context) (auth.Resource, error) {
 		"kind": "assign",
 	}, nil
 }
+func Messages(c *gin.Context) (auth.Resource, error) {
+	return auth.KeyValues{
+		"kind": "message",
+	}, nil
+}

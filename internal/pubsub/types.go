@@ -2,14 +2,19 @@ package pubsub
 
 import (
 	"context"
+	"encoding/gob"
 	"time"
 )
+
+func init() {
+	gob.Register(Message{})
+}
 
 type Message struct {
 	Id     string
 	At     time.Time
 	Kind   string
-	Detail any
+	Detail any `gorm:"type:bytes;serializer:json"`
 }
 
 type Handler interface {

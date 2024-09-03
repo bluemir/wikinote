@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Wikinote</title>
+	{{ template "snippet/header.html"}}
+</head>
+<body>
+	{{ template "snippet/navigation-bar.html" . }}
+	<main>
+		<section page>
+			<h1>Messages</h1>
+			<table>
+			<thead>
+					<tr>
+						<th>Timestamp</th>
+						<th>Kind</th>
+						<th>Message</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					{{ range .Data.messages }}
+					<tr>
+						<td font="monospace">{{ .At | rfc3339 }}</td>
+						<td>{{ .Kind }}</td>
+						<td>{{ .Detail.Text }}</td>
+						<td><details>{{ .Detail | encode }}</details></td>
+					</tr>
+					{{ end }}
+				</tbody>
+			</table>
+		
+		</section>
+	</main>
+</body>
+</html>

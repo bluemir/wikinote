@@ -51,7 +51,6 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 		system.GET("/auth/register", html("system/user/register.html"))
 		system.POST("/auth/register", handler.Register)
 
-		system.GET("/messages", handler.Messages)
 		system.GET("/search", can(verb.Search, resource.Page), handler.Search)
 
 		system.GET("/admin", can(verb.Get, resource.AdminPage), html("admin/index.html"))
@@ -62,6 +61,7 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 		system.GET("/admin/iam/groups/:groupname", can(verb.Get, resource.Groups), handler.GetGroup)
 		system.GET("/admin/iam/roles", can(verb.List, resource.Roles), handler.ListRoles)
 		system.GET("/admin/iam/assigns", can(verb.List, resource.Assigns), handler.ListAssigns)
+		system.GET("/admin/messages", can(verb.List, resource.Messages), handler.ListAllMessages)
 
 		system.GET("/initialize", handler.RequestInitialize)
 		system.GET("/initialize/:code", handler.Initialze)

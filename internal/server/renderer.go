@@ -8,6 +8,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/bluemir/wikinote/internal/assets"
 	"github.com/pkg/errors"
@@ -15,7 +16,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func NewRenderer() (*template.Template, error) {
+func NewHtmlRenderer() (*template.Template, error) {
 	tmpl := template.New("__root__").Funcs(template.FuncMap{
 		"base": path.Base,
 		"join": func(sep string, arr []string) string {
@@ -24,6 +25,9 @@ func NewRenderer() (*template.Template, error) {
 		"json": json.Marshal,
 		"toString": func(buf []byte) string {
 			return string(buf)
+		},
+		"rfc3339": func(t time.Time) string {
+			return t.Format(time.RFC3339)
 		},
 		"yaml": func(v any) string {
 			buf, err := yaml.Marshal(v)

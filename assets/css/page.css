@@ -48,4 +48,8 @@ main section[page] {
             border: 1px solid gray;
         }
     }
+
+    [font=monospace] {
+        font-family: monospace;
+    }
 }

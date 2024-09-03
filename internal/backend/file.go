@@ -18,7 +18,7 @@ func (backend *Backend) FileReadStream(path string) (io.ReadSeekCloser, fs.FileI
 func (backend *Backend) FileWrite(path string, data []byte) error {
 	data, err := backend.Plugin.TriggerFileWriteHook(path, data)
 	if err != nil {
-		backend.hub.Fire("group/admin", Message{
+		backend.hub.Publish("group/admin", Message{
 			Text: err.Error(),
 		})
 		return err

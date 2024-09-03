@@ -2,38 +2,38 @@ package backend
 
 import (
 	"context"
-	"encoding/gob"
 	"os"
 	"path/filepath"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"gorm.io/gorm"
 
 	"github.com/bluemir/wikinote/internal/auth"
+	"github.com/bluemir/wikinote/internal/backend/events"
 	"github.com/bluemir/wikinote/internal/backend/files"
 	"github.com/bluemir/wikinote/internal/backend/metadata"
-	"github.com/bluemir/wikinote/internal/events"
 	"github.com/bluemir/wikinote/internal/plugins"
+	"github.com/bluemir/wikinote/internal/pubsub"
 )
 
 type Config struct {
 	Salt     string                 `yaml:"salt"`
 	Plugins  []plugins.PluginConfig `yaml:"plugins"`
-	Auth     auth.Config            `yaml:"auth"`
 	Metadata metadata.Config        `yaml:"metadata"`
 }
 type Backend struct {
 	wikipath string
-	Config   *Config
+
+	//db  *gorm.DB
+	hub *pubsub.Hub
+
+	Config *Config
 
 	Auth     *auth.Manager
-	Metadata metadata.Store
-	Plugin   *plugins.Manager
 	files    *files.FileStore
-	hub      *events.Hub
-
-	db *gorm.DB
+	Metadata metadata.Store
+	events   *events.EventRecoder
+	Plugin   *plugins.Manager
 }
 
 func New(ctx context.Context, wikipath string, volatileDatabase bool) (*Backend, error) {
@@ -49,6 +49,16 @@ func New(ctx context.Context, wikipath string, volatileDatabase bool) (*Backend,
 	db, err := initDB(dbPath)
 	if err != nil {
 		return nil, err
+	}
+
+	hub, err := pubsub.NewHub(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to init message hub")
+	}
+
+	recoder, err := events.New(ctx, db, hub)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to init event recoder")
 	}
 
 	auth, err := auth.New(ctx, db)
@@ -74,29 +84,22 @@ func New(ctx context.Context, wikipath string, volatileDatabase bool) (*Backend,
 		return nil, errors.Wrap(err, "failed to init plugins")
 	}
 
-	gob.Register(Message{})
-
-	hub, err := events.NewHub(context.TODO(), db)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to init message hub")
-	}
-
-	if err := hub.Fire("user/bluemir", Message{"server started"}); err != nil {
-		return nil, err
-	}
-
-	backend := &Backend{
-		wikipath: wikipath,
-		db:       db,
-		Metadata: mdstore,
-		Auth:     auth,
-		Plugin:   plugin,
-		files:    store,
-		hub:      hub,
-	}
 	logrus.Trace("backend initailized")
 
-	return backend, nil
+	defer hub.Publish("system", Message{"server started"})
+
+	return &Backend{
+		wikipath: wikipath,
+
+		//db:  db,
+		hub: hub,
+
+		Auth:     auth,
+		files:    store,
+		Metadata: mdstore,
+		events:   recoder,
+		Plugin:   plugin,
+	}, nil
 }
 
 type Message struct {
