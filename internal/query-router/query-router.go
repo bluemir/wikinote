@@ -51,7 +51,7 @@ func (r *router) Handler(c *gin.Context) {
 		}
 		if _, ok := c.GetQuery(k); ok {
 			for _, h := range hs {
-				logrus.Warn(c.IsAborted())
+				logrus.Trace(c.IsAborted())
 				if c.IsAborted() {
 					return
 				}
