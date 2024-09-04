@@ -66,14 +66,14 @@ func New(ctx context.Context, wikipath string, volatileDatabase bool) (*Backend,
 		return nil, errors.Wrap(err, "failed to init auth module")
 	}
 
+	store, err := files.New(ctx, wikipath)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to init file store")
+	}
+
 	mdstore, err := metadata.New(ctx, db)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to init metadata module")
-	}
-
-	store, err := initFileStore(wikipath)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to init file store")
 	}
 
 	conf := []plugins.PluginConfig{}

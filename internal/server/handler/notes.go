@@ -114,7 +114,7 @@ func EditForm(c *gin.Context) {
 	switch category {
 	case "text":
 		data, err := backend.FileRead(c.Request.URL.Path)
-		if err != nil {
+		if err != nil && !os.IsNotExist(err) {
 			c.Error(err)
 			c.Abort()
 			return

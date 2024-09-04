@@ -12,10 +12,11 @@
 	}
 	h3 {
 		font-size: 1.5rem;
-		text-decoration: underline;
+		border-bottom: 1px solid var(--light-gray);
 	}
 	h4 {
 		font-size: 1.3rem;
+		text-decoration: underline;
 	}
 	h5 {
 		font-size: 1.2rem;

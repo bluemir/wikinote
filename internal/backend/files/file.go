@@ -1,6 +1,7 @@
 package files
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -13,7 +14,7 @@ type FileStore struct {
 	wikipath string
 }
 
-func New(wikipath string) (*FileStore, error) {
+func New(ctx context.Context, wikipath string) (*FileStore, error) {
 	return &FileStore{wikipath}, nil
 }
 

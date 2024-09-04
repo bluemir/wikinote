@@ -9,8 +9,6 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-
-	"github.com/bluemir/wikinote/internal/backend/files"
 )
 
 func initDB(dbPath string) (*gorm.DB, error) {
@@ -37,8 +35,4 @@ func initDB(dbPath string) (*gorm.DB, error) {
 	}
 
 	return db, nil
-}
-
-func initFileStore(wikipath string) (*files.FileStore, error) {
-	return files.New(wikipath)
 }

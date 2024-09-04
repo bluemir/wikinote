@@ -81,13 +81,13 @@ func (m *EventRecoder) List(ctx context.Context, opts ...ListOptionFn) ([]pubsub
 }
 
 func (m *EventRecoder) ListWithOption(ctx context.Context, opt *ListOption) ([]pubsub.Message, error) {
-	message := []pubsub.Message{}
+	messages := []pubsub.Message{}
 
-	if err := m.db.Limit(opt.Limit).Where("at < ? AND at > ?", opt.Before, opt.After).Find(&message).Error; err != nil {
+	if err := m.db.Limit(opt.Limit).Where("at < ? AND at > ?", opt.Before, opt.After).Find(&messages).Error; err != nil {
 		return nil, err
 	}
 
-	return message, nil
+	return messages, nil
 }
 
 func (m *EventRecoder) FindByKind(ctx context.Context, kind string, opts ...ListOptionFn) ([]pubsub.Message, error) {
