@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -61,7 +62,7 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 		system.GET("/admin/iam/groups/:groupName", can(verb.Get, resource.Groups), handler.GetGroup)
 		system.GET("/admin/iam/roles", can(verb.List, resource.Roles), handler.ListRoles)
 		system.GET("/admin/iam/roles/:roleName", can(verb.Get, resource.Roles), handler.GetRole)
-		system.POST("/admin/iam/roles", can(verb.Update, resource.Roles), handler.UpdateRole)
+		system.POST("/admin/iam/roles/:roleName", can(verb.Update, resource.Roles), handler.UpdateRole)
 		system.GET("/admin/iam/assigns", can(verb.List, resource.Assigns), handler.ListAssigns)
 		system.GET("/admin/messages", can(verb.List, resource.Messages), handler.ListAllMessages)
 
@@ -70,15 +71,21 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 		system.POST("/initialize/:code", handler.InitialzeAccept)
 
 		// reject other url
-		system.Use(handler.RejectNotWritten)
+		system.Use(handler.RejectNotWritten) // not work?
 	}
 
 	// plugins
 	plugins.RouteHook(app.Group("/~"))
 
 	// reject url
-	app.GET("/.app/*path", handler.NotFound)
-	app.GET("/.git/*path", handler.NotFound)
+	app.Any("/.app/*path", handler.NotFound)
+	app.Any("/.git/*path", handler.NotFound)
+	app.Use(func(c *gin.Context) {
+		if strings.HasPrefix(c.Request.URL.Path, "/-/") {
+			handler.NotFound(c)
+		}
+	})
+
 	{
 		// normal pages
 		// - GET            render file or render functional page

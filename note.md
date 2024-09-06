@@ -87,9 +87,9 @@
 		- [ ] Delete
 	- [ ] Role
 		- [ ] Create
-		- [ ] Get
+		- [x] Get
 		- [x] List
-		- [ ] Update
+		- [x] Update
 		- [ ] Delete
 	- [ ] Assign
 		- [ ] Create
@@ -141,7 +141,7 @@
 		- .md 등 Text 파일일경우
 			- Editor 를 표시
 			- Drag & Drop 하면 업로드?
-		- 그 외인 경우 
+		- 그 외인 경우
 			- Editor 로 편집이 불가함을 안내하고 대체 파일을 Upload 할수 있음.
 - [ ] Checklist render 가 가능하도록 변경 해야 함.
 - [x] [BUG] 없는 Page 를 Editor 로 새로 만들려 할떄 NotFound 가 호출됨

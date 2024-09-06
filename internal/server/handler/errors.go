@@ -4,20 +4,23 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 func NotFound(c *gin.Context) {
-	// TODO return not found error
 	c.Error(HttpError{code: http.StatusNotFound, message: c.FullPath() + " not found"})
 	c.Abort()
 }
 
 func RejectNotWritten(c *gin.Context) {
+	logger := logrus.WithField("path", c.FullPath())
+	logger.Warn("called")
 	if c.Writer.Written() {
+		logger.Trace("skip")
 		return
 	}
-	c.Error(HttpError{code: http.StatusNotFound, message: c.FullPath() + " not found"})
-	c.Abort()
+	NotFound(c)
+	logger.Trace("response not found ")
 }
 
 type HttpError struct {

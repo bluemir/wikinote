@@ -11,7 +11,11 @@
 			{{ template "snippet/iam/tabs.html" .}}
 			<h2>Role - {{ .Data.role.Name }}</h2>
 			<form method="POST">
-				<textarea indent="2space" submit-shortcut>{{ .Data.role.Rules | yaml }}</textarea>
+				<textarea
+					name="rules"
+					indent="2space"
+					submit-shortcut
+				>{{ .Data.role.Rules | yaml }}</textarea>
 				<button>Save</button>
 			</form>
 		</section>

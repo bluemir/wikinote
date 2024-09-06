@@ -117,7 +117,7 @@ func UpdateRole(c *gin.Context) {
 	backend := injector.Backends(c)
 
 	req := struct {
-		Rules string
+		Rules string `form:"rules"`
 	}{}
 
 	if err := c.ShouldBind(&req); err != nil {
@@ -132,6 +132,7 @@ func UpdateRole(c *gin.Context) {
 		c.Abort()
 		return
 	}
+	logrus.Tracef("%+v", rules)
 
 	if err := backend.Auth.UpdateRole(c.Request.Context(), &auth.Role{
 		Name:  c.Param("roleName"),
@@ -141,7 +142,8 @@ func UpdateRole(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	c.Redirect(http.StatusSeeOther, "/-/admin/iam/role/"+c.Param("roleName"))
+	c.Redirect(http.StatusSeeOther, "/-/admin/iam/roles/"+c.Param("roleName"))
+	c.Abort()
 }
 
 func ListAssigns(c *gin.Context) {
