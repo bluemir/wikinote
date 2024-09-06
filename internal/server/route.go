@@ -58,8 +58,10 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 		system.GET("/admin/iam/users/:username", can(verb.Get, resource.Users), handler.GetUser)
 		system.POST("/admin/iam/users/:username", can(verb.Get, resource.Users), handler.UpdateUser)
 		system.GET("/admin/iam/groups", can(verb.List, resource.Users), handler.ListGroups)
-		system.GET("/admin/iam/groups/:groupname", can(verb.Get, resource.Groups), handler.GetGroup)
+		system.GET("/admin/iam/groups/:groupName", can(verb.Get, resource.Groups), handler.GetGroup)
 		system.GET("/admin/iam/roles", can(verb.List, resource.Roles), handler.ListRoles)
+		system.GET("/admin/iam/roles/:roleName", can(verb.Get, resource.Roles), handler.GetRole)
+		system.POST("/admin/iam/roles", can(verb.Update, resource.Roles), handler.UpdateRole)
 		system.GET("/admin/iam/assigns", can(verb.List, resource.Assigns), handler.ListAssigns)
 		system.GET("/admin/messages", can(verb.List, resource.Messages), handler.ListAllMessages)
 

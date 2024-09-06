@@ -4,9 +4,11 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/bluemir/wikinote/internal/auth"
 	"github.com/bluemir/wikinote/internal/server/injector"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v3"
 )
 
 func GetUser(c *gin.Context) {
@@ -76,7 +78,7 @@ func ListGroups(c *gin.Context) {
 func GetGroup(c *gin.Context) {
 	backend := injector.Backends(c)
 
-	group, err := backend.Auth.GetGroup(c.Request.Context(), c.Param("groupname"))
+	group, err := backend.Auth.GetGroup(c.Request.Context(), c.Param("groupName"))
 	if err != nil {
 		c.Error(err)
 		c.Abort()
@@ -98,6 +100,48 @@ func ListRoles(c *gin.Context) {
 	c.HTML(http.StatusOK, "admin/iam/roles.html", With(c, KeyValues{
 		"roles": roles,
 	}))
+}
+func GetRole(c *gin.Context) {
+	backend := injector.Backends(c)
+
+	role, err := backend.Auth.GetRole(c.Request.Context(), c.Param("roleName"))
+	if err != nil {
+		c.Error(err)
+		return
+	}
+	c.HTML(http.StatusOK, "admin/iam/role.html", With(c, KeyValues{
+		"role": role,
+	}))
+}
+func UpdateRole(c *gin.Context) {
+	backend := injector.Backends(c)
+
+	req := struct {
+		Rules string
+	}{}
+
+	if err := c.ShouldBind(&req); err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+
+	rules := []auth.Rule{}
+	if err := yaml.Unmarshal([]byte(req.Rules), &rules); err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+
+	if err := backend.Auth.UpdateRole(c.Request.Context(), &auth.Role{
+		Name:  c.Param("roleName"),
+		Rules: rules,
+	}); err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+	c.Redirect(http.StatusSeeOther, "/-/admin/iam/role/"+c.Param("roleName"))
 }
 
 func ListAssigns(c *gin.Context) {

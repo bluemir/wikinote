@@ -54,8 +54,12 @@ func (fs *FileStore) Search(query string) (*SearchResult, error) {
 			return err
 		}
 		if len(items) != 0 {
+			path, err := filepath.Rel(fs.wikipath, path)
+			if err != nil {
+				return err
+			}
 			ret.Files = append(ret.Files, SearchResultFile{
-				FileName: path[len(fs.wikipath):],
+				FileName: "/" + path,
 				Items:    items,
 			})
 

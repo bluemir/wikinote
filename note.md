@@ -73,6 +73,30 @@
 	- Setup 용 Token 등을 사용 하는 방안도 고려 해볼수 있음.
 	- 최초 실행후 initialize 마법사가 필요..
 - [ ] Admin 용 IAM Page(RBAC)
+	- [ ] User
+		- [ ] Create
+		- [ ] Get
+		- [x] List
+		- [ ] Update
+		- [ ] Delete
+	- [ ] Group
+		- [ ] Create
+		- [ ] Get
+		- [x] List
+		- [ ] Update
+		- [ ] Delete
+	- [ ] Role
+		- [ ] Create
+		- [ ] Get
+		- [x] List
+		- [ ] Update
+		- [ ] Delete
+	- [ ] Assign
+		- [ ] Create
+		- [ ] Get
+		- [x] List
+		- [ ] Update
+		- [ ] Delete
 - [ ] 대부분 config 는 file 대신 db에 저장.
 	- UI 에서 수정을 지원
 	- yaml로 encoding 을 할수는 있음

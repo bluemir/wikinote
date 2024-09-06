@@ -8,12 +8,7 @@
 	{{ template "snippet/navigation-bar.html" . }}
 	<main>
 		<section page>
-			<c-link-tabs>
-				<a href="/-/admin/iam/users"    >Users</a>
-				<a href="/-/admin/iam/groups"   >Groups</a>
-				<a href="/-/admin/iam/roles"    >Roles</a>
-				<a href="/-/admin/iam/assigns"  >Assigns</a>
-			</c-link-tabs>
+			{{ template "snippet/iam/tabs.html" .}}
 			<table>
 				<thead>
 					<th>Name</th>
@@ -22,7 +17,7 @@
 				<tbody>
 					{{ range .Data.roles }}
 					<tr>
-						<td>{{ .Name }}</td>
+						<td><a href="/-/admin/iam/roles/{{.Name}}">{{ .Name }}</a></td>
 						<td><pre>{{ .Rules | yaml }}</pre></td>
 					</tr>
 					{{ end }}

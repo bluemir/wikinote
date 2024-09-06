@@ -36,7 +36,7 @@ func (m *Manager) CreateRole(ctx context.Context, name string, rules []Rule) (*R
 }
 func (m *Manager) GetRole(ctx context.Context, name string) (*Role, error) {
 	role := &Role{}
-	if err := m.db.WithContext(ctx).Take(role).Error; err != nil {
+	if err := m.db.WithContext(ctx).Where(Role{Name: name}).Take(role).Error; err != nil {
 		return nil, err
 	}
 	return role, nil

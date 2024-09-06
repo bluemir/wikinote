@@ -8,13 +8,7 @@
 	{{ template "snippet/navigation-bar.html" . }}
 	<main>
 		<section page>
-			<c-link-tabs>
-				<a href="/-/admin/iam/users"    >Users</a>
-				<a href="/-/admin/iam/groups"   >Groups</a>
-				<a href="/-/admin/iam/roles"    >Roles</a>
-				<a href="/-/admin/iam/assigns"  >Assigns</a>
-			</c-link-tabs>
-
+			{{ template "snippet/iam/tabs.html" .}}
 			<table>
 				<thead>
 					<th>Name</th>
@@ -26,7 +20,7 @@
 						<td><a href="/-/admin/iam/groups/{{.Name}}">{{.Name}}</a></td>
 						<td><a href="/-/admin/iam/groups/{{.Name}}">Edit</a></td>
 					</tr>
-					{{ end }}		
+					{{ end }}
 				</tbody>
 			</table>
 		</section>
