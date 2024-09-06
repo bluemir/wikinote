@@ -70,8 +70,6 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 		system.GET("/initialize/:code", handler.Initialze)
 		system.POST("/initialize/:code", handler.InitialzeAccept)
 
-		// reject other url
-		system.Use(handler.RejectNotWritten) // not work?
 	}
 
 	// plugins
@@ -80,12 +78,7 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 	// reject url
 	app.Any("/.app/*path", handler.NotFound)
 	app.Any("/.git/*path", handler.NotFound)
-	app.Use(func(c *gin.Context) {
-		if strings.HasPrefix(c.Request.URL.Path, "/-/") {
-			handler.NotFound(c)
-		}
-	})
-
+	app.Use(IfHasPrefix("/-/", handler.NotFound))
 	{
 		// normal pages
 		// - GET            render file or render functional page
@@ -115,6 +108,19 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 		noRoute(pages.Handler)
 	}
 
+}
+func IfHasPrefix(prefix string, fns ...gin.HandlerFunc) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if strings.HasPrefix(c.Request.URL.Path, prefix) {
+			for _, fn := range fns {
+				if c.IsAborted() {
+					return
+				}
+
+				fn(c)
+			}
+		}
+	}
 }
 func (server *Server) redirectToFrontPage(c *gin.Context) {
 	logrus.Debugf("redirect to front page: %s", server.frontPage)
