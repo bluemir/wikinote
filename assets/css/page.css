@@ -13,7 +13,7 @@
 
 body {
     overflow-y: scroll;
-
+    
     background: var(--contents-padding-bg-color);
 }
 
@@ -29,12 +29,23 @@ main {
     }
 }
 
+textarea[indent=tab] {
+    tab-size: 8ch;
+    
+    &[tab-size=4] {
+        tab-size: 4ch;
+    }
+    &[tab-size=2] {
+        tab-size: 2ch;
+    }
+}
+
 /*****************************************/
 main section[page] {
     /*word-break: break-word;*/
     overflow-wrap: anywhere;
     word-break: normal;
-
+    
     textarea {
         width: 100%;
         min-height: 20rem;
@@ -48,7 +59,7 @@ main section[page] {
             border: 1px solid gray;
         }
     }
-
+    
     [font=monospace] {
         font-family: monospace;
     }

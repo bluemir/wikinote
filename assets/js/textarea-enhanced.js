@@ -1,6 +1,6 @@
 import * as $ from "bm.js/bm.module.js";
 
-$.all("textarea[indent-by-tab]").map(elem => elem.on("keydown", evt => {
+$.all("textarea[indent]").map(elem => elem.on("keydown", evt => {
     // handle indent, un-indent
     switch(evt.code) {
         case "Tab":
@@ -9,37 +9,51 @@ $.all("textarea[indent-by-tab]").map(elem => elem.on("keydown", evt => {
             let start = $textarea.selectionStart;
             let end = $textarea.selectionEnd;
             let data = $textarea.value;
+            let indent = getIndentCharacter($textarea.attr("indent"))
 
             if (evt.shiftKey) {
                 // un-tab
 
                 let n = data.substring(0, start).lastIndexOf("\n")+1;
 
-                let lines = [data.substring(0, n), data.substring(n, end), data.substring(end)];
-                lines[1] = lines[1].split('\n').map(line => line.startsWith('\t')?line.substring(1): line).join('\n');
+                let sections = [data.substring(0, n), data.substring(n, end), data.substring(end)];
+                sections[1] = sections[1].split('\n').map(line => line.startsWith(indent)?line.substring(indent.length): line).join('\n');
 
-                $textarea.value = lines.join("");
+                $textarea.value = sections.join("");
 
                 $textarea.selectionStart = start > 0 ? start-1: 0;
-                $textarea.selectionEnd   = lines[0].length + lines[1].length;
+                $textarea.selectionEnd   = sections[0].length + sections[1].length;
             } else {
+                // tab
                 // if (end-start > 0 ) { }// mean selection is not empty
 
                 let n = data.substring(0, start).lastIndexOf("\n")+1;
-                let lines = [data.substring(0, n), data.substring(n, end), data.substring(end)];
+                let sections = [data.substring(0, n), data.substring(n, end), data.substring(end)];
 
-                lines[1] = lines[1].split('\n').map(line => "\t" + line).join('\n');
+                sections[1] = sections[1].split('\n').map(line => indent + line).join('\n');
 
-                $textarea.value = lines.join("");
+                $textarea.value = sections.join("");
 
-                $textarea.selectionStart = start + 1;
-                $textarea.selectionEnd   = lines[0].length + lines[1].length;
+                $textarea.selectionStart = start + indent.length;
+                $textarea.selectionEnd   = sections[0].length + sections[1].length;
             }
             return
         default:
         //console.log(evt);
     }
 }));
+
+function getIndentCharacter(attr) {
+    switch(attr) {
+        case "2space":
+            return "  ";
+        case "4space":
+            return "    ";
+        case "tab":
+        default:
+            return "\t";
+    }
+}
 
 $.all("textarea[auto-resize]").map(elem => {
     // use `field-sizing: content` when available
