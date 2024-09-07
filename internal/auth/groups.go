@@ -40,3 +40,9 @@ func (m *Manager) GetGroup(ctx context.Context, name string) (*Group, error) {
 	}
 	return group, nil
 }
+func (m *Manager) DeleteGroup(ctx context.Context, name string) error {
+	if err := m.db.WithContext(ctx).Where(Group{Name: name}).Delete(Group{}).Error; err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
+}

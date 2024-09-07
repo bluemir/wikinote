@@ -24,6 +24,12 @@
 					{{ end }}
 				</tbody>
 			</table>
+			<hr />
+			<form method="DELETE">
+				<p>Group 을 삭제 하시려면 Group 이름을 아래 입력창에 입력 해 주세요.</p>
+				<input pattern="^{{ .Context.Param "groupName" }}$" />
+				<button>Delete Group</button>
+			</form>
 		</section>
 	</main>
 </body>

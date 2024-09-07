@@ -111,6 +111,17 @@ func GetGroup(c *gin.Context) {
 		"group": group,
 	}))
 }
+func DeleteGroup(c *gin.Context) {
+	backend := injector.Backends(c)
+
+	if err := backend.Auth.DeleteGroup(c.Request.Context(), c.Param("groupName")); err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+
+	c.Redirect(http.StatusSeeOther, "/-/admin/iam/groups")
+}
 func CreateRole(c *gin.Context) {
 	backend := injector.Backends(c)
 

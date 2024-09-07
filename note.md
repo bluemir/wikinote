@@ -84,7 +84,7 @@
 		- [x] Get
 		- [x] List
 		- [ ] Update
-		- [ ] Delete
+		- [x] Delete
 	- [x] Role
 		- [x] Create
 		- [x] Get

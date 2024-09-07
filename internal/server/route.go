@@ -63,6 +63,7 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 		system.POST("/admin/iam/groups", can(verb.Create, resource.Users), handler.CreateGroup)
 		system.GET("/admin/iam/groups", can(verb.List, resource.Users), handler.ListGroups)
 		system.GET("/admin/iam/groups/:groupName", can(verb.Get, resource.Groups), handler.GetGroup)
+		system.DELETE("/admin/iam/groups/:groupName", can(verb.Delete, resource.Groups), handler.DeleteGroup)
 
 		// iam > role
 		system.POST("/admin/iam/roles", can(verb.Create, resource.Roles), handler.CreateRole)
