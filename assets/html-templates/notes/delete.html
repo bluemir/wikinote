@@ -12,7 +12,7 @@
 			<h2>Delete note: '{{.Path}}'</h2>
 			<p>Note를 삭제하려 하고 있습니다.</p>
 			<p>삭제하려면 Note 의 전체 Path('{{.Path}}') 를 입력창에 입력하세요.</p>
-			<form method="post">
+			<form method="delete">
 				<input pattern="^{{.Path}}$" />
 				<button>Delete Note</button>
 			</form>

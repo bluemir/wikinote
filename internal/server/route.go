@@ -63,6 +63,7 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 		system.GET("/admin/iam/roles", can(verb.List, resource.Roles), handler.ListRoles)
 		system.GET("/admin/iam/roles/:roleName", can(verb.Get, resource.Roles), handler.GetRole)
 		system.POST("/admin/iam/roles/:roleName", can(verb.Update, resource.Roles), handler.UpdateRole)
+		//system.POST("/admin/iam/roles/:roleName/delete", can(verb.Delete, resource.Roles), handler.DeleteRole) // for html form
 		system.GET("/admin/iam/assigns", can(verb.List, resource.Assigns), handler.ListAssigns)
 		system.GET("/admin/messages", can(verb.List, resource.Messages), handler.ListAllMessages)
 
@@ -96,15 +97,13 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 		pages.POST("move", can(verb.Update, resource.Page), handler.MoveNote)
 		pages.GET("raw", can(verb.Get, resource.Page), handler.Raw)
 		pages.GET("delete", can(verb.Delete, resource.Page), html("notes/delete.html"))
-		pages.POST("delete", can(verb.Delete, resource.Page), handler.DeleteNote)
 		pages.GET("files", can(verb.Update, resource.Page), handler.Files)
 		pages.GET("*", can(verb.Get, resource.Page), handler.View)
 		pages.POST("*", can(verb.Update, resource.Page), handler.UpdateWithForm)
 		pages.PUT("*", can(verb.Update, resource.Page), handler.Upload)
-		pages.DELETE("*", can(verb.Delete, resource.Page), handler.Delete)
+		pages.DELETE("*", can(verb.Delete, resource.Page), handler.DeleteNote)
 
 		//app.Any("/*path", pages.Handler)
-		//noRoute(handler.NotFoundWithPrefix("/-/"), pages.Handler)
 		noRoute(pages.Handler)
 	}
 

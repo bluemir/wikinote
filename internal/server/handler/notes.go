@@ -6,7 +6,6 @@ import (
 	"mime"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -229,20 +228,4 @@ func Upload(c *gin.Context) {
 	}
 
 	c.Status(http.StatusAccepted)
-}
-func Delete(c *gin.Context) {
-	backend := injector.Backends(c)
-	if c.GetHeader("X-Confirm") != path.Base(c.Request.URL.Path) {
-		c.Error(HttpError{code: http.StatusBadRequest, message: "not confirmed"})
-		c.Abort()
-		return
-	}
-
-	err := backend.FileDelete(c.Request.URL.Path)
-	if err != nil {
-		c.Error(err)
-		c.Abort()
-		return
-	}
-	c.Status(http.StatusNoContent)
 }

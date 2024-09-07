@@ -145,3 +145,6 @@
 			- Editor 로 편집이 불가함을 안내하고 대체 파일을 Upload 할수 있음.
 - [ ] Checklist render 가 가능하도록 변경 해야 함.
 - [x] [BUG] 없는 Page 를 Editor 로 새로 만들려 할떄 NotFound 가 호출됨
+- [ ] form을 enhanced 로 처리 할수 있을지 확인
+	- method에 DELETE, PUT 등을 처리
+	- 응답 받아서 적절한 처리가 가능할지 확인

@@ -79,10 +79,11 @@ $.all("textarea[submit-shortcut]").map(textarea => {
         }
         evt.preventDefault();
 
-        let $form = evt.target.closest("form");
-        let data = new FormData($form);
-        
-        let res = await $.request($form.method||"get", $form.action||location.pathname, {body: data});
+		// evt.target.closest("form").submit();
+		let $form = evt.target.closest("form");
+
+		let data = new FormData($form);
+		let res = await $.request($form.method||"get", $form.action||location.pathname, {body: data});
         // TODO show message
     })
 });
