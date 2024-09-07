@@ -9,6 +9,12 @@
 	<main>
 		<section page>
 			{{ template "snippet/iam/tabs.html" .}}
+			<form method="post">
+				<p>Create new role</p>
+				<input name="name" />
+				<button>Create Role</button>
+			</form>
+			<hr />
 			<table>
 				<thead>
 					<th>Name</th>

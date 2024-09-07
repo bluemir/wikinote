@@ -13,12 +13,17 @@ $.all(`form[method="delete" i], form[method="put" i]`).map(elem => elem.on("subm
 
 	console.log("method=delete or method=put not support in valila, it will redirect 'GET' request")
 
+	if (res.status >= 500) {
+		console.error("error on request")
+		return
+	}
+
 	// handle redirect
 	if (res.redirected) {
 		location.href = res.url;
 		return
-	} 
-	
-	// if not, 
-	location.href = endpoint;
+	}
+
+	// if not,
+	location.href = $form.action;
 }))

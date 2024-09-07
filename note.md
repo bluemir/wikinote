@@ -85,12 +85,12 @@
 		- [x] List
 		- [ ] Update
 		- [ ] Delete
-	- [ ] Role
-		- [ ] Create
+	- [x] Role
+		- [x] Create
 		- [x] Get
 		- [x] List
 		- [x] Update
-		- [ ] Delete
+		- [x] Delete
 	- [ ] Assign
 		- [ ] Create
 		- [ ] Get
@@ -119,6 +119,7 @@
 		- 1s 정도의 간격으로 text의 변경사항을 추적하고, 100 개 정도의 변경사항을 기록하면 되지 않을까?
 	- [ ] Redo
 	- [x] Resize on input
+	- [ ] editor 에서 다음줄로 넘어갈때 이전 line 의 indent 만큼은 자동으로 들어가 있도록 설정셛
 - [ ] 적절한 font 설정
 - [x] h1~ h3 까지 horizontal line 적용하기
 - [x] search 기능 고치기
@@ -145,6 +146,8 @@
 			- Editor 로 편집이 불가함을 안내하고 대체 파일을 Upload 할수 있음.
 - [ ] Checklist render 가 가능하도록 변경 해야 함.
 - [x] [BUG] 없는 Page 를 Editor 로 새로 만들려 할떄 NotFound 가 호출됨
-- [ ] form을 enhanced 로 처리 할수 있을지 확인
+- [x] form을 enhanced 로 처리 할수 있을지 확인
 	- method에 DELETE, PUT 등을 처리
 	- 응답 받아서 적절한 처리가 가능할지 확인
+		- 우선은 GET 으로 redirect 해서 처리
+

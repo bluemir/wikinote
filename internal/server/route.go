@@ -60,9 +60,14 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 		system.POST("/admin/iam/users/:username", can(verb.Get, resource.Users), handler.UpdateUser)
 		system.GET("/admin/iam/groups", can(verb.List, resource.Users), handler.ListGroups)
 		system.GET("/admin/iam/groups/:groupName", can(verb.Get, resource.Groups), handler.GetGroup)
+
+		// iam > role
+		system.POST("/admin/iam/roles", can(verb.Create, resource.Roles), handler.CreateRole)
 		system.GET("/admin/iam/roles", can(verb.List, resource.Roles), handler.ListRoles)
 		system.GET("/admin/iam/roles/:roleName", can(verb.Get, resource.Roles), handler.GetRole)
 		system.POST("/admin/iam/roles/:roleName", can(verb.Update, resource.Roles), handler.UpdateRole)
+		system.DELETE("/admin/iam/roles/:roleName", can(verb.Delete, resource.Roles), handler.DeleteRole)
+
 		//system.POST("/admin/iam/roles/:roleName/delete", can(verb.Delete, resource.Roles), handler.DeleteRole) // for html form
 		system.GET("/admin/iam/assigns", can(verb.List, resource.Assigns), handler.ListAssigns)
 		system.GET("/admin/messages", can(verb.List, resource.Messages), handler.ListAllMessages)

@@ -22,30 +22,28 @@ func AdminPage(c *gin.Context) (auth.Resource, error) {
 	}, nil
 }
 func Users(c *gin.Context) (auth.Resource, error) {
-	return auth.KeyValues{
-		"kind": "user",
-	}, nil
+	return fromParams("user", c.Params), nil
 }
-
 func Groups(c *gin.Context) (auth.Resource, error) {
-	return auth.KeyValues{
-		"kind": "group",
-	}, nil
+	return fromParams("group", c.Params), nil
 }
-
 func Roles(c *gin.Context) (auth.Resource, error) {
-	return auth.KeyValues{
-		"kind": "role",
-	}, nil
+	return fromParams("role", c.Params), nil
 }
-
 func Assigns(c *gin.Context) (auth.Resource, error) {
-	return auth.KeyValues{
-		"kind": "assign",
-	}, nil
+	return fromParams("assign", c.Params), nil
 }
 func Messages(c *gin.Context) (auth.Resource, error) {
 	return auth.KeyValues{
 		"kind": "message",
 	}, nil
+}
+func fromParams(kind string, params gin.Params) auth.KeyValues {
+	kvs := auth.KeyValues{
+		"kind": kind,
+	}
+	for _, param := range params {
+		kvs[param.Key] = param.Value
+	}
+	return kvs
 }

@@ -11,12 +11,19 @@
 			{{ template "snippet/iam/tabs.html" .}}
 			<h2>Role - {{ .Data.role.Name }}</h2>
 			<form method="POST">
+				<p>Rules</p>
 				<textarea
 					name="rules"
 					indent="2space"
 					submit-shortcut
 				>{{ .Data.role.Rules | yaml }}</textarea>
 				<button>Save</button>
+			</form>
+			<hr />
+			<form method="DELETE">
+				<p>Role 을 삭제 하시려면 Role 이름을 아래 입력창에 입력 해 주세요.</p>
+				<input pattern="^{{ .Context.Param "roleName" }}$" />
+				<button>Delete Role</button>
 			</form>
 		</section>
 	</main>

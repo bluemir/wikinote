@@ -55,7 +55,9 @@ func (m *Manager) UpdateRole(ctx context.Context, role *Role) error {
 	return nil
 }
 func (m *Manager) DeleteRole(ctx context.Context, name string) error {
-	if err := m.db.WithContext(ctx).Delete(Role{
+	if err := m.db.WithContext(ctx).Where(&Role{
+		Name: name,
+	}).Delete(Role{
 		Name: name,
 	}).Error; err != nil {
 		return errors.WithStack(err)

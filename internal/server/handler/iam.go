@@ -89,6 +89,29 @@ func GetGroup(c *gin.Context) {
 		"group": group,
 	}))
 }
+func CreateRole(c *gin.Context) {
+	backend := injector.Backends(c)
+
+	req := struct {
+		Name string `form:"name"`
+	}{}
+	if err := c.ShouldBind(&req); err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+	role, err := backend.Auth.CreateRole(c.Request.Context(), req.Name, []auth.Rule{})
+	if err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+
+	logrus.Tracef("%+v", role)
+
+	c.Redirect(http.StatusSeeOther, "/-/admin/iam/roles")
+
+}
 func ListRoles(c *gin.Context) {
 	backend := injector.Backends(c)
 
@@ -143,7 +166,16 @@ func UpdateRole(c *gin.Context) {
 		return
 	}
 	c.Redirect(http.StatusSeeOther, "/-/admin/iam/roles/"+c.Param("roleName"))
-	c.Abort()
+}
+func DeleteRole(c *gin.Context) {
+	backend := injector.Backends(c)
+
+	if err := backend.Auth.DeleteRole(c.Request.Context(), c.Param("roleName")); err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+	c.Redirect(http.StatusSeeOther, "/-/admin/iam/roles")
 }
 
 func ListAssigns(c *gin.Context) {
