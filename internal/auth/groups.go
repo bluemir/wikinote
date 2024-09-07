@@ -17,6 +17,14 @@ func (g Group) Subject() Subject {
 		Name: g.Name,
 	}
 }
+func (m *Manager) CreateGroup(ctx context.Context, name string) error {
+	if err := m.db.WithContext(ctx).Create(&Group{
+		Name: name,
+	}).Error; err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
+}
 
 func (m *Manager) ListGroups(ctx context.Context) ([]Group, error) {
 	groups := []Group{}

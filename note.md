@@ -80,8 +80,8 @@
 		- [ ] Update
 		- [ ] Delete
 	- [ ] Group
-		- [ ] Create
-		- [ ] Get
+		- [x] Create
+		- [x] Get
 		- [x] List
 		- [ ] Update
 		- [ ] Delete

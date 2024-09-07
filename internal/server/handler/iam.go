@@ -63,12 +63,34 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 }
+func CreateGroup(c *gin.Context) {
+	backend := injector.Backends(c)
+
+	req := struct {
+		Name string `form:"name"`
+	}{}
+
+	if err := c.ShouldBind(&req); err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+
+	if err := backend.Auth.CreateGroup(c.Request.Context(), req.Name); err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+
+	c.Redirect(http.StatusSeeOther, "/-/admin/iam/groups")
+}
 func ListGroups(c *gin.Context) {
 	backend := injector.Backends(c)
 
 	groups, err := backend.Auth.ListGroups(c.Request.Context())
 	if err != nil {
 		c.Error(err)
+		c.Abort()
 		return
 	}
 	c.HTML(http.StatusOK, "admin/iam/groups.html", With(c, KeyValues{
