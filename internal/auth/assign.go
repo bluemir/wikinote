@@ -49,7 +49,7 @@ func (m *Manager) DiscardRole(ctx context.Context, subject Subject, roles ...str
 
 func (m *Manager) getAssignedRoles(ctx context.Context, user *User) ([]Role, error) {
 	if user == nil { // it is guest
-		assign, err := m.getAssign(ctx, Subject{
+		assign, err := m.GetAssign(ctx, Subject{
 			Kind: KindGuest,
 		})
 		if err != nil {
@@ -61,7 +61,7 @@ func (m *Manager) getAssignedRoles(ctx context.Context, user *User) ([]Role, err
 
 	roleNames := Set{}
 
-	assign, err := m.getAssign(ctx, Subject{
+	assign, err := m.GetAssign(ctx, Subject{
 		Kind: KindUser,
 		Name: user.Name,
 	})
@@ -71,7 +71,7 @@ func (m *Manager) getAssignedRoles(ctx context.Context, user *User) ([]Role, err
 	maps.Copy(roleNames, assign.Roles)
 
 	for _, group := range user.Groups {
-		assign, err := m.getAssign(ctx, group.Subject())
+		assign, err := m.GetAssign(ctx, group.Subject())
 		if err != nil {
 			return nil, err
 		}
@@ -82,7 +82,7 @@ func (m *Manager) getAssignedRoles(ctx context.Context, user *User) ([]Role, err
 
 	return m.findRoles(ctx, roleNames)
 }
-func (m *Manager) getAssign(ctx context.Context, subject Subject) (*Assign, error) {
+func (m *Manager) GetAssign(ctx context.Context, subject Subject) (*Assign, error) {
 	assign := Assign{}
 	if err := m.db.WithContext(ctx).Where(&Assign{
 		Subject: subject,

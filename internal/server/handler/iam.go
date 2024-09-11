@@ -223,3 +223,21 @@ func ListAssigns(c *gin.Context) {
 		"assigns": assigns,
 	}))
 }
+func GetAssign(c *gin.Context) {
+	backend := injector.Backends(c)
+
+	assign, err := backend.Auth.GetAssign(c.Request.Context(), auth.Subject{
+		Kind: auth.Kind(c.Param("subjectKind")),
+		Name: c.Param("subjectName"),
+	})
+	if err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+	c.HTML(http.StatusOK, "admin/iam/assign.html", With(c, KeyValues{
+		"Assign": assign,
+	}))
+}
+func UpdateAssign(c *gin.Context) {
+}

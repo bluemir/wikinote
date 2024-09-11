@@ -37,7 +37,38 @@ $.all("textarea[indent]").map(elem => elem.on("keydown", evt => {
                 $textarea.selectionStart = start + indent.length;
                 $textarea.selectionEnd   = sections[0].length + sections[1].length;
             }
-            return
+            return;
+		case "Enter":
+            {
+                let $textarea = evt.target;
+                let start = $textarea.selectionStart;
+                let end = $textarea.selectionEnd;
+                let data = $textarea.value;
+
+                if (end - start > 0) {
+                    return; // skip. it has selection
+                }
+
+                evt.preventDefault();
+
+                // insert newline & indent
+                let n = data.substring(0, start).lastIndexOf("\n")+1;
+
+                let lastLine = data.substring(n, start);
+
+                let indent = lastLine; // if empty line, use whole line.
+                let matched = lastLine.match(/[^\s]/);
+                if (matched){
+                    indent = data.substring(n, n + lastLine.match(/[^\s]/).index);
+                }
+
+                let arr = [data.substring(0, start), "\n", indent, data.substring(start)];
+
+                $textarea.value = arr.join("");
+                $textarea.selectionStart = $textarea.selectionEnd = arr[0].length + arr[1].length + arr[2].length;
+
+                return;
+            }
         default:
         //console.log(evt);
     }

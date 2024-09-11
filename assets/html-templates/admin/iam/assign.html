@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Wikinote / IAM / Assign </title>
+	{{ template "snippet/header.html"}}
+</head>
+<body>
+	{{ template "snippet/navigation-bar.html" . }}
+	<main>
+		<section page>
+			{{ template "snippet/iam/tabs.html" .}}
+			<h2>Assign - {{ .Data.Assign.Subject.Kind }}/{{ .Data.Assign.Subject.Name }}</h2>
+			<form method="PUT">
+				<p>Roles</p>
+				<p>각 Role은 ',' 로 구분 됩니다.</p>
+				<input name="roles" value="{{ .Data.Assign.Roles }}" />
+				<button>Save</button>
+			</form>
+			<hr />
+			<form method="DELETE">
+				<p>Assign 을 삭제 하시려면 이름을 아래 입력창에 입력 해 주세요.</p>
+				<input pattern="^{{ .Data.Assign.Subject.Name }}$" />
+				<button>Delete Assign</button>
+			</form>
+		</section>
+	</main>
+</body>
+</html>

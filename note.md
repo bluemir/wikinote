@@ -93,7 +93,7 @@
 		- [x] Delete
 	- [ ] Assign
 		- [ ] Create
-		- [ ] Get
+		- [x] Get
 		- [x] List
 		- [ ] Update
 		- [ ] Delete
