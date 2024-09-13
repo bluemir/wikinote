@@ -240,4 +240,49 @@ func GetAssign(c *gin.Context) {
 	}))
 }
 func UpdateAssign(c *gin.Context) {
+	backend := injector.Backends(c)
+
+	req := struct {
+		Roles string `form:"roles"`
+	}{}
+
+	if err := c.ShouldBind(&req); err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+
+	assign, err := backend.Auth.GetAssign(c.Request.Context(), auth.Subject{
+		Kind: auth.Kind(c.Param("subjectKind")),
+		Name: c.Param("subjectName"),
+	})
+	if err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+
+	assign.Roles = auth.SetFromArray(strings.Split(req.Roles, ","))
+
+	if err := backend.Auth.UpdateAssign(c.Request.Context(), assign); err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+	c.Redirect(http.StatusSeeOther, c.Request.URL.Path)
+}
+func DeleteAssign(c *gin.Context) {
+
+	backend := injector.Backends(c)
+
+	if err := backend.Auth.DeleteAssign(c.Request.Context(), auth.Subject{
+		Kind: auth.Kind(c.Param("subjectKind")),
+		Name: c.Param("subjectName"),
+	}); err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+
+	c.Redirect(http.StatusOK, "/-/admin/iam/assigns")
 }

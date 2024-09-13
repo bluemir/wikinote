@@ -75,9 +75,11 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 		// iam > assigns
 		system.GET("/admin/iam/assigns", can(verb.List, resource.Assigns), handler.ListAssigns)
 		system.GET("/admin/iam/assigns/:subjectKind", can(verb.List, resource.Assigns), handler.GetAssign)
-		system.PUT("/admin/iam/assigns/:subjectKind", can(verb.List, resource.Assigns), handler.GetAssign)
+		system.PUT("/admin/iam/assigns/:subjectKind", can(verb.Update, resource.Assigns), handler.UpdateAssign)
+		system.DELETE("/admin/iam/assigns/:subjectKind", can(verb.Delete, resource.Assigns), handler.DeleteAssign)
 		system.GET("/admin/iam/assigns/:subjectKind/:subjectName", can(verb.List, resource.Assigns), handler.GetAssign)
-		system.PUT("/admin/iam/assigns/:subjectKind/:subjectName", can(verb.List, resource.Assigns), handler.GetAssign)
+		system.PUT("/admin/iam/assigns/:subjectKind/:subjectName", can(verb.Update, resource.Assigns), handler.UpdateAssign)
+		system.DELETE("/admin/iam/assigns/:subjectKind/:subjectName", can(verb.Delete, resource.Assigns), handler.DeleteAssign)
 
 		system.GET("/admin/messages", can(verb.List, resource.Messages), handler.ListAllMessages)
 

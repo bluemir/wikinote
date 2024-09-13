@@ -95,8 +95,8 @@
 		- [ ] Create
 		- [x] Get
 		- [x] List
-		- [ ] Update
-		- [ ] Delete
+		- [x] Update
+		- [x] Delete
 - [ ] 대부분 config 는 file 대신 db에 저장.
 	- UI 에서 수정을 지원
 	- yaml로 encoding 을 할수는 있음
@@ -119,7 +119,7 @@
 		- 1s 정도의 간격으로 text의 변경사항을 추적하고, 100 개 정도의 변경사항을 기록하면 되지 않을까?
 	- [ ] Redo
 	- [x] Resize on input
-	- [ ] editor 에서 다음줄로 넘어갈때 이전 line 의 indent 만큼은 자동으로 들어가 있도록 설정셛
+	- [x] editor 에서 다음줄로 넘어갈때 이전 line 의 indent 만큼은 자동으로 들어가 있도록 설정
 - [ ] 적절한 font 설정
 - [x] h1~ h3 까지 horizontal line 적용하기
 - [x] search 기능 고치기
@@ -150,4 +150,5 @@
 	- method에 DELETE, PUT 등을 처리
 	- 응답 받아서 적절한 처리가 가능할지 확인
 		- 우선은 GET 으로 redirect 해서 처리
+- [ ] systemd 로 등록할수 있는 예시 service config file
 

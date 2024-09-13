@@ -46,7 +46,7 @@ type Labels map[string]string
 type List []string
 type Set map[string]struct{}
 
-func setFromArray(arr []string) Set {
+func SetFromArray(arr []string) Set {
 	s := Set{}
 	for _, v := range arr {
 		s[v] = struct{}{}

@@ -43,7 +43,7 @@ func initializeDefaultObject(db *gorm.DB) func(ctx context.Context) error {
 		for _, assign := range data.Assigns {
 			if err := txn.Create(&Assign{
 				Subject: assign.Subject,
-				Roles:   setFromArray(assign.Roles),
+				Roles:   SetFromArray(assign.Roles),
 			}).Error; err != nil {
 				return errors.WithStack(err)
 			}

@@ -123,3 +123,17 @@ func (m *Manager) ListAssigns(ctx context.Context) ([]Assign, error) {
 	}
 	return assigns, nil
 }
+
+func (m *Manager) UpdateAssign(ctx context.Context, assign *Assign) error {
+	if err := m.db.WithContext(ctx).Where(Assign{Subject: assign.Subject}).Save(assign).Error; err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
+}
+
+func (m *Manager) DeleteAssign(ctx context.Context, subject Subject) error {
+	if err := m.db.WithContext(ctx).Where(Assign{Subject: subject}).Delete(Assign{}).Error; err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
+}
