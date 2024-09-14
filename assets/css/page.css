@@ -1,5 +1,6 @@
 @import "./common/reset.css";
 @import "./common/color.css";
+@import "./common/enhanced.css";
 @import "./system/grid.css";
 @import "./pages/markdown.css";
 @import "./components/navigation-bar.css";
@@ -8,12 +9,12 @@
     max-width: 1200px;
     margin: auto;
     padding: 0 1rem;
-    
+
 }
 
 body {
     overflow-y: scroll;
-    
+
     background: var(--contents-padding-bg-color);
 }
 
@@ -31,7 +32,7 @@ main {
 
 textarea[indent=tab] {
     tab-size: 8ch;
-    
+
     &[tab-size=4] {
         tab-size: 4ch;
     }
@@ -45,7 +46,7 @@ main section[page] {
     /*word-break: break-word;*/
     overflow-wrap: anywhere;
     word-break: normal;
-    
+
     textarea {
         width: 100%;
         min-height: 20rem;
@@ -53,13 +54,13 @@ main section[page] {
         tab-size: 4ch;
         font-family: monospace;
     }
-    
+
     table {
         th, td {
             border: 1px solid gray;
         }
     }
-    
+
     [font=monospace] {
         font-family: monospace;
     }

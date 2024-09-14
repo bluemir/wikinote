@@ -31,6 +31,13 @@ func (backend *Backend) FileWrite(path string, data []byte) error {
 
 	return backend.files.Write(path, data)
 }
+func (backend *Backend) FileWriteStream(path string, reader io.Reader) error {
+	// TODO FileWriteHook
+	defer backend.hub.Publish("system.file.written", Message{
+		Text: fmt.Sprintf("file written,path=%s", path),
+	})
+	return backend.files.WriteStream(path, reader)
+}
 
 func (backend *Backend) FileDelete(path string) error {
 	defer backend.hub.Publish("system.file.deleted", Message{

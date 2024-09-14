@@ -211,6 +211,30 @@ func DeleteRole(c *gin.Context) {
 	c.Redirect(http.StatusSeeOther, "/-/admin/iam/roles")
 }
 
+func CreateAssign(c *gin.Context) {
+	backend := injector.Backends(c)
+
+	req := struct {
+		Kind string `form:"kind"`
+		Name string `form:"name"`
+	}{}
+	if err := c.ShouldBind(&req); err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+
+	if err := backend.Auth.AssignRole(c.Request.Context(), auth.Subject{
+		Kind: auth.Kind(req.Kind),
+		Name: req.Name,
+	}); err != nil {
+		c.Error(err)
+		c.Abort()
+		return
+	}
+
+	c.Redirect(http.StatusSeeOther, c.Request.URL.Path)
+}
 func ListAssigns(c *gin.Context) {
 	backend := injector.Backends(c)
 

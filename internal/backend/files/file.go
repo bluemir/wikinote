@@ -47,7 +47,7 @@ func (fs *FileStore) Write(path string, data []byte) error {
 
 	return nil
 }
-func (fs *FileStore) WriteStream(path string, r io.ReadCloser) error {
+func (fs *FileStore) WriteStream(path string, r io.Reader) error {
 	fullpath := fs.getFullPath(path)
 
 	if err := os.MkdirAll(filepath.Dir(fullpath), 0755); err != nil {

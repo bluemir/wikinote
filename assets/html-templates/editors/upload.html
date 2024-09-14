@@ -9,12 +9,12 @@
 	<main>
 		<section page>
 			<h2>Upload File</h2>
-			<p>You want <a href="{{.Path}}.md?edit">Editor</a>?</p>
-			<form method="post">
-				<input type="file" />
+			<p>Replace file '{{.Path}}'</p>
+			<!--p>You want <a href="{{.Path}}.md?edit">Editor</a>?</p-->
+			<form method="put" enctype="multipart/form-data" action="{{.Path}}?file">
+				<input type="file" name="file" multiple />
 				<button>Upload</button>
 			</form>
-			<wikinote-upload path="{{.Path}}"></wikinote-upload>
 		</section>
 	</main>
 </body>

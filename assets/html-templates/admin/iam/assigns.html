@@ -10,6 +10,27 @@
 		<section page>
 			{{ template "snippet/iam/tabs.html" .}}
 			<p>Group 은 기본적으로 같은 이름의 Role 에 할당 되어 되어 있습니다.</p>
+			<fieldset fit>
+				<form method="post">
+					<div grid>
+						<label col="3">Kind</label>
+						<div col="9">
+							<select name="kind">
+								<option value="group">Group</option>
+								<option value="user" >User</option>
+								<option value="guest">Guest</option>
+							</select>
+						</div>
+					</div>
+					<div grid>
+						<label col="3">Name</label>
+						<div col="9">
+							<input name="name" placeholder="name"/>
+						</div>
+					</div>
+					<button>Create Assigns</button>
+				</form>
+			</fieldset>
 			<table>
 				<thead>
 					<th>Kind</th>

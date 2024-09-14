@@ -73,6 +73,7 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 		system.DELETE("/admin/iam/roles/:roleName", can(verb.Delete, resource.Roles), handler.DeleteRole)
 
 		// iam > assigns
+		system.POST("/admin/iam/assigns", can(verb.Create, resource.Assigns), handler.CreateAssign)
 		system.GET("/admin/iam/assigns", can(verb.List, resource.Assigns), handler.ListAssigns)
 		system.GET("/admin/iam/assigns/:subjectKind", can(verb.List, resource.Assigns), handler.GetAssign)
 		system.PUT("/admin/iam/assigns/:subjectKind", can(verb.Update, resource.Assigns), handler.UpdateAssign)
@@ -113,10 +114,10 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 		pages.POST("move", can(verb.Update, resource.Page), handler.MoveNote)
 		pages.GET("raw", can(verb.Get, resource.Page), handler.Raw)
 		pages.GET("delete", can(verb.Delete, resource.Page), html("notes/delete.html"))
-		pages.GET("files", can(verb.Update, resource.Page), handler.Files)
+		pages.POST("file", can(verb.Update, resource.Page), handler.UploadFiles)        // upload file, with multipart encoding, create or overwrite file
+		pages.PUT("file", can(verb.Update, resource.Page), handler.UploadFileToReplace) // upload file. with multipart encoding. replace file
 		pages.GET("*", can(verb.Get, resource.Page), handler.View)
 		pages.POST("*", can(verb.Update, resource.Page), handler.UpdateWithForm)
-		pages.PUT("*", can(verb.Update, resource.Page), handler.Upload)
 		pages.DELETE("*", can(verb.Delete, resource.Page), handler.DeleteNote)
 
 		//app.Any("/*path", pages.Handler)

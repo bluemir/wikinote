@@ -9,7 +9,8 @@
 		<main>
 			<section page>
 				{{ template "snippet/editor/tabs.html" .}}
-				<form>
+				<form method="post" action="{{.Path}}?file">
+					<input placeholder="file name" />
 					<input type="file" />
 					<button>Upload</button>
 				</form>

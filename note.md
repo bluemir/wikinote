@@ -45,6 +45,35 @@
 	- Guest 는 wiki를 볼수 있음
 - Editor에서 변경 후 Save 시 변경 내용이 저장 된다.
 
+## 설계 결정 사항
+
+- files 관련
+	- 어떤 경로에 접근시 ext(확장자)가 없다면 `.md` 로 redirect 한다.
+	- 만약 `?files` 가 있다면 redirect 하지 않는다.
+	- file upload 는 `?files` Page에서 가능하다.
+		- Upload 할 file 과 file 이름을 지정할수 있다.
+	- files page 에서 edit를 누르면 `.md`가 붙은 markdown editor 창으로 이동한다.
+	- markdown edit 창에서 file upload 는 허용하지 않는다.
+	- markdown edit 창에서 files 로 이동할수 있는 button 을 제공한다.
+		- 이동시에는 확장자는 제거하고, base 로 이동한다.
+	- image 등의 editor 창에서는 replace upload 를 제공한다.
+		- 현재 file 을 대체해서 upload 할수 있다.
+
+- edit 는 replace 방식의 upload 만 제공 한다.
+	- file 의 mime type 에 따라 제공 되지 않을수 있다.
+- files 는 파일 이름을 지정해서 upload 할수 있다
+	- 같은 이름이 있으면 overwrite
+	- 없을경우 upload 하는 file의 이름이 기본이 된다.
+- edit는 반드시 mime type 이 지정 되는경우에만 보여준다.
+	-
+- files는 반드시 mime type 이 지정 되지 않는 경우에만 보여준다.
+	-
+
+- edit에서 mine type을 알수 없으면 dir 로 취급, mine type 을 알수 있으면 file 로 취급
+	- editor 에서 files 로 가는 링크는 그저 extention 을 땐 editor 로 갈뿐 실질적으로 별개의 page/route 를 가져야되는것이 아님  (wikinote 에서는 별개의 query)
+
+
+
 ## TODO
 - [ ] UI 구조개선
 	- CustomElement(not React)
@@ -91,8 +120,8 @@
 		- [x] List
 		- [x] Update
 		- [x] Delete
-	- [ ] Assign
-		- [ ] Create
+	- [x] Assign
+		- [x] Create
 		- [x] Get
 		- [x] List
 		- [x] Update
@@ -151,4 +180,8 @@
 	- 응답 받아서 적절한 처리가 가능할지 확인
 		- 우선은 GET 으로 redirect 해서 처리
 - [ ] systemd 로 등록할수 있는 예시 service config file
+- [ ] Loading 시 Logo 깜빡임 줄이기
+- [ ] image viewer 개선
+	- [ ] not found 표시
+	- [ ] 기본적인 정보 표시(like size, ...)
 
