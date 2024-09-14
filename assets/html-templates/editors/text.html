@@ -9,7 +9,7 @@
 	<main>
 		<section page>
 			{{ template "snippet/editor/tabs.html" .}}
-			<form method="post" action="{{.Path}}"  enctype="multipart/form-data">
+			<form method="put" action="{{.Path}}"  enctype="multipart/form-data">
 				<textarea
 					name="data"
 					indent="tab"

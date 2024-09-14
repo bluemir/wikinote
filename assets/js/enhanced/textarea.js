@@ -114,7 +114,7 @@ $.all("textarea[submit-shortcut]").map(textarea => {
 		let $form = evt.target.closest("form");
 
 		let data = new FormData($form);
-		let res = await $.request($form.method||"get", $form.action||location.pathname, {body: data});
+		let res = await $.request($form.attr("method")||$form.method, $form.action||location.pathname, {body: data});
         // TODO show message
     })
 });
