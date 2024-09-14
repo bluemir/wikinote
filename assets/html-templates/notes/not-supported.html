@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Wikinote - {{ .Context.Request.URL.Path }}</title>
+	{{ template "snippet/header.html"}}
+</head>
+<body>
+	{{ template "snippet/navigation-bar.html" . }}
+	<main>
+		<section page>
+			<h1>Not Supported File</h1>
+			<p>you can see <a href="{{.Path}}?raw">raw file</a></p>
+		</section>
+	</main>
+</body>
+</html>

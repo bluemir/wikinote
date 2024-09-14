@@ -33,8 +33,10 @@ func filetype(path string) (string, string) {
 	switch filepath.Ext(path) {
 	case ".md":
 		return "text", "markdown"
+	case "":
+		return "directory", ""
 	default:
-		return "", ""
+		return "unknown", ""
 	}
 }
 func View(c *gin.Context) {
@@ -83,11 +85,13 @@ func View(c *gin.Context) {
 		c.HTML(http.StatusOK, "notes/video.html", With(c, gin.H{
 			"path": c.Request.URL.Path,
 		}))
-	default:
+	case "directory":
 		if !strings.HasSuffix(c.Request.URL.Path, ".md") {
 			// or show files?
 			c.Redirect(http.StatusTemporaryRedirect, c.Request.URL.Path+".md")
 		}
+	default:
+		c.HTML(http.StatusOK, "notes/not-supported.html", With(c, nil))
 	}
 }
 
@@ -125,8 +129,21 @@ func EditForm(c *gin.Context) {
 			"data": template.HTML(data),
 		}))
 		return
-	}
-	if kind != "" {
+	case "directory":
+		// it may be directory. show upload form.
+		files, err := backend.FileList(c.Request.URL.Path)
+		if err != nil && !os.IsNotExist(err) {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+
+		c.HTML(http.StatusOK, "editors/files.html", With(c, KeyValues{
+			"files": files,
+		}))
+		return
+	case "unknown":
+		fallthrough
+	default:
 		// it's file but there is no editor for this file
 		// show upload forms for replacement
 		c.HTML(http.StatusOK, "editors/upload.html", With(c, KeyValues{
@@ -134,20 +151,6 @@ func EditForm(c *gin.Context) {
 		}))
 		return
 	}
-
-	// it may be directory. show upload form.
-	files, err := backend.FileList(c.Request.URL.Path)
-	if err != nil && !os.IsNotExist(err) {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	c.HTML(http.StatusOK, "editors/files.html", With(c, KeyValues{
-		"files": files,
-	}))
-	//c.Redirect(http.StatusSeeOther, c.Request.URL.Path+".md?edit")
-	return
-
 }
 func UpdateWithForm(c *gin.Context) {
 	backend := injector.Backends(c)
@@ -177,7 +180,7 @@ func UpdateWithForm(c *gin.Context) {
 func UploadFileToReplace(c *gin.Context) {
 	// replace file
 	category, _ := filetype(c.Request.URL.Path)
-	if category == "" {
+	if category == "directory" {
 		c.Error(errors.Errorf("bad request"))
 		c.Abort()
 		return
@@ -213,7 +216,7 @@ func UploadFileToReplace(c *gin.Context) {
 func UploadFiles(c *gin.Context) {
 	// upload file to directory
 	category, _ := filetype(c.Request.URL.Path)
-	if category != "" {
+	if category != "directory" {
 		c.Error(errors.Errorf("bad request"))
 		c.Abort()
 		return
