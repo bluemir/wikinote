@@ -35,6 +35,12 @@ func Run(ctx context.Context, b *backend.Backend, conf *Config) error {
 		frontPage: conf.FrontPage,
 	}
 
+	if logrus.IsLevelEnabled(logrus.DebugLevel) {
+		gin.SetMode(gin.DebugMode)
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	app := gin.New()
 
 	app.Use(injector.Inject(b))
