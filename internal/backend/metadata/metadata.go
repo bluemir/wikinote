@@ -6,28 +6,26 @@ import (
 	"gorm.io/gorm"
 )
 
-type Store interface {
+type IStore interface {
 	//FindByPath(path string) ([]Item, error)
 	//FindByKey(key string) ([]Item, error)
-	Take(path, key string) (string, error)
-	Save(path, key, value string) error
-	Delete(path, key string) error
+	Take(ctx context.Context, path, key string) (string, error)
+	Save(ctx context.Context, path, key, value string) error
+	Delete(ctx context.Context, path, key string) error
+	FindByLabels(ctx context.Context, labels map[string]string) ([]StoreItem, error)
 }
 
-var _ Store = &GormStore{}
+var _ IStore = (*Store)(nil)
 
-type Item struct {
-	Path  string
-	Key   string
+type StoreItem struct {
+	Path  string `gorm:"primary_key"`
+	Key   string `gorm:"primary_key"`
 	Value string
 }
 
-type Config struct {
-}
-
-func New(ctx context.Context, db *gorm.DB) (Store, error) {
-	if err := db.AutoMigrate(&GormEntry{}); err != nil {
+func New(ctx context.Context, db *gorm.DB) (IStore, error) {
+	if err := db.AutoMigrate(&StoreItem{}); err != nil {
 		return nil, err
 	}
-	return &GormStore{db}, nil
+	return &Store{db}, nil
 }

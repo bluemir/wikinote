@@ -1,19 +1,19 @@
 package plugins
 
-import "github.com/gin-gonic/gin"
+import (
+	"context"
+	"net/http"
+)
 
 type Plugin interface {
+	SetConfig(ctx context.Context, conf any) error
+	//GetConfig(ctx context.Context) (string, error)
 }
 
 type PluginReadHook interface {
 	FileReadHook(path string, data []byte) ([]byte, error)
 }
-type PluginWriteHook interface {
-	FileWriteHook(path string, data []byte) ([]byte, error)
-}
 type PluginFooter interface {
 	Footer(path string) ([]byte, error)
 }
-type PluginRoute interface {
-	Route(r gin.IRouter) error
-}
+type PluginHTTPHandler = http.Handler

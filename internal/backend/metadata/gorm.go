@@ -1,25 +1,18 @@
 package metadata
 
 import (
+	"context"
+
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )
 
-type GormStoreConfig struct {
-	DB *gorm.DB
-}
-type GormStore struct {
+type Store struct {
 	*gorm.DB
 }
 
-type GormEntry struct {
-	Path  string `gorm:"primary_key"`
-	Key   string `gorm:"primary_key"`
-	Value string
-}
-
-func (store *GormStore) Take(path, key string) (string, error) {
-	entry := &GormEntry{
+func (store *Store) Take(ctx context.Context, path, key string) (string, error) {
+	entry := &StoreItem{
 		Path: path,
 		Key:  key,
 	}
@@ -31,16 +24,37 @@ func (store *GormStore) Take(path, key string) (string, error) {
 	}
 	return entry.Value, nil
 }
-func (store *GormStore) Save(path, key, value string) error {
-	return store.DB.Save(&GormEntry{
+func (store *Store) Save(ctx context.Context, path, key, value string) error {
+	return store.DB.Save(&StoreItem{
 		Path:  path,
 		Key:   key,
 		Value: value,
 	}).Error
 }
-func (store *GormStore) Delete(path, key string) error {
-	return store.DB.Delete(&GormEntry{
+func (store *Store) Delete(ctx context.Context, path, key string) error {
+	return store.DB.Delete(&StoreItem{
 		Path: path,
 		Key:  key,
 	}).Error
+}
+func (store *Store) FindByLabels(ctx context.Context, labels map[string]string) ([]StoreItem, error) {
+
+	cond := [][]any{}
+	for k, v := range labels {
+		cond = append(cond, []any{k, v})
+	}
+
+	entries := []StoreItem{}
+
+	if err := store.DB.WithContext(ctx).
+		Model(&StoreItem{}).
+		Where("(key, value) in ?", cond).
+		Group("path").
+		Having("count(*) = ?", len(labels)).
+		Find(&entries).Error; err != nil {
+
+		return nil, err
+	}
+
+	return entries, nil
 }

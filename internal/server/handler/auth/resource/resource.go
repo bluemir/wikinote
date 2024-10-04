@@ -38,6 +38,9 @@ func Messages(c *gin.Context) (auth.Resource, error) {
 		"kind": "message",
 	}, nil
 }
+func Plugins(c *gin.Context) (auth.Resource, error) {
+	return fromParams("plugin", c.Params), nil
+}
 func fromParams(kind string, params gin.Params) auth.KeyValues {
 	kvs := auth.KeyValues{
 		"kind": kind,

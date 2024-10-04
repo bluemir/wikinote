@@ -17,9 +17,7 @@ import (
 )
 
 type Config struct {
-	Salt     string                 `yaml:"salt"`
-	Plugins  []plugins.PluginConfig `yaml:"plugins"`
-	Metadata metadata.Config        `yaml:"metadata"`
+	Salt string `yaml:"salt"`
 }
 type Backend struct {
 	wikipath string
@@ -31,7 +29,7 @@ type Backend struct {
 
 	Auth     *auth.Manager
 	files    *files.FileStore
-	Metadata metadata.Store
+	metadata metadata.IStore
 	events   *events.EventRecoder
 	Plugin   *plugins.Manager
 }
@@ -76,10 +74,7 @@ func New(ctx context.Context, wikipath string, volatileDatabase bool) (*Backend,
 		return nil, errors.Wrap(err, "failed to init metadata module")
 	}
 
-	conf := []plugins.PluginConfig{}
-	// TODO Load plugin configs
-
-	plugin, err := plugins.New(conf, mdstore)
+	plugin, err := plugins.New(ctx, db, mdstore, hub)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to init plugins")
 	}
@@ -96,7 +91,7 @@ func New(ctx context.Context, wikipath string, volatileDatabase bool) (*Backend,
 
 		Auth:     auth,
 		files:    store,
-		Metadata: mdstore,
+		metadata: mdstore,
 		events:   recoder,
 		Plugin:   plugin,
 	}, nil

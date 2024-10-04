@@ -1,17 +1,25 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<title>Wikinote / admin</title>
-	{{ template "snippet/header.html"}}
-</head>
-<body>
-	{{ template "snippet/navigation-bar.html" . }}
-	<main>
-		<section page>
-			<a href="/-/admin/iam/users" >IAM</a>
-			<a href="/-/admin/plugins"   >Plugins</a>
-			<a href="/-/messages"        >Messages</a>
-		</section>
-	</main>
-</body>
+	<head>
+		<title>Wikinote / admin</title>
+		{{ template "snippet/header.html"}}
+	</head>
+	<body>
+		{{ template "snippet/navigation-bar.html" . }}
+		<main>
+			<section page>
+				<ul>
+					<li>
+						<a href="/-/admin/iam/users" >IAM</a>
+					</li>
+					<li>
+						<a href="/-/admin/plugins"   >Plugins</a>
+					</li>
+					<li>
+						<a href="/-/messages"        >Messages</a>
+					</li>
+				</ul>
+			</section>
+		</main>
+	</body>
 </html>

@@ -5,9 +5,11 @@ import (
 	"html/template"
 
 	"github.com/pkg/errors"
+	"golang.org/x/net/context"
 
 	"github.com/bluemir/wikinote/internal/backend/metadata"
 	"github.com/bluemir/wikinote/internal/plugins"
+	"github.com/bluemir/wikinote/internal/pubsub"
 )
 
 // https://giscus.app
@@ -27,14 +29,27 @@ type Options struct {
 	Lang          string
 }
 
+var defaultConfig string = `
+
+repo:
+repoId:
+category:
+categoryId:
+reactions:
+inputPosition: 
+theme:
+lang:
+`
+
 func init() {
-	plugins.Register("giscus", New, &Options{})
+	plugins.Register("giscus", New, defaultConfig, &Options{})
 }
 
-func New(o interface{}, store metadata.Store) (plugins.Plugin, error) {
-	opt, ok := o.(*Options)
+func New(ctx context.Context, conf any, store metadata.IStore, hub *pubsub.Hub) (plugins.Plugin, error) {
+	opt := &Options{}
+	opt, ok := conf.(*Options)
 	if !ok {
-		return nil, errors.Errorf("option not matched")
+		return nil, errors.Errorf("option type not matched: %T", conf)
 	}
 
 	// validation
@@ -107,4 +122,12 @@ func makeHTML(opt *Options) (string, error) {
 	}
 
 	return buf.String(), nil
+}
+
+func (*Giscus) SetConfig(ctx context.Context, conf any) error {
+	_, ok := conf.(*Options)
+	if !ok {
+		return errors.Errorf("optiontype not matched: %T", conf)
+	}
+	return nil
 }

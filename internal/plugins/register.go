@@ -1,18 +1,34 @@
 package plugins
 
 import (
-	"github.com/bluemir/wikinote/internal/backend/metadata"
-)
+	"reflect"
 
-type PluginInit func(opt interface{}, store metadata.Store) (Plugin, error)
+	"github.com/pkg/errors"
+)
 
 type PluginInitDriver struct {
 	Init    PluginInit
-	Options interface{}
+	Type    reflect.Type
+	Default string
 }
 
-var inits = map[string]PluginInitDriver{}
+var drivers = map[string]PluginInitDriver{}
 
-func Register(name string, init PluginInit, opt interface{}) {
-	inits[name] = PluginInitDriver{init, opt}
+func Register(name string, init PluginInit, defaultConfig string, configType any) {
+	drivers[name] = PluginInitDriver{
+		Init:    init,
+		Type:    reflect.TypeOf(configType),
+		Default: defaultConfig,
+	}
+}
+
+func (d *PluginInitDriver) newConfig() any {
+	return reflect.New(d.Type).Interface()
+}
+func getDriver(name string) (*PluginInitDriver, error) {
+	d, ok := drivers[name]
+	if !ok {
+		return nil, errors.Errorf("plugin not found")
+	}
+	return &d, nil
 }

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Wikinote / admin / plugins</title>
+	{{ template "snippet/header.html"}}
+</head>
+<body>
+	{{ template "snippet/navigation-bar.html" . }}
+	<main>
+		<section page>
+			<table>
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Enabled</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+				{{ range .Data }}
+					<tr>
+						<td>{{ .Name }}</td>
+						<td>{{ .IsEnabled }}</td>
+						<td>
+							<a href="/-/admin/plugins/{{.Name}}">Config</a>
+						</td>
+					</tr>
+				</tbody>
+				{{ end }}
+			</table>
+		</section>
+	</main>
+</body>
+</html>

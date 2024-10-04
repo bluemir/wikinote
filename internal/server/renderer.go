@@ -10,10 +10,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bluemir/wikinote/internal/assets"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
+
+	"github.com/bluemir/wikinote/internal/assets"
 )
 
 func NewHtmlRenderer() (*template.Template, error) {

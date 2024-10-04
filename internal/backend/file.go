@@ -17,14 +17,6 @@ func (backend *Backend) FileReadStream(path string) (io.ReadSeekCloser, fs.FileI
 }
 
 func (backend *Backend) FileWrite(path string, data []byte) error {
-	data, err := backend.Plugin.TriggerFileWriteHook(path, data)
-	if err != nil {
-		backend.hub.Publish("system", Message{
-			Text: err.Error(),
-		})
-		return err
-	}
-
 	defer backend.hub.Publish("system.file.written", Message{
 		Text: fmt.Sprintf("file written,path=%s", path),
 	})
@@ -32,7 +24,6 @@ func (backend *Backend) FileWrite(path string, data []byte) error {
 	return backend.files.Write(path, data)
 }
 func (backend *Backend) FileWriteStream(path string, reader io.Reader) error {
-	// TODO FileWriteHook
 	defer backend.hub.Publish("system.file.written", Message{
 		Text: fmt.Sprintf("file written,path=%s", path),
 	})

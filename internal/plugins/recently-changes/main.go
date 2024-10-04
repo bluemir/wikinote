@@ -1,6 +1,7 @@
 package recent
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/bluemir/wikinote/internal/backend/metadata"
 	"github.com/bluemir/wikinote/internal/plugins"
+	"github.com/bluemir/wikinote/internal/pubsub"
 )
 
 type Options struct {
@@ -19,20 +21,24 @@ type Options struct {
 }
 type Recents struct {
 	opt   *Options
-	store metadata.Store
+	store metadata.IStore
 }
 type Data struct {
 	Path string
 	Time time.Time
 }
 
+var defaultConfig = `
+limit: 10
+`
+
 func init() {
-	plugins.Register("recently-changes", New, &Options{Limit: 10})
+	plugins.Register("recently-changes", New, defaultConfig, &Options{Limit: 10})
 }
-func New(o interface{}, store metadata.Store) (plugins.Plugin, error) {
-	opt, ok := o.(*Options)
+func New(ctx context.Context, conf any, store metadata.IStore, hub *pubsub.Hub) (plugins.Plugin, error) {
+	opt, ok := conf.(*Options)
 	if !ok {
-		return nil, errors.Errorf("option not matched")
+		return nil, errors.Errorf("option type not matched: %T", conf)
 	}
 
 	return &Recents{opt, store}, nil
@@ -83,7 +89,8 @@ func (r *Recents) Route(app gin.IRouter) error {
 	return nil
 }
 func (r *Recents) read() ([]Data, error) {
-	str, err := r.store.Take(".plugins", "recently-changed")
+	ctx := context.Background()
+	str, err := r.store.Take(ctx, ".plugins", "recently-changed")
 	if err != nil {
 		return nil, err
 	}
@@ -94,9 +101,14 @@ func (r *Recents) read() ([]Data, error) {
 	return list, nil
 }
 func (r *Recents) write(list []Data) error {
+	ctx := context.Background()
 	buf, err := json.Marshal(list)
 	if err != nil {
 		return err
 	}
-	return r.store.Save(".plugins", "recently-changed", string(buf))
+	return r.store.Save(ctx, ".plugins", "recently-changed", string(buf))
+}
+
+func (*Recents) SetConfig(ctx context.Context, conf any) error {
+	return nil
 }

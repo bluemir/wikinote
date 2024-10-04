@@ -82,6 +82,11 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 		system.PUT("/admin/iam/assigns/:subjectKind/:subjectName", can(verb.Update, resource.Assigns), handler.UpdateAssign)
 		system.DELETE("/admin/iam/assigns/:subjectKind/:subjectName", can(verb.Delete, resource.Assigns), handler.DeleteAssign)
 
+		// plugins
+		system.GET("/admin/plugins", can(verb.List, resource.Plugins), handler.ListPlugins)
+		system.GET("/admin/plugins/:name", can(verb.Get, resource.Plugins), handler.GetPlugin)
+		system.PUT("/admin/plugins/:name", can(verb.Update, resource.Plugins), handler.UpdatePlugin)
+
 		system.GET("/admin/messages", can(verb.List, resource.Messages), handler.ListAllMessages)
 
 		system.GET("/initialize", handler.RequestInitialize)
@@ -91,7 +96,8 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 	}
 
 	// plugins
-	plugins.RouteHook(app.Group("/~"))
+	//plugins.RouteHook(app.Group("/~"))
+	app.Any("/~/:name/*path", plugins.HandleHTTPRequest)
 
 	// reject url
 	app.Any("/.app/*path", handler.NotFound)

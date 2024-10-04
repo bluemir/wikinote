@@ -63,7 +63,7 @@ func View(c *gin.Context) {
 				return
 			}
 
-			footerData, err := backend.Plugin.GetWikiFooter(c.Request.URL.Path)
+			footerData, err := backend.Plugin.GetFooters(c.Request.URL.Path)
 			if err != nil {
 				logrus.Warn(err)
 				c.Error(err)

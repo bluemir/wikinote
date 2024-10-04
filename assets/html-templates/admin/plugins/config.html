@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Wikinote / admin / plugins</title>
+	{{ template "snippet/header.html"}}
+</head>
+<body>
+	{{ template "snippet/navigation-bar.html" . }}
+	<main>
+		<section page>
+			<nav>
+				<a href="/-/admin/plugins">Plugins</a>
+			</nav>
+			<h1>Plugin: '{{ .Data.Name }}'</h1>
+			<form method="put">
+				<label>IsEnabled</label>
+				<input
+					name="isEnabled"
+					type="checkbox"
+					value="{{.Data.IsEnabled}}"
+				/>
+				<textarea
+					name="config"
+					indent="2space"
+					auto-resize
+					submit-shortcut
+				>{{ .Data.Config }}</textarea>
+			</form>
+		</section>
+	</main>
+</body>
+</html>

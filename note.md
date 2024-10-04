@@ -184,4 +184,6 @@
 - [ ] image viewer 개선
 	- [ ] not found 표시
 	- [ ] 기본적인 정보 표시(like size, ...)
-
+- cache 정책 수립
+- Plugin 개선
+	- [ ] on/off by web UI
