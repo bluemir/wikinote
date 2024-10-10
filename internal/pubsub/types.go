@@ -49,4 +49,4 @@ type IHub interface {
 	// eg) for evt := range hub.Watch("test", ctx.Done())
 }
 
-var _ IHub = &Hub{}
+var _ IHub = (*Hub)(nil)

@@ -171,7 +171,7 @@ func TestListenWithStar(t *testing.T) {
 
 	assert.Equal(t, 1, counter.GetCount())
 }
-func ignoreTestListenWithStarInWord(t *testing.T) {
+func todoTestListenWithStarInWord(t *testing.T) {
 	ctx, cancel := testContext(t, 1*time.Second)
 	defer cancel()
 

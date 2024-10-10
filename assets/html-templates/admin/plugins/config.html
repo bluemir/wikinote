@@ -8,8 +8,12 @@
 	{{ template "snippet/navigation-bar.html" . }}
 	<main>
 		<section page>
-			<nav>
+			<nav class="breadcrumb">
+				<a href="/-/admin/"><c-icon kind="home"></c-icon></a>
+				/
 				<a href="/-/admin/plugins">Plugins</a>
+				/
+				<a >{{ .Data.Name }}</a>
 			</nav>
 			<h1>Plugin: '{{ .Data.Name }}'</h1>
 			<form method="put">
@@ -17,7 +21,8 @@
 				<input
 					name="isEnabled"
 					type="checkbox"
-					value="{{.Data.IsEnabled}}"
+					{{ if .Data.IsEnabled }}checked{{ end }}
+					value="true"
 				/>
 				<textarea
 					name="config"
@@ -25,6 +30,7 @@
 					auto-resize
 					submit-shortcut
 				>{{ .Data.Config }}</textarea>
+				<button>Save</button>
 			</form>
 		</section>
 	</main>

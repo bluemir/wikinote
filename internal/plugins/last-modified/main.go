@@ -4,10 +4,13 @@ import (
 	"context"
 	"time"
 
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+
+	"github.com/bluemir/wikinote/internal/backend/events"
 	"github.com/bluemir/wikinote/internal/backend/metadata"
 	"github.com/bluemir/wikinote/internal/plugins"
 	"github.com/bluemir/wikinote/internal/pubsub"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -24,7 +27,6 @@ type Core struct {
 
 var defaultConfig = `
 # Last Modified
-format: RFC3339
 `
 
 func init() {
@@ -36,16 +38,33 @@ func New(ctx context.Context, conf any, store metadata.IStore, hub *pubsub.Hub) 
 	if !ok {
 		return nil, errors.Errorf("option type not matched: %T", conf)
 	}
+
+	go handleFileWrite(ctx, store, hub)
+
+	logrus.Trace("last-modified enabled")
+
 	return &Core{opt, store}, nil
 }
+func handleFileWrite(ctx context.Context, store metadata.IStore, hub *pubsub.Hub) {
 
-func (c *Core) FileWriteHook(path string, data []byte) ([]byte, error) {
-	ctx := context.Background()
-	if err := c.store.Save(ctx, path, KeyLastModified, time.Now().UTC().Format(time.RFC3339)); err != nil {
-		return data, err
+	logrus.Tracef("%+v", hub)
+
+	ch := hub.Watch(events.KindFileWritten, ctx.Done())
+
+	logrus.Tracef("%+v", hub)
+
+	for msg := range ch {
+		evt := msg.Detail.(events.FileWritten)
+		logrus.Trace(evt)
+
+		if err := store.Save(ctx, evt.Path, KeyLastModified, time.Now().UTC().Format(time.RFC3339)); err != nil {
+			logrus.Warn(err)
+			hub.Publish("error", err)
+		}
+		logrus.WithField("path", evt.Path).WithField("time", time.Now()).Trace("last-modified updated")
 	}
-	return data, nil
 }
+
 func (c *Core) Footer(path string) ([]byte, error) {
 	ctx := context.Background()
 	value, err := c.store.Take(ctx, path, KeyLastModified)

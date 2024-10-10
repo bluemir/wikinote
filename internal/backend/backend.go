@@ -28,9 +28,9 @@ type Backend struct {
 	Config *Config
 
 	Auth     *auth.Manager
-	files    *files.FileStore
-	metadata metadata.IStore
-	events   *events.EventRecoder
+	Files    *files.FileStore
+	Metadata *metadata.Store
+	Events   *events.EventRecoder
 	Plugin   *plugins.Manager
 }
 
@@ -64,17 +64,17 @@ func New(ctx context.Context, wikipath string, volatileDatabase bool) (*Backend,
 		return nil, errors.Wrap(err, "failed to init auth module")
 	}
 
-	store, err := files.New(ctx, wikipath)
+	fileStore, err := files.New(ctx, wikipath)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to init file store")
 	}
 
-	mdstore, err := metadata.New(ctx, db)
+	metadataStore, err := metadata.New(ctx, db)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to init metadata module")
 	}
 
-	plugin, err := plugins.New(ctx, db, mdstore, hub)
+	plugin, err := plugins.New(ctx, db, metadataStore, hub)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to init plugins")
 	}
@@ -90,9 +90,9 @@ func New(ctx context.Context, wikipath string, volatileDatabase bool) (*Backend,
 		hub: hub,
 
 		Auth:     auth,
-		files:    store,
-		metadata: mdstore,
-		events:   recoder,
+		Files:    fileStore,
+		Metadata: metadataStore,
+		Events:   recoder,
 		Plugin:   plugin,
 	}, nil
 }

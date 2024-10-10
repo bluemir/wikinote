@@ -64,6 +64,8 @@ func (h *Hub) broadcast(evt Message) {
 	{
 		handlers, _ := h.handlers.GetOrSet(keys, datastruct.NewSet[Handler]())
 
+		logrus.Tracef("handlers: %d", handlers.Len())
+
 		for _, handler := range handlers.List() {
 			handler.Handle(h, evt)
 		}
@@ -97,6 +99,7 @@ func (h *Hub) RemoveHandler(kind string, handler Handler) {
 }
 
 func (h *Hub) AddListener(kind string, l Listener) {
+	logrus.Tracef("register listener: %s", kind)
 	h.AddHandler(kind, chanEventHandler{l})
 }
 func (h *Hub) RemoveListener(kind string, l Listener) {
@@ -104,12 +107,15 @@ func (h *Hub) RemoveListener(kind string, l Listener) {
 }
 
 func (h *Hub) Watch(kind string, done <-chan struct{}) <-chan Message {
+	logrus.WithField("kind", kind).Trace("watch event")
+
 	c := make(chan Message)
 	h.AddListener(kind, c)
 	go func() {
 		<-done
 		h.RemoveListener(kind, c)
 		close(c)
+		logrus.WithField("kind", kind).Trace("unwatch event")
 	}()
 
 	return c

@@ -58,3 +58,11 @@ func (store *Store) FindByLabels(ctx context.Context, labels map[string]string) 
 
 	return entries, nil
 }
+
+func (store *Store) List(ctx context.Context) ([]StoreItem, error) {
+	items := []StoreItem{}
+	if err := store.DB.WithContext(ctx).Find(&items).Error; err != nil {
+		return nil, err
+	}
+	return items, nil
+}

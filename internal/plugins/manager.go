@@ -38,13 +38,17 @@ type PluginInit func(ctx context.Context, conf any, store metadata.IStore, hub *
 var _ IManager = (*Manager)(nil)
 
 type Manager struct {
-	db *gorm.DB
-	// plugins
+	rootCtx context.Context
 
+	db    *gorm.DB
+	store metadata.IStore
+	hub   *pubsub.Hub
+
+	// plugins
 	Plugins map[string]Plugin
 
-	Footers   []PluginFooter
-	ReadHooks []PluginReadHook
+	Footers   map[string]PluginFooter
+	ReadHooks map[string]PluginReadHook
 	Handlers  map[string]http.Handler
 }
 
@@ -56,6 +60,7 @@ func New(ctx context.Context, db *gorm.DB, store metadata.IStore, hub *pubsub.Hu
 	// First, ensure all plugin(even disabled) have PluginState.
 	for name, driver := range drivers {
 		logrus.Tracef("make plugin entry: %s", name)
+
 		if err := db.WithContext(ctx).FirstOrCreate(&PluginState{
 			Name:   name,
 			Config: driver.Default,
@@ -71,44 +76,60 @@ func New(ctx context.Context, db *gorm.DB, store metadata.IStore, hub *pubsub.Hu
 	}
 
 	manager := &Manager{
-		db: db,
+		rootCtx: ctx,
+
+		db:    db,
+		store: store,
+		hub:   hub,
+
+		Plugins:   map[string]Plugin{},
+		Footers:   map[string]PluginFooter{},
+		ReadHooks: map[string]PluginReadHook{},
+		Handlers:  map[string]http.Handler{},
 	}
 	for _, state := range states {
-		driver, err := getDriver(state.Name)
-		if err != nil {
-			return nil, err
-			// TODO removed plugin, show it but not enabled & missing.
-		}
-
-		// load config
-		conf := driver.newConfig()
-
-		if err := yaml.Unmarshal([]byte(state.Config), conf); err != nil {
-			return nil, errors.WithStack(err)
-		}
-
-		plugin, err := driver.Init(ctx, conf, store, hub)
-		if err != nil {
+		if err := manager.initialzePlugin(state.Name, state.Config); err != nil {
 			return nil, err
 		}
-
-		manager.Plugins[state.Name] = plugin
-
-		if v, ok := plugin.(PluginReadHook); ok {
-			manager.ReadHooks = append(manager.ReadHooks, v)
-			logrus.Tracef("footer detected")
-		}
-		if v, ok := plugin.(PluginFooter); ok {
-			manager.Footers = append(manager.Footers, v)
-			logrus.Tracef("writeHook detected")
-		}
-		if v, ok := plugin.(PluginHTTPHandler); ok {
-			manager.Handlers[state.Name] = v
-			logrus.Tracef("route detected")
-		}
-
 	}
 	return manager, nil
+}
+
+func (manager *Manager) initialzePlugin(name string, config string) error {
+	driver, err := getDriver(name)
+	if err != nil {
+		return err
+		// TODO removed plugin, show it but not enabled & missing.
+	}
+
+	// load config
+	conf := driver.newConfig()
+
+	if err := yaml.Unmarshal([]byte(config), conf); err != nil {
+		return errors.WithStack(err)
+	}
+
+	plugin, err := driver.Init(manager.rootCtx, conf, manager.store, manager.hub)
+	if err != nil {
+		return err
+	}
+
+	manager.Plugins[name] = plugin
+
+	if v, ok := plugin.(PluginReadHook); ok {
+		manager.ReadHooks[name] = v
+		logrus.Tracef("read hook detected")
+	}
+	if v, ok := plugin.(PluginFooter); ok {
+		manager.Footers[name] = v
+		logrus.Tracef("footer detected")
+	}
+	if v, ok := plugin.(PluginHTTPHandler); ok {
+		manager.Handlers[name] = v
+		logrus.Tracef("route detected")
+	}
+
+	return nil
 }
 
 func (m *Manager) TriggerFileReadHooks(path string, data []byte) ([]byte, error) {
@@ -166,7 +187,11 @@ func (m *Manager) Enable(ctx context.Context, name string) error {
 		return errors.WithStack(err)
 	}
 
-	// TODO initialize plugin
+	// initialize plugin
+	if err := m.initialzePlugin(name, state.Config); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -182,7 +207,13 @@ func (m *Manager) Disable(ctx context.Context, name string) error {
 	if err := m.db.WithContext(ctx).Save(state).Error; err != nil {
 		return errors.WithStack(err)
 	}
-	// TODO remove plugin from manager
+
+	// remove plugin instance from manager
+	delete(m.Plugins, name)
+	delete(m.Footers, name)
+	delete(m.ReadHooks, name)
+	delete(m.Handlers, name)
+
 	return nil
 }
 func (m *Manager) SetConfig(ctx context.Context, name string, configString string) error {
@@ -213,5 +244,9 @@ func (m *Manager) SetConfig(ctx context.Context, name string, configString strin
 		return err
 	}
 
-	return m.Plugins[name].SetConfig(ctx, conf)
+	plugin, exist := m.Plugins[name]
+	if !exist {
+		return errors.Errorf("plugin instance not found: %s", name)
+	}
+	return plugin.SetConfig(ctx, conf)
 }

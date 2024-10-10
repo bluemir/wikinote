@@ -8,10 +8,10 @@ import (
 	"github.com/bluemir/wikinote/cmd"
 	// plugins
 	_ "github.com/bluemir/wikinote/internal/plugins/_sample"
-	//_ "github.com/bluemir/wikinote/internal/plugins/footer"
-	//_ "github.com/bluemir/wikinote/internal/plugins/giscus"
-	//_ "github.com/bluemir/wikinote/internal/plugins/last-modified"
-	//_ "github.com/bluemir/wikinote/internal/plugins/recently-changes"
+	_ "github.com/bluemir/wikinote/internal/plugins/footer"
+	_ "github.com/bluemir/wikinote/internal/plugins/giscus"
+	_ "github.com/bluemir/wikinote/internal/plugins/last-modified"
+	_ "github.com/bluemir/wikinote/internal/plugins/recently-changes"
 )
 
 func main() {

@@ -14,5 +14,5 @@ func (backend *Backend) GetMessages(ctx context.Context) ([]pubsub.Message, erro
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return backend.events.List(ctx, events.Since(d))
+	return backend.Events.List(ctx, events.Since(d))
 }

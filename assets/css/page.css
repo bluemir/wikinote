@@ -64,4 +64,16 @@ main section[page] {
     [font=monospace] {
         font-family: monospace;
     }
+
+    .breadcrumb {
+        color: black;
+        
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    }
 }

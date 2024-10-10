@@ -38,6 +38,11 @@ func Messages(c *gin.Context) (auth.Resource, error) {
 		"kind": "message",
 	}, nil
 }
+func Metadata(c *gin.Context) (auth.Resource, error) {
+	return auth.KeyValues{
+		"kind": "metadata",
+	}, nil
+}
 func Plugins(c *gin.Context) (auth.Resource, error) {
 	return fromParams("plugin", c.Params), nil
 }

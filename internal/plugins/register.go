@@ -23,7 +23,7 @@ func Register(name string, init PluginInit, defaultConfig string, configType any
 }
 
 func (d *PluginInitDriver) newConfig() any {
-	return reflect.New(d.Type).Interface()
+	return reflect.New(d.Type.Elem()).Interface()
 }
 func getDriver(name string) (*PluginInitDriver, error) {
 	d, ok := drivers[name]

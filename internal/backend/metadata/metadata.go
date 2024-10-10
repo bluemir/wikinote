@@ -12,6 +12,9 @@ type IStore interface {
 	Take(ctx context.Context, path, key string) (string, error)
 	Save(ctx context.Context, path, key, value string) error
 	Delete(ctx context.Context, path, key string) error
+
+	List(ctx context.Context) ([]StoreItem, error)
+
 	FindByLabels(ctx context.Context, labels map[string]string) ([]StoreItem, error)
 }
 
@@ -23,7 +26,7 @@ type StoreItem struct {
 	Value string
 }
 
-func New(ctx context.Context, db *gorm.DB) (IStore, error) {
+func New(ctx context.Context, db *gorm.DB) (*Store, error) {
 	if err := db.AutoMigrate(&StoreItem{}); err != nil {
 		return nil, err
 	}

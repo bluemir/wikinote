@@ -89,6 +89,8 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 
 		system.GET("/admin/messages", can(verb.List, resource.Messages), handler.ListAllMessages)
 
+		system.GET("/admin/metadata", can(verb.Get, resource.Metadata), handler.ListMetadata)
+
 		system.GET("/initialize", handler.RequestInitialize)
 		system.GET("/initialize/:code", handler.Initialze)
 		system.POST("/initialize/:code", handler.InitialzeAccept)
