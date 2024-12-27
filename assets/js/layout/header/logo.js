@@ -5,7 +5,7 @@ import {css} from "common.js";
 var tmpl = (app) => html`
 	<style>
 		${css}
-		
+
 		a {
 			color: var(--header-fg-color);
 			text-decoration: none;
@@ -21,7 +21,7 @@ class WikinoteHeaderLogo extends $.CustomElement {
 		super();
 	}
 	async render() {
-		render(tmpl(this), this.shadow);
+		render(tmpl(this), this.shadowRoot);
 	}
 	// attribute
 }

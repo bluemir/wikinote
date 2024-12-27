@@ -42,7 +42,7 @@ class Icon extends $.CustomElement {
 		this.render();
 	}
 	async render() {
-		render(tmpl(this), this.shadow);
+		render(tmpl(this), this.shadowRoot);
 	}
 	// attribute
 	get size() {

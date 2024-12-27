@@ -65,8 +65,6 @@ export async function request(method, url, options = {}) {
 		return obj
 	}, opts.query || {});
 
-
-
 	u.search = "";
 	url = u.href
 
@@ -479,20 +477,17 @@ extend(Array, {
 	},
 });
 
-
-export class CustomElement extends HTMLElement {
-	// private
-	#handler = {}
-
-	constructor({enableShadow = true} = {}) {
-		super();
-
-		if (enableShadow) {
-			//this["--shadow"] = this.attachShadow({mode: 'open'})
-			this.attachShadow({mode: 'open'})
-		}
-	}
-	// syntactic sugar
+extend(HTMLElement, {
+	// syntactic sugars
+	connectedCallback() {
+		this.render && this.render();
+		this.onConnected && this.onConnected();
+		this.fireEvent("connected");
+	},
+	disconnectedCallback() {
+		this.onDisconnected && this.onDisconnected();
+		this.fireEvent("disconnected")
+	},
 	attributeChangedCallback(name, oldValue, newValue) {
 		//  to use set follow to custom elements
 		//
@@ -505,30 +500,21 @@ export class CustomElement extends HTMLElement {
 			new: newValue,
 		});
 		this.onAttributeChanged(name, oldValue, newValue);
-	}
+	},
 	onAttributeChanged() {
 		this.render && this.render();
-	}
-	connectedCallback()  {
-		this.render && this.render();
-		this.onConnected && this.onConnected();
-		this.fireEvent("connected")
-	}
-	disconnectedCallback() {
-		this.onDisconnected && this.onDisconnected();
-		this.fireEvent("disconnected")
-	}
-	get shadow() {
-		return this.shadowRoot;
-	}
-	handler(h) {
-		var name = h instanceof Function ? h.name : h;
-		var f = h instanceof Function ? h : this[h];
+	},
+})
 
-		if (!this.#handler[name]) {
-			this.#handler[name] = evt => f.call(this, evt.detail);
+
+export class CustomElement extends HTMLElement {
+	constructor({enableShadow = true} = {}) {
+		super();
+
+		if (enableShadow) {
+			// this.shadowRoot
+			this.attachShadow({mode: 'open'})
 		}
-		return this.#handler[name];
 	}
 }
 

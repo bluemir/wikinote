@@ -1,5 +1,4 @@
 import * as $ from "bm.js/bm.module.js";
-//import {html, render} from '/lib/lit-html/lit-html.js';
 import {html, render} from 'lit-html';
 
 var tmpl = (elem) => html`

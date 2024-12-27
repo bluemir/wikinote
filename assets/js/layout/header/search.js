@@ -7,7 +7,7 @@ var tmpl = (app) => html`
 		${css}
 
 		:host {
-			
+
 		}
 	</style>
 	<form action="/-/search">
@@ -21,7 +21,7 @@ class CustomElement extends $.CustomElement {
 		super();
 	}
 	async render() {
-		render(tmpl(this), this.shadow);
+		render(tmpl(this), this.shadowRoot);
 	}
 	// attribute
 	get query() {

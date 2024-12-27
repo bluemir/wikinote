@@ -30,16 +30,6 @@ main {
     }
 }
 
-textarea[indent=tab] {
-    tab-size: 8ch;
-
-    &[tab-size=4] {
-        tab-size: 4ch;
-    }
-    &[tab-size=2] {
-        tab-size: 2ch;
-    }
-}
 
 /*****************************************/
 main section[page] {
@@ -51,7 +41,6 @@ main section[page] {
         width: 100%;
         min-height: 20rem;
         resize: vertical;
-        tab-size: 4ch;
         font-family: monospace;
     }
 
@@ -67,7 +56,7 @@ main section[page] {
 
     .breadcrumb {
         color: black;
-        
+
         a {
             color: inherit;
             text-decoration: none;
@@ -76,4 +65,8 @@ main section[page] {
             text-decoration: underline;
         }
     }
+}
+
+c-link-tabs a {
+	color: black;
 }

@@ -11,11 +11,12 @@
 			{{ template "snippet/editor/tabs.html" .}}
 			<form method="put" action="{{.Path}}"  enctype="multipart/form-data">
 				<textarea
+					is="enhanced-textarea"
 					name="data"
 					indent="tab"
+					tab-size="4"
 					auto-resize
 					submit-shortcut
-					tab-size="4"
 				>{{ .Data.data }}</textarea>
 				<button>Save</button>
 			</form>
