@@ -12,7 +12,7 @@
 	}
 	h3 {
 		font-size: 1.5rem;
-		border-bottom: 1px solid var(--light-gray);
+		border-bottom: 2px dotted var(--light-gray);
 	}
 	h4 {
 		font-size: 1.3rem;
@@ -24,7 +24,7 @@
 	h6 {
 		font-size: 1rem;
 	}
-	
+
 
 	a {
 		color: var(--link-fg-color);

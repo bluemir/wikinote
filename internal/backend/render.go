@@ -7,7 +7,6 @@ import (
 )
 
 func (backend *Backend) Render(input []byte) ([]byte, error) {
-
 	extensions := 0 |
 		parser.CommonExtensions |
 		parser.Footnotes |
