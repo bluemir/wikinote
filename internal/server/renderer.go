@@ -10,11 +10,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 
 	"github.com/bluemir/wikinote/internal/assets"
+	"github.com/bluemir/wikinote/internal/server/middleware/cache"
 )
 
 func NewHtmlRenderer() (*template.Template, error) {
@@ -48,6 +50,9 @@ func NewHtmlRenderer() (*template.Template, error) {
 			}
 
 			return string(buf)
+		},
+		"rev": func(c *gin.Context) string {
+			return c.GetString(cache.REVVED)
 		},
 	})
 

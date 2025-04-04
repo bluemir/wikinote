@@ -2,7 +2,7 @@
 <html>
 <head>
 	<title>Wikinote</title>
-	{{ template "snippet/header.html"}}
+	{{ template "snippet/header.html" . }}
 </head>
 <body>
 	{{ template "snippet/navigation-bar.html" . }}
@@ -27,7 +27,7 @@
 					{{ end }}
 				</tbody>
 			</table>
-		
+
 		</section>
 	</main>
 </body>

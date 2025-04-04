@@ -40,6 +40,7 @@ build/static/js/%: $(JS_SOURCES) package.json package-lock.json
 	@mkdir -p $(dir $@)
 	npx esbuild $(@:build/static/%=assets/%) --outdir=$(dir $@) \
 		--external:lit-html \
+		--external:bm.js/bm.module.js \
 		--bundle --sourcemap --format=esm \
 		$(OPTIONAL_WEB_BUILD_ARGS)
 	#--minify \

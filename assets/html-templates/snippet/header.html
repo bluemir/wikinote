@@ -1,14 +1,19 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-	@import "/-/static/css/page.css";
-</style>
-<script type="importmap">
+<script type="importmap" rev="{{rev .}}">
 	{
 		"imports": {
-			"lit-html": "https://unpkg.com/lit-html/lit-html.js"
+			"bm.js/bm.module.js": "/-/static/{{rev .}}/lib/bm.js/bm.module.js",
+			"lit-html": "https://unpkg.com/lit-html@3.2.1/lit-html.js",
+			"api.js": "/-/static/{{rev .}}/js/api.js",
+			"index.js": "/-/static/{{rev .}}/js/index.js"
 		}
 	}
 </script>
-<script type="module" src="/-/static/js/index.js"></script>
+<style>
+	@import "/-/static/{{rev .}}/css/page.css";
+</style>
+<script type="module">
+	import "index.js";
+</script>

@@ -13,6 +13,7 @@ import (
 	"github.com/bluemir/wikinote/internal/server/handler"
 	"github.com/bluemir/wikinote/internal/server/handler/auth/resource"
 	"github.com/bluemir/wikinote/internal/server/handler/auth/verb"
+	"github.com/bluemir/wikinote/internal/server/middleware/cache"
 )
 
 var (
@@ -25,6 +26,8 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 
 	app.GET("/", server.redirectToFrontPage)
 
+	// static
+	app.Group("/-/static/", staticCache).Group(cache.Rev()).StaticFS("/", http.FS(assets.Static))
 	{
 		// APIs
 		api := app.Group("/-/api", markAPI)
@@ -40,7 +43,6 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 	{
 		// system pages
 		system := app.Group("/-", markHTML)
-		system.Group("/static", staticCache).StaticFS("/", http.FS(assets.Static))
 
 		system.GET("/welcome", html("system/welcome.html"))
 
@@ -55,6 +57,12 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 		system.GET("/search", can(verb.Search, resource.Page), handler.Search)
 
 		system.GET("/admin", can(verb.Get, resource.AdminPage), html("admin/index.html"))
+
+		// common
+		system.GET("/admin/common ", can(verb.Get, resource.AdminPage), html("admin/common.html"))
+		system.POST("/admin", can(verb.Update, resource.AdminPage), handler.UpdateCommonSetting)
+
+		// iam > users
 		system.GET("/admin/iam/users", can(verb.List, resource.Users), handler.ListUsers)
 		system.GET("/admin/iam/users/:username", can(verb.Get, resource.Users), handler.GetUser)
 		system.POST("/admin/iam/users/:username", can(verb.Get, resource.Users), handler.UpdateUser)

@@ -187,3 +187,4 @@
 - cache 정책 수립
 - Plugin 개선
 	- [ ] on/off by web UI
+- [ ] title 을 변경할수 있는 설정

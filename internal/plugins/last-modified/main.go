@@ -46,7 +46,6 @@ func New(ctx context.Context, conf any, store metadata.IStore, hub *pubsub.Hub) 
 	return &Core{opt, store}, nil
 }
 func handleFileWrite(ctx context.Context, store metadata.IStore, hub *pubsub.Hub) {
-
 	logrus.Tracef("%+v", hub)
 
 	ch := hub.Watch(events.KindFileWritten, ctx.Done())

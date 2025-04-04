@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Wikinote / admin</title>
+		{{ template "snippet/header.html" . }}
+	</head>
+	<body>
+		{{ template "snippet/navigation-bar.html" . }}
+		<main>
+			<section page>
+				<form method="POST">
+					<label>Wiki Title</label>
+					<input name="title" />
+				</form>
+			</section>
+		</main>
+	</body>
+</html>

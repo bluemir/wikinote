@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/gin-contrib/location"
 	"github.com/gin-contrib/sessions"
@@ -14,7 +15,9 @@ import (
 	"github.com/bluemir/wikinote/internal/backend"
 	"github.com/bluemir/wikinote/internal/server/graceful"
 	"github.com/bluemir/wikinote/internal/server/injector"
+	"github.com/bluemir/wikinote/internal/server/middleware/cache"
 	"github.com/bluemir/wikinote/internal/server/middleware/errors"
+	"github.com/bluemir/wikinote/internal/server/middleware/prom"
 )
 
 type Config struct {
@@ -70,11 +73,19 @@ func Run(ctx context.Context, b *backend.Backend, conf *Config) error {
 	})
 	app.Use(sessions.Sessions("wikinote_session", store))
 
+	app.Use(location.Default(), fixURL)
+	app.Use(cache.CacheBusting)
+
+	app.Use(prom.Metrics())
+
 	// Register Routing
 	server.route(app, app.NoRoute, b.Plugin)
 
 	return graceful.Run(ctx, &http.Server{
-		Addr:    conf.Bind,
-		Handler: app,
+		Addr:              conf.Bind,
+		Handler:           app,
+		ReadHeaderTimeout: 1 * time.Minute,
+		WriteTimeout:      3 * time.Minute,
+		IdleTimeout:       3 * time.Minute,
 	})
 }
