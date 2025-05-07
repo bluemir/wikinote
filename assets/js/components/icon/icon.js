@@ -1,6 +1,6 @@
-import * as $ from "../../bm.module.js";
+import * as $ from "bm.js/bm.module.js";
 import {html, render} from 'lit-html';
-import {css} from "../common.js";
+import {css} from "common.js";
 
 var tmpl = (elem) => html`
 	<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />

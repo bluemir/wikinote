@@ -10,10 +10,10 @@ import (
 )
 
 type IEventRecoder interface {
-	List(ctx context.Context, opts ...ListOptionFn) ([]pubsub.Message, error)
-	ListWithOption(ctx context.Context, opt *ListOption) ([]pubsub.Message, error)
-	FindByKind(ctx context.Context, kind string, opts ...ListOptionFn) ([]pubsub.Message, error)
-	FindByKindWithOption(ctx context.Context, kind string, opt *ListOption) ([]pubsub.Message, error)
+	List(ctx context.Context, opts ...ListOptionFn) ([]pubsub.Event, error)
+	ListWithOption(ctx context.Context, opt *ListOption) ([]pubsub.Event, error)
+	FindByKind(ctx context.Context, kind string, opts ...ListOptionFn) ([]pubsub.Event, error)
+	FindByKindWithOption(ctx context.Context, kind string, opt *ListOption) ([]pubsub.Event, error)
 }
 
 var _ IEventRecoder = (*EventRecoder)(nil)
@@ -23,18 +23,14 @@ type EventRecoder struct {
 }
 
 func New(ctx context.Context, db *gorm.DB, hub *pubsub.Hub) (*EventRecoder, error) {
-	if err := db.AutoMigrate(&pubsub.Message{}); err != nil {
+	if err := db.AutoMigrate(&pubsub.Event{}); err != nil {
 		return nil, err
 	}
 
 	go func() {
-		for msg := range hub.Watch("*", ctx.Done()) {
-			if msg.Kind == "error" {
-				logrus.Error(msg.Detail) // give up recode. just log it
-				return
-			}
-			if err := db.Create(msg).Error; err != nil {
-				hub.Publish("error", err)
+		for evt := range hub.WatchAll(ctx.Done()) {
+			if err := db.Create(evt).Error; err != nil {
+				logrus.Error(evt) // give up recode. just log it
 			}
 		}
 	}()
@@ -66,7 +62,7 @@ func Until(d time.Duration) ListOptionFn {
 	}
 }
 
-func (m *EventRecoder) List(ctx context.Context, opts ...ListOptionFn) ([]pubsub.Message, error) {
+func (m *EventRecoder) List(ctx context.Context, opts ...ListOptionFn) ([]pubsub.Event, error) {
 	opt := ListOption{
 		Limit:  -1,
 		After:  time.Time{},
@@ -80,8 +76,8 @@ func (m *EventRecoder) List(ctx context.Context, opts ...ListOptionFn) ([]pubsub
 	return m.ListWithOption(ctx, &opt)
 }
 
-func (m *EventRecoder) ListWithOption(ctx context.Context, opt *ListOption) ([]pubsub.Message, error) {
-	messages := []pubsub.Message{}
+func (m *EventRecoder) ListWithOption(ctx context.Context, opt *ListOption) ([]pubsub.Event, error) {
+	messages := []pubsub.Event{}
 
 	if err := m.db.Limit(opt.Limit).Where("at < ? AND at > ?", opt.Before, opt.After).Find(&messages).Error; err != nil {
 		return nil, err
@@ -90,7 +86,7 @@ func (m *EventRecoder) ListWithOption(ctx context.Context, opt *ListOption) ([]p
 	return messages, nil
 }
 
-func (m *EventRecoder) FindByKind(ctx context.Context, kind string, opts ...ListOptionFn) ([]pubsub.Message, error) {
+func (m *EventRecoder) FindByKind(ctx context.Context, kind string, opts ...ListOptionFn) ([]pubsub.Event, error) {
 	opt := ListOption{
 		Limit:  -1,
 		After:  time.Time{},
@@ -103,8 +99,8 @@ func (m *EventRecoder) FindByKind(ctx context.Context, kind string, opts ...List
 
 	return m.ListWithOption(ctx, &opt)
 }
-func (m *EventRecoder) FindByKindWithOption(ctx context.Context, kind string, opt *ListOption) ([]pubsub.Message, error) {
-	message := []pubsub.Message{}
+func (m *EventRecoder) FindByKindWithOption(ctx context.Context, kind string, opt *ListOption) ([]pubsub.Event, error) {
+	message := []pubsub.Event{}
 
 	if err := m.db.Limit(opt.Limit).Where("at =< ? AND at >= ? AND kind = ?", opt.Before, opt.After, kind).Find(&message).Error; err != nil {
 		return nil, err

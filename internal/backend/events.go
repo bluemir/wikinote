@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (backend *Backend) GetMessages(ctx context.Context) ([]pubsub.Message, error) {
+func (backend *Backend) GetEvents(ctx context.Context) ([]pubsub.Event, error) {
 	d, err := time.ParseDuration("-24h") // TODO
 	if err != nil {
 		return nil, errors.WithStack(err)

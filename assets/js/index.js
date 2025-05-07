@@ -1,6 +1,9 @@
 import "./common.js";
+import "./components/breadcrumb/breadcrumb.js";
 import "./components/dropdown/dropdown.js";
 import "./components/go-back.js";
+import "./components/icon/icon.js";
+import "./components/input/input.js";
 import "./components/input/key-value.js";
 import "./components/input/list.js";
 import "./components/link-tabs/tabs.js";

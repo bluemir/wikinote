@@ -1,16 +1,17 @@
 package pubsub
 
 import (
+	"context"
 	"time"
 
 	"github.com/sirupsen/logrus"
 )
 
 type chanEventHandler struct {
-	ch chan<- Message
+	ch chan<- Event
 }
 
-func (h chanEventHandler) Handle(ctx Context, evt Message) {
+func (h chanEventHandler) Handle(ctx context.Context, evt Event) {
 	for {
 		select {
 		case h.ch <- evt:

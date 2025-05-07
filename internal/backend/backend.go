@@ -81,7 +81,9 @@ func New(ctx context.Context, wikipath string, volatileDatabase bool) (*Backend,
 
 	logrus.Trace("backend initailized")
 
-	defer hub.Publish("system", Message{"server started"})
+	defer hub.Publish(context.Background(), events.SystemMessage{
+		Message: "server started",
+	})
 
 	return &Backend{
 		wikipath: wikipath,

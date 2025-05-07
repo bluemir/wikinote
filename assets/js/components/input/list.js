@@ -19,10 +19,10 @@ var tmpl = (elem) => html`
 					placeholder="${elem.attr("placeholder")}"
 					type="${elem.attr("type")||"text"}"
 				/>
-				<c-button><button  @click="${evt => elem.removeValue(index)}">Delete</button></c-button>
+				<button  @click="${evt => elem.removeValue(index)}">Delete</button>
 			</div>
 		`)}
-		<c-button><button @click="${evt => elem.addValue(evt)}">Add</button></c-button>
+		<button @click="${evt => elem.addValue(evt)}">Add</button>
 	</div>
 `;
 

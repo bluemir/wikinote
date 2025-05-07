@@ -11,7 +11,7 @@ import (
 func ListAllMessages(c *gin.Context) {
 	backend := injector.Backends(c)
 
-	messages, err := backend.GetMessages(c.Request.Context())
+	messages, err := backend.GetEvents(c.Request.Context())
 	if err != nil {
 		c.Error(err)
 		c.Abort()

@@ -208,28 +208,43 @@ export function frames({fps = 30} = {}) {
 	return f();
 }
 
-export function parsePathParam(pattern) {
-	let ptn = pattern.split("/").filter( str => str.length > 0);
-
-	let paths = location.pathname.split("/").filter( str => str.length > 0);
-
-	return ptn.reduce((obj, current, index) => {
-		if (obj === null) {
-			return obj;
-		}
-		if (current.startsWith(":")) {
-			let name = current.substring(1);
-			obj[name] = paths[index]
-		} else {
-			if (current != paths[index]) {
-				// not matched
-				return null;
-			}
-		}
-		return obj
-	}, {});
+export async function* range({step = 1, sleep = 0, start = 0} = {}) {
+	let count = start;
+	while(true) {
+		yield new Promise((resolve, reject) => {
+			setTimeout(() => {
+				resolve(count);
+				count+=step;
+			}, sleep)
+		});
+	}
 }
 
+export function animateFrames(callback, {fps = 30} = {}) {
+	let stop = false;
+	let fpsInterval = 1000 / fps;
+	let then = Date.now();
+	animate();
+
+	function animate() {
+		if (stop) {
+			return;
+		}
+		requestAnimationFrame(animate);
+
+		let now = Date.now();
+		let elapsed = now - then;
+
+		if (elapsed > fpsInterval) {
+			then = now - (elapsed % fpsInterval);
+
+			let ret = callback(elapsed - (elapsed%fpsInterval));
+			if (ret && ret.stop) {
+				stop = true;
+			}
+		}
+	}
+}
 export function jq(data, query, value) {
 	let keys = query.split("\\.").map(str => str.split(".")).reduce((p, c) => {
 		if (p.length == 0 ) {
@@ -258,8 +273,107 @@ export function jq(data, query, value) {
 			return visitor[keys.shift()];
 		}
 	} catch(e) {
-		throw new ExtendedError("[$.jq] not found", e);
+		return null;
+		//throw new Error(`[$.jq] not found: ${query}`, e);
 	}
+
+	////////////////////// by chat gpt
+	/*
+	function accessJsonByPath(obj, path, value) {
+		// maybe need tokenizer? is it overengineer?
+		// 특수 문자 이스케이프 처리
+		const ESCAPED_DOT = '__DOT__';
+		const ESCAPED_OPEN_BRACKET = '__OB__';
+		const ESCAPED_CLOSE_BRACKET = '__CB__';
+
+		path = path
+			.replace(/\\\./g, ESCAPED_DOT)      // `\.` → `__DOT__`
+			.replace(/\\\[/g, ESCAPED_OPEN_BRACKET)  // `\[ ` → `__OB__`
+			.replace(/\\\]/g, ESCAPED_CLOSE_BRACKET); // `\]` → `__CB__`
+
+		const keys = path.split('.');
+		let current = obj;
+
+		for (let i = 0; i < keys.length; i++) {
+			let key = keys[i];
+
+			// 이스케이프된 문자 원상 복구
+			key = key
+				.replace(new RegExp(ESCAPED_DOT, 'g'), '.')
+				.replace(new RegExp(ESCAPED_OPEN_BRACKET, 'g'), '[')
+				.replace(new RegExp(ESCAPED_CLOSE_BRACKET, 'g'), ']');
+
+			// 배열 인덱스 처리 (예: book[1])
+			const arrayMatch = key.match(/^(.+?)\[(\d+)]$/);
+			if (arrayMatch) {
+				const [, arrayKey, index] = arrayMatch;
+
+				if (!current[arrayKey]) {
+					if (value === undefined) return undefined; // 조회 시 경로 없음
+					current[arrayKey] = []; // 경로 생성
+				}
+
+				if (!Array.isArray(current[arrayKey])) throw new Error(`${arrayKey} is not an array`);
+
+				if (value === undefined) {
+					return current[arrayKey][index]; // 조회 모드
+				}
+
+				// 배열 요소가 없으면 기본 객체 생성
+				if (!current[arrayKey][index]) current[arrayKey][index] = {};
+
+				// 마지막 키면 값 삽입
+				if (i === keys.length - 1) {
+					current[arrayKey][index] = value;
+					return obj;
+				}
+
+				current = current[arrayKey][index];
+			} else {
+				if (value === undefined) {
+					return current[key]; // 조회 모드
+				}
+
+				// 객체가 없으면 생성
+				if (!current[key]) current[key] = {};
+
+				// 마지막 키면 값 삽입
+				if (i === keys.length - 1) {
+					current[key] = value;
+					return obj;
+				}
+
+				current = current[key];
+			}
+		}
+
+		return obj;
+	}
+
+	// ✅ 테스트용 JSON 데이터
+	const data = {
+		store: {
+			book: [
+				{ title: "The Great Gatsby" },
+				{ title: "Harry Potter" }
+			]
+		}
+	};
+
+	// ✅ 조회(GET) 테스트
+	console.log(accessJsonByPath(data, "store.book[1].title")); // "Harry Potter"
+	console.log(accessJsonByPath(data, "store.book[2].title")); // undefined (없는 경로)
+	console.log(accessJsonByPath(data, "store\\.settings\\.theme")); // undefined (점 포함된 키)
+
+	// ✅ 설정(SET) 테스트
+	console.log(accessJsonByPath(data, "store.book[1].author", "J.K. Rowling")); // 기존 배열 내부 값 추가
+	console.log(accessJsonByPath(data, "store.book[2].title", "New Book")); // 새 배열 요소 추가
+	console.log(accessJsonByPath(data, "store.bicycle.color", "red")); // 새 객체 삽입
+	console.log(accessJsonByPath(data, "store\\.settings\\.theme", "dark")); // 점 포함된 키 추가
+	console.log(accessJsonByPath(data, "store.array\\[0\\]", "Escaped Array Key")); // 이스케이프된 배열 키 추가
+
+	console.log(JSON.stringify(data, null, 2)); // 최종 JSON 확인
+	*/
 }
 export function merge(...args) {
 	return args.reduce((target, src={}) => {
@@ -279,6 +393,34 @@ export function merge(...args) {
 			return {...t, [key]:value}
 		}, target)
 	}, {})
+}
+
+export function parsePathParam(pattern, url = location.pathname) {
+	let ptn = pattern.split("/").filter( str => str.length > 0);
+
+	let paths = url.split("/").filter( str => str.length > 0);
+
+	return ptn.reduce((obj, current, index) => {
+		if (obj === null) {
+			return obj;
+		}
+		if (current.startsWith(":")) {
+			let name = current.substring(1);
+			obj[name] = paths[index]
+		} else {
+			if (current != paths[index]) {
+				// not matched
+				return null;
+			}
+		}
+		return obj
+	}, {});
+}
+
+export function closeDialog(evt) {
+	if (evt.target.nodeName === 'DIALOG') {
+		evt.target.close();
+	}
 }
 
 export function wsURL (url){
@@ -331,7 +473,8 @@ Object.keyValues= function(obj, f) {
 Object.map = function(obj, f) {
 	return Object.entries(obj).map(([key, value]) => f({key,value})).reduce((obj, {key,value}={}) => (key?{ ...obj, [key]: value}:obj), {});
 }
-Object.same = function(x, y) {
+
+export function isSame(x, y){
 	if (x === null || x === undefined || y === null || y === undefined) {
 		return x === y;
 	}
@@ -370,7 +513,7 @@ Object.same = function(x, y) {
 	}
 
 	// recursive object equality check
-	return xk.every(i => Object.same(x[i], y[i]))
+	return xk.every(i => isSame(x[i], y[i]));
 }
 
 const sig = "__bm.js_inserted__"
@@ -408,29 +551,28 @@ extend(Element, {
 			return
 		}
 		if (value !== undefined) {
-
-			this.setAttribute(name, value)
+			this.setAttribute(name, value);
 			return value;
 		} else {
-			return this.getAttribute(name)
+			return this.getAttribute(name);
 		}
 	},
 })
 
 extend(EventTarget, {
-	on: function(name, handler, opt) {
-		this.addEventListener(name, handler, opt);
+	on: function(name, handler, opts) {
+		this.addEventListener(name, handler, opts);
 		return this;
 	},
-	off: function(name, handler, opt) {
-		this.removeEventListener(name, handler, opt)
+	off: function(name, handler, opts) {
+		this.removeEventListener(name, handler, opts)
 		return this;
 	},
 	fireEvent: function(name, detail) {
 		let evt = new CustomEvent(name, {detail: detail});
 		this.dispatchEvent(evt);
 		return this;
-	}
+	},
 });
 
 extend(NodeList, {
@@ -468,6 +610,53 @@ extend(Array, {
 	},
 });
 
+
+
+// custom elements
+// usage.
+// let tmpl = html`<p>hello <span var="name"></span></p>`
+// class CustomElement extends $.CustomElement {
+//   onConnected() {
+//     this.shadowRoot.append($.populate({
+//       name:"world",
+//     }, tmpl.content.cloneNode(true)));
+//   }
+//   onDisconnected() {
+//     this.shadowRoot.clear();
+//   }
+//   render() {
+//     $.populate({
+//       name:"world",
+//     }, this.shadowRoot);
+//   }
+// }
+export function html(strings, values) {
+	let dom = $.create("template");
+
+	let result = '';
+	for (let i = 0; i < strings.length; i++) {
+		result += strings[i];
+		if (values && i < values.length) {
+			result += values[i];
+		}
+	}
+
+	dom.innerHTML = result;
+	return dom;
+}
+
+export function populate(data, elem = document) {
+	$.all(e, "[var]").forEach(elem => {
+		let key = elem.attr("var");
+
+		let value = jq(data, key);
+
+		elem.clear();
+		elem.appendChild(document.createTextNode(value));
+	});
+	return elem;
+}
+
 extend(HTMLElement, {
 	// syntactic sugars
 	connectedCallback() {
@@ -495,7 +684,7 @@ extend(HTMLElement, {
 	onAttributeChanged() {
 		this.render && this.render();
 	},
-})
+});
 
 export class CustomElement extends HTMLElement {
 	constructor({enableShadow = true} = {}) {
@@ -503,10 +692,12 @@ export class CustomElement extends HTMLElement {
 
 		if (enableShadow) {
 			// this.shadowRoot
-			this.attachShadow({mode: 'open'})
+			this.attachShadow({mode})
 		}
 	}
 }
+
+// async events
 
 export class AwaitEventTarget {
 	constructor() {
@@ -537,11 +728,13 @@ export class AwaitEventTarget {
 	}
 
 	// syntactic sugar
-	on(eventName, handler) {
-		this.addEventListener(eventName, handler)
+	on(eventName, handler, opts) {
+		this.addEventListener(eventName, handler, opts);
+		return this;
 	}
-	off(eventName, handler) {
-		this.removeEventListener(eventName, handler)
+	off(eventName, handler, opts) {
+		this.removeEventListener(eventName, handler, opts);
+		return this;
 	}
 	fireEvent(name, detail) {
 		let evt = new CustomEvent(name, {detail: detail});
@@ -588,3 +781,4 @@ export class AwaitQueue {
 		return this.queue.length;
 	}
 }
+

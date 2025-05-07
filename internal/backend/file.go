@@ -1,7 +1,7 @@
 package backend
 
 import (
-	"fmt"
+	"context"
 	"io"
 	"io/fs"
 
@@ -18,14 +18,14 @@ func (backend *Backend) FileReadStream(path string) (io.ReadSeekCloser, fs.FileI
 }
 
 func (backend *Backend) FileWrite(path string, data []byte) error {
-	defer backend.hub.Publish(events.KindFileWritten, events.FileWritten{
+	defer backend.hub.Publish(context.Background(), events.FileWritten{
 		Path: path,
 	})
 
 	return backend.Files.Write(path, data)
 }
 func (backend *Backend) FileWriteStream(path string, reader io.Reader) error {
-	defer backend.hub.Publish(events.KindFileWritten, events.FileWritten{
+	defer backend.hub.Publish(context.Background(), events.FileWritten{
 		Path: path,
 	})
 
@@ -33,9 +33,7 @@ func (backend *Backend) FileWriteStream(path string, reader io.Reader) error {
 }
 
 func (backend *Backend) FileDelete(path string) error {
-	defer backend.hub.Publish("system.file.deleted", Message{
-		Text: fmt.Sprintf("file deleted,path=%s", path),
-	})
+	defer backend.hub.Publish(context.Background(), events.FileDeleted{Path: path})
 	return backend.Files.Delete(path)
 }
 func (backend *Backend) FileList(path string) ([]files.FileInfo, error) {

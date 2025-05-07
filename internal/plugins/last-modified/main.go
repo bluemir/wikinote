@@ -48,7 +48,7 @@ func New(ctx context.Context, conf any, store metadata.IStore, hub *pubsub.Hub) 
 func handleFileWrite(ctx context.Context, store metadata.IStore, hub *pubsub.Hub) {
 	logrus.Tracef("%+v", hub)
 
-	ch := hub.Watch(events.KindFileWritten, ctx.Done())
+	ch := hub.Watch(events.FileWritten{}, ctx.Done())
 
 	logrus.Tracef("%+v", hub)
 
@@ -58,7 +58,10 @@ func handleFileWrite(ctx context.Context, store metadata.IStore, hub *pubsub.Hub
 
 		if err := store.Save(ctx, evt.Path, KeyLastModified, time.Now().UTC().Format(time.RFC3339)); err != nil {
 			logrus.Warn(err)
-			hub.Publish("error", err)
+			hub.Publish(context.Background(), events.ErrorOccured{
+				Error: err,
+			})
+			continue
 		}
 		logrus.WithField("path", evt.Path).WithField("time", time.Now()).Trace("last-modified updated")
 	}

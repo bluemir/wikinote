@@ -15,10 +15,10 @@ var tmpl = (elem) => html`
 			<div>
 				<input .value="${kv.key}"   @change="${evt => elem.setKey(index, evt.target.value)}"   placeholder="key"   />
 				<input .value="${kv.value}" @change="${evt => elem.setValue(index, evt.target.value)}" placeholder="value" />
-				<c-button><button @click="${evt => elem.removeKeyValue(index)}">Delete</button></c-button>
+				<button @click="${evt => elem.removeKeyValue(index)}">Delete</button>
 			</div>
 		`)}
-		<c-button><button @click="${evt => elem.addKeyValue(evt)}">Add</button></c-button>
+		<button @click="${evt => elem.addKeyValue(evt)}">Add</button>
 	</div>
 
 
