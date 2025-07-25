@@ -20,7 +20,7 @@ build/$(APP_NAME): $(GO_SOURCES) $(MAKEFILE_LIST) fmt vet
 		-ldflags "\
 			-X '$(IMPORT_PATH)/internal/buildinfo.AppName=$(APP_NAME)' \
 			-X '$(IMPORT_PATH)/internal/buildinfo.Version=$(VERSION)' \
-			-X '$(IMPORT_PATH)/internal/buildinfo.BuildTime=$(shell date --rfc-3339=ns)' \
+			-X '$(IMPORT_PATH)/internal/buildinfo.BuildTime=$(shell go run scripts/tools/date/main.go)' \
 		" \
 		$(OPTIONAL_BUILD_ARGS) \
 		-o $@ .

@@ -33,8 +33,8 @@ help: ## Display this help
 	#  - node  : 14.16.x
 	#  - make  : 4.3 (*CAUTION* osx has lower verion of make)
 	#
-	@echo -e "# Usage:"
-	@echo -e "#   make \033[36m<target>\033[0m"
+	@printf "# Usage:\n"
+	@printf "#   make \033[36m<target>\033[0m\n"
 	@awk 'BEGIN {FS = ":.*##";} /^[a-zA-Z_0-9-]+:.*?##/ { printf "#   \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "#\n# \033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 .PHONY: default build run test clean tools build-tools help
