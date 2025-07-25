@@ -4,8 +4,6 @@ export VERSION
 IMPORT_PATH=$(shell cat go.mod | head -n 1 | awk '{print $$2}')
 APP_NAME=$(notdir $(IMPORT_PATH))
 
-export GO111MODULE=on
-
 export PATH:=${PATH}:./build/tools/
 
 # go build args
