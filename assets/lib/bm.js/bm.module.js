@@ -687,7 +687,7 @@ extend(HTMLElement, {
 });
 
 export class CustomElement extends HTMLElement {
-	constructor({enableShadow = true} = {}) {
+	constructor({enableShadow = true, mode = "open"} = {}) {
 		super();
 
 		if (enableShadow) {

@@ -2,27 +2,28 @@ import * as $ from "bm.js/bm.module.js";
 import {html, render} from 'lit-html';
 import {css} from "common.js";
 
-var tmpl = (app) => html`
-	<style>
-		${css}
+class CustomElement extends $.CustomElement {
+	template() {
+		return html`
+			<style>
+				${css}
 
-		a {
-			color: var(--header-fg-color);
-			text-decoration: none;
-			font-size: 2rem;
-			font-weight: bold;
-		}
-	</style>
-	<a href="/">Wikinote</a>
-`;
-
-class WikinoteHeaderLogo extends $.CustomElement {
+				a {
+					color: var(--header-fg-color);
+					text-decoration: none;
+					font-size: 2rem;
+					font-weight: bold;
+				}
+			</style>
+			<a href="/">Wikinote</a>
+		`;
+	}
 	constructor() {
 		super();
 	}
 	async render() {
-		render(tmpl(this), this.shadowRoot);
+		render(this.template(), this.shadowRoot);
 	}
 	// attribute
 }
-customElements.define("wikinote-header-logo", WikinoteHeaderLogo);
+customElements.define("wikinote-header-logo", CustomElement);

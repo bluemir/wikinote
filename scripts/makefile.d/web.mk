@@ -41,6 +41,7 @@ build/static/js/%: $(JS_SOURCES) package.json package-lock.json
 	npx esbuild $(@:build/static/%=assets/%) --outdir=$(dir $@) \
 		--external:lit-html \
 		--external:bm.js/bm.module.js \
+		--minify \
 		--bundle --sourcemap --format=esm \
 		$(OPTIONAL_WEB_BUILD_ARGS)
 	#--minify \
@@ -53,6 +54,7 @@ build/static/css/%.css: $(CSS_SOURCES) $(WEB_LIBS)
 	@mkdir -p $(dir $@)
 	npx esbuild $(@:build/static/%=assets/%) --outdir=$(dir $@) \
 		--bundle --sourcemap \
+		--minify \
 		$(OPTIONAL_WEB_BUILD_ARGS)
 
 .PHONY: build-web
