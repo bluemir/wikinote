@@ -1,6 +1,5 @@
 ##@ Run
 
-
 .PHONY: run
 run: build/$(APP_NAME) ## Run web app
 	$< -vv server --wiki-path=runtime --volatile-database

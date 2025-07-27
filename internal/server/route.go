@@ -102,7 +102,6 @@ func (server *Server) route(app gin.IRouter, noRoute func(...gin.HandlerFunc), p
 		system.GET("/initialize", handler.RequestInitialize)
 		system.GET("/initialize/:code", handler.Initialze)
 		system.POST("/initialize/:code", handler.InitialzeAccept)
-
 	}
 
 	// plugins
