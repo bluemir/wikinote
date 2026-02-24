@@ -9,7 +9,7 @@
 		- footnote
 		- table
 		- checklist
-- [ ] markdown css 손보기
+- [x] markdown css 손보기
 - [ ] layout 용 custom element 는 제거
 	- layout은 html 로 하고, component 들만 custom element로
 - [x] gnb는 position: sticky 로
@@ -18,7 +18,7 @@
 - [x] pubsub을 0xC0DE에 있는 버전으로 업데이트
 - [x] `github.com/cockroachdb/errors` 로 교체
 - [x] embed 파일을 assets 내로 이동
-- [ ] 현재 `d1fc296` 를 서빙 중인데 차이점 및 버전업 할때 고려사항 확인
+- [x] 현재 `d1fc296` 를 서빙 중인데 차이점 및 버전업 할때 고려사항 확인
 - [x] password 암호화 방식 변경.
 - [x] web.mk 의 정리
 	- embed.go 에서 build 하므로 해당 script 는 필요하면 정리.

@@ -121,7 +121,7 @@ func EditForm(c *gin.Context) error {
 			return err
 		}
 		c.HTML(http.StatusOK, "editors/text.html", With(c, KeyValues{
-			"data": template.HTML(data),
+			"data": string(data),
 		}))
 		return nil
 	case "directory":
