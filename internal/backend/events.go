@@ -9,7 +9,7 @@ import (
 	"github.com/cockroachdb/errors"
 )
 
-func (backend *Backend) GetEvents(ctx context.Context) ([]pubsub.Event, error) {
+func (backend *Backend) GetEvents(ctx context.Context) ([]pubsub.Event[any], error) {
 	d, err := time.ParseDuration("-24h") // TODO
 	if err != nil {
 		return nil, errors.WithStack(err)

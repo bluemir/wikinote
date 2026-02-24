@@ -33,20 +33,21 @@ type EventForTest struct {
 // Simple recording handler
 type RecordingHandler struct {
 	mu     sync.Mutex
-	Events []pubsub.Event
+	Events []pubsub.Event[any]
 }
 
 func NewRecordingHandler() *RecordingHandler {
 	return &RecordingHandler{
-		Events: make([]pubsub.Event, 0),
+		Events: make([]pubsub.Event[any], 0),
 	}
 }
 
-func (rh *RecordingHandler) Handle(ctx context.Context, evt pubsub.Event) {
+func (rh *RecordingHandler) Handle(ctx context.Context, evt pubsub.Event[any]) error {
 	rh.mu.Lock()
 	defer rh.mu.Unlock()
 	// evt.Context = nil // Avoid storing context if comparing events directly
 	rh.Events = append(rh.Events, evt)
+	return nil
 }
 
 func (rh *RecordingHandler) Count() int {
@@ -86,7 +87,7 @@ func TestHub_SingleEvent(t *testing.T) {
 
 	assert.Equal(t, 1, recorder.Count(), "Handler should have received one event")
 	require.Len(t, recorder.Events, 1)
-	assert.Equal(t, reflect.TypeFor[EventForTest]().String(), recorder.Events[0].Kind)
+	assert.Equal(t, reflect.TypeOf(eventToSend).String(), recorder.Events[0].Kind)
 	assert.Equal(t, eventToSend, recorder.Events[0].Detail)
 }
 
@@ -105,8 +106,8 @@ func TestHub_MultipleEvents(t *testing.T) {
 	hub.Publish(context.Background(), EventForTest{Message: "world"})
 
 	assert.Len(t, recoder.Events, 2)
-	assert.Equal(t, reflect.TypeFor[EventForTest]().String(), recoder.Events[0].Kind)
-	assert.Equal(t, reflect.TypeFor[EventForTest]().String(), recoder.Events[1].Kind)
+	assert.Equal(t, reflect.TypeOf(EventForTest{}).String(), recoder.Events[0].Kind)
+	assert.Equal(t, reflect.TypeOf(EventForTest{}).String(), recoder.Events[1].Kind)
 	assert.Equal(t, "hello", recoder.Events[0].Detail.(EventForTest).Message)
 	assert.Equal(t, "world", recoder.Events[1].Detail.(EventForTest).Message)
 }
@@ -149,10 +150,11 @@ type ModifyingHandler struct {
 	recoder *RecordingHandler
 }
 
-func (h ModifyingHandler) Handle(ctx context.Context, evt pubsub.Event) {
+func (h ModifyingHandler) Handle(ctx context.Context, evt pubsub.Event[any]) error {
 	hub := pubsub.HubFrom(ctx)
 
 	hub.AddHandler(EventForTest{}, h.recoder)
+	return nil
 }
 
 type EventAddHandler struct {
@@ -178,4 +180,94 @@ func TestHub_ModifyHandlersInHandler(t *testing.T) {
 	hub.Publish(ctx, EventForTest{})
 
 	assert.Equal(t, 1, recoder.Count(), "AddedRecorder count mismatch")
+}
+
+func TestHub_RemoveHandler(t *testing.T) {
+	ctx, cancel := testContext(t, 1*time.Second)
+	defer cancel()
+
+	hub, err := pubsub.NewHub(ctx)
+	require.NoError(t, err)
+
+	recoder := NewRecordingHandler()
+	// Note: AddHandler uses reflect.TypeOf(kind), so pass an instance
+	hub.AddHandler(EventForTest{}, recoder)
+
+	hub.Publish(ctx, EventForTest{Message: "msg1"})
+
+	assert.Equal(t, 1, recoder.Count())
+
+	hub.RemoveHandler(EventForTest{}, recoder)
+
+	hub.Publish(ctx, EventForTest{Message: "msg2"})
+	assert.Equal(t, 1, recoder.Count(), "Should not receive event after removal")
+}
+
+func TestHub_Watch(t *testing.T) {
+	ctx, cancel := testContext(t, 1*time.Second)
+	defer cancel()
+
+	hub, err := pubsub.NewHub(ctx)
+	require.NoError(t, err)
+
+	done := make(chan struct{})
+	ch := hub.Watch(EventForTest{}, done)
+
+	expectedMsg := "test-watch"
+	go func() {
+		// Give time for Watch to be registered if needed, though it should be synchronous
+		time.Sleep(10 * time.Millisecond)
+		hub.Publish(ctx, EventForTest{Message: expectedMsg})
+	}()
+
+	select {
+	case evt := <-ch:
+		val, ok := evt.Detail.(EventForTest)
+		assert.True(t, ok)
+		assert.Equal(t, expectedMsg, val.Message)
+	case <-time.After(500 * time.Millisecond):
+		t.Fatal("Timeout waiting for event via Watch")
+	}
+
+	close(done)
+	select {
+	case _, ok := <-ch:
+		assert.False(t, ok, "Channel from Watch should be closed after done is closed")
+	case <-time.After(500 * time.Millisecond):
+		t.Fatal("Timeout waiting for Watch channel close")
+	}
+}
+
+func TestHub_WatchAll(t *testing.T) {
+	ctx, cancel := testContext(t, 1*time.Second)
+	defer cancel()
+
+	hub, err := pubsub.NewHub(ctx)
+	require.NoError(t, err)
+
+	done := make(chan struct{})
+	ch := hub.WatchAll(done)
+
+	expectedMsg := "test-watch-all"
+	go func() {
+		time.Sleep(10 * time.Millisecond)
+		hub.Publish(ctx, EventForTest{Message: expectedMsg})
+	}()
+
+	select {
+	case evt := <-ch:
+		val, ok := evt.Detail.(EventForTest)
+		assert.True(t, ok)
+		assert.Equal(t, expectedMsg, val.Message)
+	case <-time.After(500 * time.Millisecond):
+		t.Fatal("Timeout waiting for event via WatchAll")
+	}
+
+	close(done)
+	select {
+	case _, ok := <-ch:
+		assert.False(t, ok, "Channel from WatchAll should be closed after done is closed")
+	case <-time.After(500 * time.Millisecond):
+		t.Fatal("Timeout waiting for WatchAll channel close")
+	}
 }

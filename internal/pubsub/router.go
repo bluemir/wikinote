@@ -6,31 +6,31 @@ import (
 	"time"
 
 	"github.com/rs/xid"
+	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/internal/datastruct"
 )
 
-type IRouter interface {
-	Publish(ctx context.Context, kind string, detail any)
-	AddHandler(kind string, handler Handler)
-	RemoveHandler(kind string, handler Handler)
-	Watch(kind string, done <-chan struct{}) <-chan Event
-	WatchAll(done <-chan struct{}) <-chan Event
+type IRouter[T any] interface {
+	Publish(ctx context.Context, kind string, detail T)
+	AddHandler(kind string, handler Handler[T])
+	RemoveHandler(kind string, handler Handler[T])
+	Watch(kind string, done <-chan struct{}, opts ...WatchOption) <-chan Event[T]
+	WatchAll(done <-chan struct{}, opts ...WatchOption) <-chan Event[T]
 }
 
-var _ IRouter = (*Router)(nil)
+var _ IRouter[any] = (*Router[any])(nil)
 
-type Router struct {
-	handlers datastruct.Tree[string, datastruct.Set[Handler]]
-
-	all datastruct.Set[chan<- Event]
+type Router[T any] struct {
+	handlers    datastruct.Tree[string, datastruct.Set[Handler[T]]]
+	broadcaster *Broadcaster[Event[T]]
 }
 
 const Separator = "." // QUESTION make configurable?
 
-func NewRoute(ctx context.Context) (*Router, error) {
-	return &Router{
-		all: datastruct.NewSet[chan<- Event](),
+func NewRoute[T any](ctx context.Context) (*Router[T], error) {
+	return &Router[T]{
+		broadcaster: NewBroadcaster[Event[T]](),
 	}, nil
 }
 
@@ -38,19 +38,16 @@ type keyTypeRouter struct{}
 
 var keyRouter = keyTypeRouter{}
 
-func RouterFrom(ctx context.Context) *Router {
-	return ctx.Value(keyRouter).(*Router)
+func RouterFrom[T any](ctx context.Context) *Router[T] {
+	return ctx.Value(keyRouter).(*Router[T])
 }
 
-func (router *Router) Publish(ctx context.Context, kind string, detail any) {
+func (router *Router[T]) Publish(ctx context.Context, kind string, detail T) {
 	keys := strings.Split(kind, Separator)
 	handlers, ok := router.handlers.Get(keys...)
-	if !ok {
-		return
-	}
 
 	ctx = context.WithValue(ctx, keyRouter, router)
-	evt := Event{
+	evt := Event[T]{
 		Context: ctx,
 		Id:      xid.New().String(),
 		At:      time.Now(),
@@ -58,30 +55,52 @@ func (router *Router) Publish(ctx context.Context, kind string, detail any) {
 		Kind:    kind,
 	}
 
-	for _, handler := range handlers.List() {
-		handler.Handle(ctx, evt)
+	if ok {
+		snapshot := []Handler[T]{}
+		if err := handlers.Range(func(handler Handler[T]) error {
+			snapshot = append(snapshot, handler)
+			return nil
+		}); err != nil {
+			logrus.Debug(err)
+		}
+
+		for _, handler := range snapshot {
+			if err := handler.Handle(ctx, evt); err != nil {
+				logrus.Debug(err)
+			}
+		}
 	}
 
-	for _, ch := range router.all.List() {
-		ch <- evt
-	}
+	router.broadcaster.Broadcast(evt)
 }
-func (router *Router) AddHandler(kind string, handler Handler) {
+func (router *Router[T]) AddHandler(kind string, handler Handler[T]) {
 	keys := strings.Split(kind, Separator)
-	handlers, _ := router.handlers.GetOrSet(keys, datastruct.NewSet[Handler]())
+	handlers, _ := router.handlers.GetOrSet(keys, datastruct.NewSet[Handler[T]]())
 
 	handlers.Add(handler)
 }
-func (router *Router) RemoveHandler(kind string, handler Handler) {
+func (router *Router[T]) RemoveHandler(kind string, handler Handler[T]) {
 	keys := strings.Split(kind, Separator)
-	handlers, _ := router.handlers.GetOrSet(keys, datastruct.NewSet[Handler]())
+	handlers, _ := router.handlers.GetOrSet(keys, datastruct.NewSet[Handler[T]]())
 
 	handlers.Remove(handler)
 }
-func (router *Router) Watch(kind string, done <-chan struct{}) <-chan Event {
-	ch := make(chan Event)
+func (router *Router[T]) Watch(kind string, done <-chan struct{}, opts ...WatchOption) <-chan Event[T] {
+	conf := watchConfig{
+		bufferSize: -1,
+	}
+	for _, opt := range opts {
+		opt(&conf)
+	}
 
-	h := chanEventHandler{
+	var ch chan Event[T]
+	if conf.bufferSize >= 0 {
+		ch = make(chan Event[T], conf.bufferSize)
+	} else {
+		ch = make(chan Event[T])
+	}
+
+	h := chanEventHandler[T]{
 		ch: ch,
 	}
 
@@ -92,17 +111,13 @@ func (router *Router) Watch(kind string, done <-chan struct{}) <-chan Event {
 		close(ch)
 	}()
 
-	return ch
-}
-func (router *Router) WatchAll(done <-chan struct{}) <-chan Event {
-	ch := make(chan Event)
+	if conf.bufferSize >= 0 {
+		return ch
+	}
 
-	router.all.Add(ch)
-	go func() {
-		<-done
-		router.all.Remove(ch)
-		close(ch)
-	}()
-
+	// Use DynamicChan to prevent deadlock during recursive publishing
 	return datastruct.DynamicChan(ch)
+}
+func (router *Router[T]) WatchAll(done <-chan struct{}, opts ...WatchOption) <-chan Event[T] {
+	return router.broadcaster.Watch(done, opts...)
 }

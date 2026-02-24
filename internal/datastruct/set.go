@@ -83,3 +83,14 @@ func (s *Set[T]) ToArray() []T {
 	}
 	return result
 }
+
+func (s *Set[T]) Range(fn func(T) error) error {
+	s.RLock()
+	defer s.RUnlock()
+	for item := range s.m {
+		if err := fn(item); err != nil {
+			return err
+		}
+	}
+	return nil
+}
