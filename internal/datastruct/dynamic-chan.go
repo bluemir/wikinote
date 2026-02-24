@@ -5,17 +5,16 @@ import (
 )
 
 var (
-	eventQueueSize = prometheus.NewGauge(
+	EventQueueSize = prometheus.NewGauge(
 		prometheus.GaugeOpts{
 			Name: "event_queue_size",
 			Help: "event queue size",
 		},
 	)
-)
 
-func init() {
-	prometheus.MustRegister(eventQueueSize)
-}
+	// if want to know queue size, run this.
+	// prometheus.MustRegister(EventQueueSize)
+)
 
 func DynamicChan[T any](in <-chan T) <-chan T {
 	out := make(chan T)
@@ -26,7 +25,7 @@ func DynamicChan[T any](in <-chan T) <-chan T {
 		store := NewQueue[T]()
 
 		for {
-			eventQueueSize.Set(float64(store.Len()))
+			EventQueueSize.Set(float64(store.Len()))
 
 			if store.Len() == 0 {
 				evt, more := <-in
@@ -41,7 +40,7 @@ func DynamicChan[T any](in <-chan T) <-chan T {
 			case evt, more := <-in:
 				if !more {
 					for store.Len() > 0 {
-						eventQueueSize.Set(float64(store.Len()))
+						EventQueueSize.Set(float64(store.Len()))
 
 						out <- store.Front()
 						store.Pop()
