@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cockroachdb/errors"
 	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
 
 	"github.com/bluemir/wikinote/internal/backend/metadata"
 	"github.com/bluemir/wikinote/internal/plugins"

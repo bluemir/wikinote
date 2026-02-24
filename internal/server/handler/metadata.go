@@ -7,14 +7,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ListMetadata(c *gin.Context) {
+func ListMetadata(c *gin.Context) error {
 	items, err := injector.Backends(c).ListMetadata(c.Request.Context())
 	if err != nil {
-		c.Error(err)
-		return
+		return err
 	}
 
 	c.HTML(http.StatusOK, "admin/metadata.html", With(c, gin.H{
 		"Items": items,
 	}))
+	return nil
 }

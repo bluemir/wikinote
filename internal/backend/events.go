@@ -6,7 +6,7 @@ import (
 
 	"github.com/bluemir/wikinote/internal/backend/events"
 	"github.com/bluemir/wikinote/internal/pubsub"
-	"github.com/pkg/errors"
+	"github.com/cockroachdb/errors"
 )
 
 func (backend *Backend) GetEvents(ctx context.Context) ([]pubsub.Event, error) {

@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -12,36 +11,35 @@ import (
 	"github.com/bluemir/wikinote/internal/server/injector"
 )
 
-var code = xid.New().String()
+var initCode = xid.New().String()
 
-func RequestInitialize(c *gin.Context) {
-	logrus.Infof("To initailze server, visit %s", c.Request.URL.String()+"/"+code)
+func RequestInitialize(c *gin.Context) error {
+	logrus.Infof("To initailze server, visit %s", c.Request.URL.String()+"/"+initCode)
 
 	c.HTML(http.StatusAccepted, "system/initialize/request.html", With(c, KeyValues{}))
+	return nil
 }
 
-func Initialze(c *gin.Context) {
-	if c.Param("code") != code {
-		c.Error(HttpError{code: http.StatusForbidden, message: "code not matched"})
-		return
+func Initialze(c *gin.Context) error {
+	if c.Param("code") != initCode {
+		return ErrInvalidCode
 	}
 	c.HTML(http.StatusOK, "system/initialize/notice.html", With(c, KeyValues{}))
+	return nil
 }
-func InitialzeAccept(c *gin.Context) {
-	if c.Param("code") != code {
-		c.Error(errors.New("code not matched"))
-		return
+func InitialzeAccept(c *gin.Context) error {
+	if c.Param("code") != initCode {
+		return ErrInvalidCode
 	}
 
-	code = xid.New().String()
+	initCode = xid.New().String()
 
 	req := struct {
 		Username string
 	}{}
 
 	if err := c.ShouldBind(&req); err != nil {
-		c.Error(err)
-		return
+		return err
 	}
 
 	backends := injector.Backends(c)
@@ -49,21 +47,16 @@ func InitialzeAccept(c *gin.Context) {
 	// Add admin to requested user
 	user, _, err := backends.Auth.GetUser(c.Request.Context(), req.Username)
 	if err != nil {
-		c.Error(err)
-		return
+		return err
 	}
 
 	if user == nil {
-		c.Error(HttpError{code: http.StatusBadRequest, message: "user not found"})
-		//c.Error(errors.New("user not found"))
-		return
+		return HttpError{code: http.StatusBadRequest, message: "user not found"}
 	}
 	user.AddGroup("admin")
 
 	if err := backends.Auth.UpdateUser(c.Request.Context(), user); err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 
 	// reset admin role
@@ -73,10 +66,9 @@ func InitialzeAccept(c *gin.Context) {
 			{}, // allow all
 		},
 	}); err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 
 	c.HTML(http.StatusOK, "system/initialize/done.html", With(c, nil))
+	return nil
 }

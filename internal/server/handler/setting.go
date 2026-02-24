@@ -6,11 +6,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func UpdateCommonSetting(c *gin.Context) {
+func UpdateCommonSetting(c *gin.Context) error {
 	/*settings, err := injector.Backends(c).Settings.Get()
 	if err != nil {
-		c.Error(err)
-		return
+		return err
 	}*/
 	c.Redirect(http.StatusSeeOther, "/-/admin/common")
+	return nil
 }

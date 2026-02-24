@@ -3,7 +3,7 @@ package auth
 import (
 	"context"
 
-	"github.com/pkg/errors"
+	"github.com/cockroachdb/errors"
 )
 
 type Group struct {

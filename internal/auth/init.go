@@ -4,7 +4,7 @@ import (
 	"context"
 	_ "embed"
 
-	"github.com/pkg/errors"
+	"github.com/cockroachdb/errors"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 	"gorm.io/gorm"

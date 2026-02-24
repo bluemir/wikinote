@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/pkg/errors"
+	"github.com/cockroachdb/errors"
 	"github.com/rs/xid"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"

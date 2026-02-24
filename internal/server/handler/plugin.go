@@ -9,25 +9,25 @@ import (
 	"github.com/bluemir/wikinote/internal/server/injector"
 )
 
-func ListPlugins(c *gin.Context) {
+func ListPlugins(c *gin.Context) error {
 	plugins, err := injector.Backends(c).Plugin.List(c.Request.Context())
 	if err != nil {
-		c.Error(err)
-		return
+		return err
 	}
 
 	c.HTML(http.StatusOK, "admin/plugins/list.html", With(c, plugins))
+	return nil
 }
-func GetPlugin(c *gin.Context) {
+func GetPlugin(c *gin.Context) error {
 	plugin, err := injector.Backends(c).Plugin.Get(c.Request.Context(), c.Param("name"))
 	if err != nil {
-		c.Error(err)
-		return
+		return err
 	}
 
 	c.HTML(http.StatusOK, "admin/plugins/config.html", With(c, plugin))
+	return nil
 }
-func UpdatePlugin(c *gin.Context) {
+func UpdatePlugin(c *gin.Context) error {
 	name := c.Param("name")
 
 	req := struct {
@@ -36,31 +36,25 @@ func UpdatePlugin(c *gin.Context) {
 	}{}
 
 	if err := c.ShouldBind(&req); err != nil {
-		c.Error(err)
-		return
+		return err
 	}
 
 	logrus.Tracef("name: %s, request: %+v", name, req)
 
 	if err := injector.Backends(c).Plugin.SetConfig(c.Request.Context(), name, req.Config); err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 
 	if req.IsEnabled {
 		if err := injector.Backends(c).Plugin.Enable(c.Request.Context(), name); err != nil {
-			c.Error(err)
-			c.Abort()
-			return
+			return err
 		}
 	} else {
 		if err := injector.Backends(c).Plugin.Disable(c.Request.Context(), name); err != nil {
-			c.Error(err)
-			c.Abort()
-			return
+			return err
 		}
 	}
 
 	c.Redirect(http.StatusSeeOther, c.Request.URL.Path)
+	return nil
 }

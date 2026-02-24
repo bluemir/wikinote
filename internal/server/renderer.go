@@ -10,12 +10,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cockroachdb/errors"
 	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 
-	"github.com/bluemir/wikinote/internal/assets"
+	"github.com/bluemir/wikinote/assets"
 	"github.com/bluemir/wikinote/internal/server/middleware/cache"
 )
 

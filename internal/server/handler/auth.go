@@ -7,9 +7,9 @@ import (
 
 	"github.com/bluemir/wikinote/internal/auth"
 	"github.com/bluemir/wikinote/internal/server/injector"
+	"github.com/cockroachdb/errors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -75,41 +75,37 @@ func User(c *gin.Context) (*auth.User, error) {
 	return nil, nil
 }
 
-func Login(c *gin.Context) {
+func Login(c *gin.Context) error {
 	req := struct {
 		Username string `form:"username"`
 		Password string `form:"password"`
 	}{}
 
 	if err := c.ShouldBind(&req); err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
-		return
+		return err
 	}
 
 	user, err := injector.Backends(c).Auth.Default(req.Username, req.Password)
 	if err != nil {
-		c.AbortWithError(http.StatusUnauthorized, err)
-		return
+		return err
 	}
 
 	if err := saveUserToSession(c, user); err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 
 	logrus.Tracef("logined: %s", user.Name)
 
 	c.Redirect(http.StatusSeeOther, returnURL(c))
+	return nil
 }
 
-func Logout(c *gin.Context) {
+func Logout(c *gin.Context) error {
 	if err := deleteUserFromSession(c); err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 	c.Redirect(http.StatusSeeOther, returnURL(c))
+	return nil
 }
 
 func returnURL(c *gin.Context) string {

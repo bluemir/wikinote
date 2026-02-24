@@ -108,6 +108,8 @@ $RECYCLE.BIN/
 
 # End of https://www.gitignore.io/api/vim,windows,osx,linux,go
 build/
+assets/dist/
+assets/src/js/index.js
 runtime/
 
 # Created by https://www.toptal.com/developers/gitignore/api/node

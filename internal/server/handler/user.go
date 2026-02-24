@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,7 +9,7 @@ import (
 	"github.com/bluemir/wikinote/internal/server/injector"
 )
 
-func Register(c *gin.Context) {
+func Register(c *gin.Context) error {
 	backend := injector.Backends(c)
 
 	req := &struct {
@@ -20,12 +19,10 @@ func Register(c *gin.Context) {
 		Confirm  string `form:"confirm"   validate:"required,eqfield=Password"`
 	}{}
 	if err := c.ShouldBind(req); err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
-		return
+		return err
 	}
 	if req.Password != req.Confirm {
-		c.AbortWithError(http.StatusBadRequest, errors.New("password & confirm password note matched"))
-		return
+		return ErrPasswordMismatch
 	}
 
 	user, err := backend.Auth.CreateUser(c.Request.Context(), &auth.User{
@@ -35,31 +32,24 @@ func Register(c *gin.Context) {
 		},
 	})
 	if err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 	if _, err := backend.Auth.IssueToken(c.Request.Context(), req.Username, req.Password); err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 
 	if err := saveUserToSession(c, user); err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 
 	c.Redirect(http.StatusSeeOther, "/-/welcome?return="+c.Query("return")) // must use GET method
+	return nil
 }
 
-func Profile(c *gin.Context) {
+func Profile(c *gin.Context) error {
 	user, err := User(c)
 	if err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 
 	c.HTML(http.StatusOK, "system/user/register.html", With(c, struct {
@@ -67,16 +57,16 @@ func Profile(c *gin.Context) {
 	}{
 		User: user,
 	}))
+	return nil
 }
 
-func Me(c *gin.Context) {
+func Me(c *gin.Context) error {
 	//backend := injector.Backend(c)
 	user, err := User(c)
 	if err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 
 	c.JSON(http.StatusOK, user)
+	return nil
 }

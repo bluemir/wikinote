@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/alecthomas/kingpin/v2"
-	"github.com/pkg/errors"
+	"github.com/cockroachdb/errors"
 	"github.com/sirupsen/logrus"
 
 	"github.com/bluemir/wikinote/cmd/config"

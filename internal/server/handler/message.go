@@ -8,16 +8,15 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func ListAllMessages(c *gin.Context) {
+func ListAllMessages(c *gin.Context) error {
 	backend := injector.Backends(c)
 
 	messages, err := backend.GetEvents(c.Request.Context())
 	if err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 	logrus.Trace(messages)
 
 	c.HTML(http.StatusOK, "admin/messages.html", With(c, gin.H{"messages": messages}))
+	return nil
 }

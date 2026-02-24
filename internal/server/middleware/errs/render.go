@@ -1,7 +1,7 @@
 package errs
 
 import (
-	"errors"
+	"github.com/cockroachdb/errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

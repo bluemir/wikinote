@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"github.com/pkg/errors"
+	"github.com/cockroachdb/errors"
 )
 
 var (

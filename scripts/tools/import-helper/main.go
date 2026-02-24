@@ -11,12 +11,12 @@ import (
 func main() {
 	jsFiles := []string{}
 
-	if err := filepath.Walk("assets/js", func(path string, info fs.FileInfo, err error) error {
+	if err := filepath.Walk("assets/src/js", func(path string, info fs.FileInfo, err error) error {
 		if !strings.HasSuffix(path, ".js") {
 			return nil
 		}
 
-		path = strings.TrimPrefix(path, "assets/js/")
+		path = strings.TrimPrefix(path, "assets/src/js/")
 
 		if path == "index.js" { // remove self reference
 			return nil
@@ -37,7 +37,7 @@ func main() {
 
 	data := strings.Join(lines, "\n")
 
-	if err := os.WriteFile("assets/js/index.js", []byte(data), 0644); err != nil {
+	if err := os.WriteFile("assets/src/js/index.js", []byte(data), 0644); err != nil {
 		panic(err)
 	}
 }

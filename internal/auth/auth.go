@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/bluemir/wikinote/internal/initializer"
-	"github.com/pkg/errors"
+	"github.com/cockroachdb/errors"
 	"github.com/rs/xid"
 	"gorm.io/gorm"
 )

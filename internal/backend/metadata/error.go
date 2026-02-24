@@ -1,6 +1,6 @@
 package metadata
 
-import "github.com/pkg/errors"
+import "github.com/cockroachdb/errors"
 
 var (
 	ErrNotFound       = errors.New("metadata not found")

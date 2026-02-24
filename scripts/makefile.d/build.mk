@@ -68,5 +68,4 @@ fmt: ## Run go fmt against code
 
 .PHONY: vet
 vet: ## Run go vet against code
-	@mkdir -p build/static
 	go vet ./...

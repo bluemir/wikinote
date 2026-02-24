@@ -3,7 +3,7 @@ package plugins
 import (
 	"reflect"
 
-	"github.com/pkg/errors"
+	"github.com/cockroachdb/errors"
 )
 
 type PluginInitDriver struct {

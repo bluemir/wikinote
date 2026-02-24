@@ -11,35 +11,33 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func GetUser(c *gin.Context) {
+func GetUser(c *gin.Context) error {
 	backend := injector.Backends(c)
 
 	user, _, err := backend.Auth.GetUser(c.Request.Context(), c.Param("username"))
 	if err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 
 	c.HTML(http.StatusOK, "admin/iam/user.html", With(c, KeyValues{
 		"user": user,
 	}))
-
+	return nil
 }
-func ListUsers(c *gin.Context) {
+func ListUsers(c *gin.Context) error {
 	backend := injector.Backends(c)
 
 	users, err := backend.Auth.ListUsers(c.Request.Context())
 	if err != nil {
-		c.Error(err)
-		return
+		return err
 	}
 
 	c.HTML(http.StatusOK, "admin/iam/users.html", With(c, KeyValues{
 		"users": users,
 	}))
+	return nil
 }
-func UpdateUser(c *gin.Context) {
+func UpdateUser(c *gin.Context) error {
 	backend := injector.Backends(c)
 
 	req := struct {
@@ -48,9 +46,7 @@ func UpdateUser(c *gin.Context) {
 
 	user, _, err := backend.Auth.GetUser(c.Request.Context(), c.Param("username"))
 	if err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 
 	for group := range strings.SplitSeq(req.Groups, ",") {
@@ -58,12 +54,11 @@ func UpdateUser(c *gin.Context) {
 	}
 
 	if err := backend.Auth.UpdateUser(c.Request.Context(), user); err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
+	return nil
 }
-func CreateGroup(c *gin.Context) {
+func CreateGroup(c *gin.Context) error {
 	backend := injector.Backends(c)
 
 	req := struct {
@@ -71,105 +66,95 @@ func CreateGroup(c *gin.Context) {
 	}{}
 
 	if err := c.ShouldBind(&req); err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 
 	if err := backend.Auth.CreateGroup(c.Request.Context(), req.Name); err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 
 	c.Redirect(http.StatusSeeOther, "/-/admin/iam/groups")
+	return nil
 }
-func ListGroups(c *gin.Context) {
+func ListGroups(c *gin.Context) error {
 	backend := injector.Backends(c)
 
 	groups, err := backend.Auth.ListGroups(c.Request.Context())
 	if err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 	c.HTML(http.StatusOK, "admin/iam/groups.html", With(c, KeyValues{
 		"groups": groups,
 	}))
+	return nil
 }
-func GetGroup(c *gin.Context) {
+func GetGroup(c *gin.Context) error {
 	backend := injector.Backends(c)
 
 	group, err := backend.Auth.GetGroup(c.Request.Context(), c.Param("groupName"))
 	if err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 	logrus.Tracef("%+v", group)
 	c.HTML(http.StatusOK, "admin/iam/group.html", With(c, KeyValues{
 		"group": group,
 	}))
+	return nil
 }
-func DeleteGroup(c *gin.Context) {
+func DeleteGroup(c *gin.Context) error {
 	backend := injector.Backends(c)
 
 	if err := backend.Auth.DeleteGroup(c.Request.Context(), c.Param("groupName")); err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 
 	c.Redirect(http.StatusSeeOther, "/-/admin/iam/groups")
+	return nil
 }
-func CreateRole(c *gin.Context) {
+func CreateRole(c *gin.Context) error {
 	backend := injector.Backends(c)
 
 	req := struct {
 		Name string `form:"name"`
 	}{}
 	if err := c.ShouldBind(&req); err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 	role, err := backend.Auth.CreateRole(c.Request.Context(), req.Name, []auth.Rule{})
 	if err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 
 	logrus.Tracef("%+v", role)
 
 	c.Redirect(http.StatusSeeOther, "/-/admin/iam/roles")
-
+	return nil
 }
-func ListRoles(c *gin.Context) {
+func ListRoles(c *gin.Context) error {
 	backend := injector.Backends(c)
 
 	roles, err := backend.Auth.ListRoles(c.Request.Context())
 	if err != nil {
-		c.Error(err)
-		return
+		return err
 	}
 	c.HTML(http.StatusOK, "admin/iam/roles.html", With(c, KeyValues{
 		"roles": roles,
 	}))
+	return nil
 }
-func GetRole(c *gin.Context) {
+func GetRole(c *gin.Context) error {
 	backend := injector.Backends(c)
 
 	role, err := backend.Auth.GetRole(c.Request.Context(), c.Param("roleName"))
 	if err != nil {
-		c.Error(err)
-		return
+		return err
 	}
 	c.HTML(http.StatusOK, "admin/iam/role.html", With(c, KeyValues{
 		"role": role,
 	}))
+	return nil
 }
-func UpdateRole(c *gin.Context) {
+func UpdateRole(c *gin.Context) error {
 	backend := injector.Backends(c)
 
 	req := struct {
@@ -177,16 +162,12 @@ func UpdateRole(c *gin.Context) {
 	}{}
 
 	if err := c.ShouldBind(&req); err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 
 	rules := []auth.Rule{}
 	if err := yaml.Unmarshal([]byte(req.Rules), &rules); err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 	logrus.Tracef("%+v", rules)
 
@@ -194,24 +175,22 @@ func UpdateRole(c *gin.Context) {
 		Name:  c.Param("roleName"),
 		Rules: rules,
 	}); err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 	c.Redirect(http.StatusSeeOther, "/-/admin/iam/roles/"+c.Param("roleName"))
+	return nil
 }
-func DeleteRole(c *gin.Context) {
+func DeleteRole(c *gin.Context) error {
 	backend := injector.Backends(c)
 
 	if err := backend.Auth.DeleteRole(c.Request.Context(), c.Param("roleName")); err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 	c.Redirect(http.StatusSeeOther, "/-/admin/iam/roles")
+	return nil
 }
 
-func CreateAssign(c *gin.Context) {
+func CreateAssign(c *gin.Context) error {
 	backend := injector.Backends(c)
 
 	req := struct {
@@ -219,35 +198,32 @@ func CreateAssign(c *gin.Context) {
 		Name string `form:"name"`
 	}{}
 	if err := c.ShouldBind(&req); err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 
 	if err := backend.Auth.AssignRole(c.Request.Context(), auth.Subject{
 		Kind: auth.Kind(req.Kind),
 		Name: req.Name,
 	}); err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 
 	c.Redirect(http.StatusSeeOther, c.Request.URL.Path)
+	return nil
 }
-func ListAssigns(c *gin.Context) {
+func ListAssigns(c *gin.Context) error {
 	backend := injector.Backends(c)
 
 	assigns, err := backend.Auth.ListAssigns(c.Request.Context())
 	if err != nil {
-		c.Error(err)
-		return
+		return err
 	}
 	c.HTML(http.StatusOK, "admin/iam/assigns.html", With(c, KeyValues{
 		"assigns": assigns,
 	}))
+	return nil
 }
-func GetAssign(c *gin.Context) {
+func GetAssign(c *gin.Context) error {
 	backend := injector.Backends(c)
 
 	assign, err := backend.Auth.GetAssign(c.Request.Context(), auth.Subject{
@@ -255,15 +231,14 @@ func GetAssign(c *gin.Context) {
 		Name: c.Param("subjectName"),
 	})
 	if err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 	c.HTML(http.StatusOK, "admin/iam/assign.html", With(c, KeyValues{
 		"Assign": assign,
 	}))
+	return nil
 }
-func UpdateAssign(c *gin.Context) {
+func UpdateAssign(c *gin.Context) error {
 	backend := injector.Backends(c)
 
 	req := struct {
@@ -271,9 +246,7 @@ func UpdateAssign(c *gin.Context) {
 	}{}
 
 	if err := c.ShouldBind(&req); err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 
 	assign, err := backend.Auth.GetAssign(c.Request.Context(), auth.Subject{
@@ -281,21 +254,18 @@ func UpdateAssign(c *gin.Context) {
 		Name: c.Param("subjectName"),
 	})
 	if err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 
 	assign.Roles = auth.SetFromArray(strings.Split(req.Roles, ","))
 
 	if err := backend.Auth.UpdateAssign(c.Request.Context(), assign); err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 	c.Redirect(http.StatusSeeOther, c.Request.URL.Path)
+	return nil
 }
-func DeleteAssign(c *gin.Context) {
+func DeleteAssign(c *gin.Context) error {
 
 	backend := injector.Backends(c)
 
@@ -303,10 +273,9 @@ func DeleteAssign(c *gin.Context) {
 		Kind: auth.Kind(c.Param("subjectKind")),
 		Name: c.Param("subjectName"),
 	}); err != nil {
-		c.Error(err)
-		c.Abort()
-		return
+		return err
 	}
 
 	c.Redirect(http.StatusOK, "/-/admin/iam/assigns")
+	return nil
 }

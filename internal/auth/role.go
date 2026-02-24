@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"slices"
 
-	"github.com/pkg/errors"
+	"github.com/cockroachdb/errors"
 	"github.com/sirupsen/logrus"
 )
 

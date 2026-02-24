@@ -1,7 +1,7 @@
 package errs
 
 import (
-	"errors"
+	"github.com/cockroachdb/errors"
 	"net/http"
 	"os"
 	"strings"
@@ -13,6 +13,7 @@ import (
 
 	"github.com/bluemir/wikinote/internal/auth"
 	"github.com/bluemir/wikinote/internal/backend/metadata"
+	"github.com/bluemir/wikinote/internal/server/handler"
 )
 
 func code(err error) int {
@@ -40,6 +41,14 @@ func code(err error) int {
 		return http.StatusNotFound
 	case errors.Is(err, metadata.ErrNotImplemented):
 		return http.StatusNotImplemented
+	case errors.Is(err, handler.ErrNotFile):
+		return http.StatusBadRequest
+	case errors.Is(err, handler.ErrNotDirectory):
+		return http.StatusBadRequest
+	case errors.Is(err, handler.ErrPasswordMismatch):
+		return http.StatusBadRequest
+	case errors.Is(err, handler.ErrInvalidCode):
+		return http.StatusForbidden
 	case errors.As(err, &sqliteErr):
 		switch {
 		case sqliteErr.Code == sqlite3.ErrConstraint && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique:
