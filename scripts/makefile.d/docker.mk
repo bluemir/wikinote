@@ -4,8 +4,7 @@ DOCKER_IMAGE_NAME=$(shell echo $(APP_NAME)| tr A-Z a-z)
 .PHONY: docker
 docker: build/docker-image ## Build docker image
 
-build/docker-image: Dockerfile $(MAKEFILE_LIST)
-	@$(MAKE) build/tools/docker
+build/docker-image: Dockerfile $(MAKEFILE_LIST) | runtime/tools/docker
 	@mkdir -p $(dir $@)
 	docker build \
 		--build-arg VERSION=$(VERSION) \
@@ -16,8 +15,7 @@ build/docker-image: Dockerfile $(MAKEFILE_LIST)
 .PHONY: docker-push
 docker-push: build/docker-image.pushed ## Push docker image
 
-build/docker-image.pushed: build/docker-image
-	@$(MAKE) build/tools/docker
+build/docker-image.pushed: build/docker-image | runtime/tools/docker
 	@mkdir -p $(dir $@)
 	docker push $(shell cat $<)
 	echo $(shell cat $<) > $@
@@ -29,6 +27,6 @@ docker-run: build/docker-image ## Run docker container
 	$(shell cat $<) \
 	$(APP_NAME) -vv server -w /var/run/data
 
-tools: build/tools/docker
-build/tools/docker:
+tools: runtime/tools/docker
+runtime/tools/docker:
 	@which $(notdir $@)

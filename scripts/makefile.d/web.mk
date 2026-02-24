@@ -35,10 +35,9 @@ OPTIONAL_CLEAN += assets/js/index.js
 ## esbuild
 STATICS += build/static/js/index.js # entrypoints
 build/static/js/%: export NODE_PATH=assets/js:assets/lib
-build/static/js/%: $(JS_SOURCES) package.json package-lock.json
-	@$(MAKE) build/tools/npx
+build/static/js/%: $(JS_SOURCES) package.json package-lock.json | runtime/tools/esbuild
 	@mkdir -p $(dir $@)
-	npx esbuild $(@:build/static/%=assets/%) --outdir=$(dir $@) \
+	esbuild $(@:build/static/%=assets/%) --outdir=$(dir $@) \
 		--external:lit-html \
 		--external:bm.js/bm.module.js \
 		--minify \
@@ -49,10 +48,9 @@ build/static/js/%: $(JS_SOURCES) package.json package-lock.json
 
 
 STATICS += build/static/css/page.css build/static/css/element.css
-build/static/css/%.css: $(CSS_SOURCES) $(WEB_LIBS)
-	@$(MAKE) build/tools/npx
+build/static/css/%.css: $(CSS_SOURCES) $(WEB_LIBS) | runtime/tools/esbuild
 	@mkdir -p $(dir $@)
-	npx esbuild $(@:build/static/%=assets/%) --outdir=$(dir $@) \
+	esbuild $(@:build/static/%=assets/%) --outdir=$(dir $@) \
 		--bundle --sourcemap \
 		--minify \
 		$(OPTIONAL_WEB_BUILD_ARGS)
@@ -73,18 +71,17 @@ build/static:
 OPTIONAL_CLEAN += node_modules
 
 build/$(APP_NAME): package-lock.json
-package-lock.json: package.json
-	@$(MAKE) build/tools/npm
+package-lock.json: package.json | runtime/tools/npm
 	@mkdir -p $(dir $@)
 	npm install
 	touch $@
 
 build/docker-image: package.json
 
-build-tools: build/tools/npm build/tools/npx
-build/tools/npm:
+## Go esbuild (npm/npx 대신 사용)
+runtime/tools/esbuild:
+	GOBIN=$(shell pwd)/runtime/tools go install github.com/evanw/esbuild/cmd/esbuild@latest
+
+build-tools: runtime/tools/esbuild runtime/tools/npm
+runtime/tools/npm:
 	@which $(notdir $@)
-build/tools/npx:
-	@which $(notdir $@)
-build/tools/yarn: build/tools/npm
-	@which $(notdir $@) || (npm install -g yarn)

@@ -4,7 +4,7 @@ export VERSION
 IMPORT_PATH=$(shell cat go.mod | head -n 1 | awk '{print $$2}')
 APP_NAME=$(notdir $(IMPORT_PATH))
 
-export PATH:=${PATH}:./build/tools/
+export PATH:=./runtime/tools:${PATH}
 
 # go build args
 OPTIONAL_BUILD_ARGS?=

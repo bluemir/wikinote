@@ -5,8 +5,7 @@ run: build/$(APP_NAME) ## Run web app
 	$< -vv server --wiki-path=runtime --volatile-database
 
 .PHONY: dev-run
-dev-run: ## Run dev server. If detect file change, automatically rebuild&restart server
-	@$(MAKE) build/tools/watcher
+dev-run: | runtime/tools/watcher ## Run dev server. If detect file change, automatically rebuild&restart server
 	watcher \
 		--include "go.mod" \
 		--include "go.sum" \
@@ -33,7 +32,7 @@ dev-run: ## Run dev server. If detect file change, automatically rebuild&restart
 reset: ## Kill all make process. Use when dev-run stuck.
 	ps -e | grep make | grep -v grep | awk '{print $$1}' | xargs kill
 
-tools: build/tools/watcher
-build/tools/watcher:
+tools: runtime/tools/watcher
+runtime/tools/watcher:
 	@which $(notdir $@) || (./scripts/tools/install/go-tool.sh github.com/bluemir/watcher)
 

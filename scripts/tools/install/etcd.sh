@@ -1,7 +1,7 @@
 set -e
 
 VERSION=$1
-BINDIR=$(pwd)/build/tools
+BINDIR=$(pwd)/runtime/tools
 
 OS=$(go env GOOS)
 ARCH=$(go env GOARCH)
