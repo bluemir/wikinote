@@ -16,7 +16,7 @@ import (
 	"github.com/bluemir/wikinote/internal/server/graceful"
 	"github.com/bluemir/wikinote/internal/server/injector"
 	"github.com/bluemir/wikinote/internal/server/middleware/cache"
-	"github.com/bluemir/wikinote/internal/server/middleware/errors"
+	"github.com/bluemir/wikinote/internal/server/middleware/errs"
 	"github.com/bluemir/wikinote/internal/server/middleware/prom"
 )
 
@@ -54,7 +54,7 @@ func Run(ctx context.Context, b *backend.Backend, conf *Config) error {
 	app.Use(gin.LoggerWithWriter(writer))
 
 	// Error Handling
-	app.Use(errors.Middleware)
+	app.Use(errs.Middleware)
 
 	// Recovery
 	app.Use(gin.Recovery())
