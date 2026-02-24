@@ -1,4 +1,4 @@
-//go:build !embed
+//go:build !prod
 
 package main
 

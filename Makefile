@@ -9,6 +9,12 @@ export PATH:=./runtime/tools:${PATH}
 # go build args
 OPTIONAL_BUILD_ARGS?=
 
+# Make version check
+MIN_MAKE_VERSION := 4.3
+ifneq ($(shell printf '%s\n' "$(MIN_MAKE_VERSION)" "$(MAKE_VERSION)" | sort -V | tail -n 1),$(MAKE_VERSION))
+    $(error Makefile을 실행하려면 Make 버전 4.3 이상이 필요합니다. 현재 버전: $(MAKE_VERSION))
+endif
+
 default: build
 	# `make help` for more information.
 

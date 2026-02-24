@@ -1,12 +1,12 @@
 package auth
 
 import (
+	"context"
 	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
 	"github.com/rs/xid"
-	"golang.org/x/net/context"
 	"gorm.io/gorm"
 )
 

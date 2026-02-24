@@ -2,10 +2,10 @@ package utteranc
 
 import (
 	"bytes"
+	"context"
 	"html/template"
 
 	"github.com/pkg/errors"
-	"golang.org/x/net/context"
 
 	"github.com/bluemir/wikinote/internal/backend/metadata"
 	"github.com/bluemir/wikinote/internal/plugins"
@@ -36,7 +36,7 @@ repoId:
 category:
 categoryId:
 reactions:
-inputPosition: 
+inputPosition:
 theme:
 lang:
 `

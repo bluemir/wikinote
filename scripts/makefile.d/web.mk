@@ -55,6 +55,8 @@ build/static/css/%.css: $(CSS_SOURCES) $(WEB_LIBS) | runtime/tools/esbuild
 		--minify \
 		$(OPTIONAL_WEB_BUILD_ARGS)
 
+gen: $(filter-out build/static/js/% build/static/css/%,$(STATICS))
+
 .PHONY: build-web
 build-web: $(STATICS) ## Build web-files. (bundle, minify, transpile, etc.)
 

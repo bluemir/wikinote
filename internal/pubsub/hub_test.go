@@ -86,7 +86,7 @@ func TestHub_SingleEvent(t *testing.T) {
 
 	assert.Equal(t, 1, recorder.Count(), "Handler should have received one event")
 	require.Len(t, recorder.Events, 1)
-	assert.Equal(t, reflect.TypeOf(eventToSend).String(), recorder.Events[0].Kind)
+	assert.Equal(t, reflect.TypeFor[EventForTest]().String(), recorder.Events[0].Kind)
 	assert.Equal(t, eventToSend, recorder.Events[0].Detail)
 }
 
@@ -105,8 +105,8 @@ func TestHub_MultipleEvents(t *testing.T) {
 	hub.Publish(context.Background(), EventForTest{Message: "world"})
 
 	assert.Len(t, recoder.Events, 2)
-	assert.Equal(t, reflect.TypeOf(EventForTest{}).String(), recoder.Events[0].Kind)
-	assert.Equal(t, reflect.TypeOf(EventForTest{}).String(), recoder.Events[1].Kind)
+	assert.Equal(t, reflect.TypeFor[EventForTest]().String(), recoder.Events[0].Kind)
+	assert.Equal(t, reflect.TypeFor[EventForTest]().String(), recoder.Events[1].Kind)
 	assert.Equal(t, "hello", recoder.Events[0].Detail.(EventForTest).Message)
 	assert.Equal(t, "world", recoder.Events[1].Detail.(EventForTest).Message)
 }
@@ -129,10 +129,10 @@ func TestHub_ConcurrentPublish(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(numGoroutines)
 
-	for i := 0; i < numGoroutines; i++ {
+	for i := range numGoroutines {
 		go func(gID int) {
 			defer wg.Done()
-			for j := 0; j < numEventsPerG; j++ {
+			for j := range numEventsPerG {
 				hub.Publish(ctx, EventForTest{Message: fmt.Sprintf("g%d-e%d", gID, j)})
 				// time.Sleep(time.Duration(rand.Intn(5)) * time.Millisecond) // Optional: add jitter
 			}

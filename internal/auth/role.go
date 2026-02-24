@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/gob"
 	"regexp"
+	"slices"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -80,12 +81,7 @@ func (rule *Rule) isMatchVerb(verb Verb) bool {
 	if len(rule.Verbs) == 0 {
 		return true
 	}
-	for _, v := range rule.Verbs {
-		if verb == v {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(rule.Verbs, verb)
 }
 func (rule *Rule) isMatchResource(resource Resource) bool {
 	if len(rule.Resources) == 0 {

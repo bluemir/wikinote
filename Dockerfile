@@ -32,7 +32,7 @@ RUN yarn install
 # build
 #WORKDIR /src
 
-ENV OPTIONAL_BUILD_ARGS="-tags embed"
+ENV OPTIONAL_BUILD_ARGS="-tags prod"
 ENV OPTIONAL_WEB_BUILD_ARGS="--minify"
 
 ARG VERSION

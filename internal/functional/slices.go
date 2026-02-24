@@ -1,5 +1,7 @@
 package functional
 
+import "slices"
+
 func Map[In any, Out any](in []In, fn func(In) Out) []Out {
 	out := make([]Out, 0, len(in))
 
@@ -26,13 +28,7 @@ func Contain[In comparable](in []In, v In) bool {
 	return ContainWithFn(in, func(i In) bool { return i == v })
 }
 func ContainWithFn[In any](in []In, fn func(In) bool) bool {
-	for _, v := range in {
-		if fn(v) {
-			return true
-		}
-	}
-
-	return false
+	return slices.ContainsFunc(in, fn)
 }
 func Filter[T any](in []T, fn func(T) bool) []T {
 	out := []T{}
@@ -56,12 +52,7 @@ func ToLookupTable[Key comparable, Element any](in []Element, keyFn func(Element
 	return m
 }
 func Some[T any](in []T, fn func(T) bool) bool {
-	for _, v := range in {
-		if fn(v) {
-			return true
-		}
-	}
-	return false
+	return slices.ContainsFunc(in, fn)
 }
 func All[T any](in []T, fn func(T) bool) bool {
 	for _, v := range in {

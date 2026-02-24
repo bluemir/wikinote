@@ -48,7 +48,7 @@ func Middleware(c *gin.Context) {
 	}
 
 	// with header or without header, or other processer/ maybe hook? depend on error type? or just code
-	for _, accept := range strings.Split(c.Request.Header.Get("Accept"), ",") {
+	for accept := range strings.SplitSeq(c.Request.Header.Get("Accept"), ",") {
 		t, _, e := mime.ParseMediaType(accept)
 		if e != nil {
 			logrus.Error(e)

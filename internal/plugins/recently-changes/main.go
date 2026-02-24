@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -76,13 +77,13 @@ func (r *Recents) Route(app gin.IRouter) error {
 			c.JSON(http.StatusInternalServerError, err.Error())
 		}
 
-		result := ""
+		var result strings.Builder
 		for _, d := range list {
-			result += fmt.Sprintf(`<p><a href="%s">%s</a> %s</p>`, d.Path, d.Path, d.Time.Local().Format(time.RFC3339))
+			result.WriteString(fmt.Sprintf(`<p><a href="%s">%s</a> %s</p>`, d.Path, d.Path, d.Time.Local().Format(time.RFC3339)))
 		}
 
 		c.HTML(http.StatusOK, "/viewers/markdown.html", gin.H{
-			"content": template.HTML(result),
+			"content": template.HTML(result.String()),
 		})
 	})
 

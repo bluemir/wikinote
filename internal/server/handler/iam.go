@@ -53,7 +53,7 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
-	for _, group := range strings.Split(req.Groups, ",") {
+	for group := range strings.SplitSeq(req.Groups, ",") {
 		user.AddGroup(group)
 	}
 
