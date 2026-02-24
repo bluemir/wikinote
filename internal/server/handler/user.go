@@ -34,7 +34,7 @@ func Register(c *gin.Context) error {
 	if err != nil {
 		return err
 	}
-	if _, err := backend.Auth.IssueToken(c.Request.Context(), req.Username, req.Password); err != nil {
+	if err := backend.Auth.SetPassword(c.Request.Context(), req.Username, req.Password); err != nil {
 		return err
 	}
 

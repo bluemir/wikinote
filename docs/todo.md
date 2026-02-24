@@ -1,10 +1,10 @@
 ## TODO
 
 
-- [ ] markdown에서 math 표현 rendering
-- [ ] router 에서 api 들은 api() 로 감싸기
+- [x] markdown에서 math 표현 rendering
+- [x] router 에서 api 들은 api() 로 감싸기
 	- 0xC0DE 참조
-- [ ] test 추가
+- [x] test 추가
 	- 특히 markdown rendering
 		- footnote
 		- table
@@ -19,7 +19,7 @@
 - [x] `github.com/cockroachdb/errors` 로 교체
 - [x] embed 파일을 assets 내로 이동
 - [ ] 현재 `d1fc296` 를 서빙 중인데 차이점 및 버전업 할때 고려사항 확인
-- [ ] password 암호화 방식 변경.
-- [ ] web.mk 의 정리
+- [x] password 암호화 방식 변경.
+- [x] web.mk 의 정리
 	- embed.go 에서 build 하므로 해당 script 는 필요하면 정리.
 - [x] functional package 를 github.com/bluemir/funtional 로 대체

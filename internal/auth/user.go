@@ -11,11 +11,12 @@ import (
 )
 
 type User struct {
-	Name     string    `gorm:"primary_key" json:"name"`
-	CreateAt time.Time `json:"createAt"`
-	Groups   []Group   `gorm:"many2many:members;" json:"groups"`
-	Labels   Labels    `gorm:"type:bytes;serializer:gob" json:"labels" expr:"labels"`
-	Salt     string    `json:"-"`
+	Name           string    `gorm:"primary_key" json:"name"`
+	CreateAt       time.Time `json:"createAt"`
+	Groups         []Group   `gorm:"many2many:members;" json:"groups"`
+	Labels         Labels    `gorm:"type:bytes;serializer:gob" json:"labels" expr:"labels"`
+	Salt           string    `json:"-"`
+	HashedPassword string    `json:"-"`
 }
 
 func (u User) Subject() Subject {
@@ -71,6 +72,23 @@ func (m *Manager) DeleteUser(ctx context.Context, name string) error {
 	return m.db.WithContext(ctx).Delete(User{
 		Name: name,
 	}).Error
+}
+func (m *Manager) SetPassword(ctx context.Context, username, password string) error {
+	user, ok, err := m.GetUser(ctx, username)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return errors.Errorf("user not found")
+	}
+
+	hashed, err := bcryptHash(password)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	user.HashedPassword = hashed
+	return errors.WithStack(m.db.WithContext(ctx).Save(user).Error)
 }
 
 func (user *User) AddGroup(group string) {

@@ -29,6 +29,7 @@ type IManager interface {
 	ListUsers(ctx context.Context) ([]User, error)
 	//UpdateUser(ctx context.Context) (*User, error)
 	DeleteUser(ctx context.Context, name string) error
+	SetPassword(ctx context.Context, username, password string) error
 
 	// Token
 	IssueToken(ctx context.Context, username, unhashedKey string, opts ...TokenOpt) (*Token, error)
