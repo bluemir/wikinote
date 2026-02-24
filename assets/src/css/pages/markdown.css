@@ -1,7 +1,22 @@
 @import "../common/color.css";
 
 [view=markdown] {
-	/* headers */
+	line-height: 1.7;
+
+	/* Block element spacing */
+	p, ul, ol, blockquote, pre, table, hr, details {
+		margin: 1rem 0;
+	}
+
+	/* Headers */
+	h1, h2, h3, h4, h5, h6 {
+		margin-top: 1.5rem;
+		margin-bottom: 0.5rem;
+		line-height: 1.3;
+	}
+	:first-child {
+		margin-top: 0;
+	}
 	h1 {
 		font-size: 2rem;
 		text-shadow: 1px 1px 5px var(--gray);
@@ -9,10 +24,12 @@
 	h2 {
 		font-size: 1.7rem;
 		border-bottom: 1px solid var(--gray);
+		padding-bottom: 0.3rem;
 	}
 	h3 {
 		font-size: 1.5rem;
 		border-bottom: 2px dotted var(--light-gray);
+		padding-bottom: 0.2rem;
 	}
 	h4 {
 		font-size: 1.3rem;
@@ -25,7 +42,7 @@
 		font-size: 1rem;
 	}
 
-
+	/* Links */
 	a {
 		color: var(--link-fg-color);
 		text-decoration: none;
@@ -33,16 +50,88 @@
 	a:hover {
 		text-decoration: underline;
 	}
+
+	/* Inline code */
+	code {
+		background-color: #f0f0f0;
+		padding: 0.15em 0.4em;
+		border-radius: 3px;
+		font-size: 0.9em;
+	}
+
+	/* Code blocks */
+	pre {
+		background-color: #f6f6f6;
+		padding: 1rem;
+		border-radius: 4px;
+		overflow-x: auto;
+	}
+	pre code {
+		background-color: transparent;
+		padding: 0;
+		border-radius: 0;
+		font-size: inherit;
+	}
+
+	/* Blockquote */
+	blockquote {
+		border-left: 4px solid var(--light-gray);
+		padding: 0.5rem 1rem;
+		background-color: #fafafa;
+		color: var(--dark-gray);
+	}
+	blockquote > :first-child {
+		margin-top: 0;
+	}
+	blockquote > :last-child {
+		margin-bottom: 0;
+	}
+
+	/* Table */
 	table {
 		border-collapse: collapse;
 	}
 	table th, table td {
 		border: 1px solid var(--gray);
+		padding: 0.4rem 0.8rem;
 	}
+	table th {
+		background-color: #f0f0f0;
+	}
+
+	/* Horizontal rule */
+	hr {
+		border: none;
+		border-top: 1px solid var(--light-gray);
+	}
+
+	/* Lists */
+	ul, ol {
+		padding-left: 2rem;
+	}
+	li + li {
+		margin-top: 0.25rem;
+	}
+	li > ul, li > ol {
+		margin: 0.25rem 0;
+	}
+
+	/* Task list */
 	li.task-list-item {
 		list-style-type: none;
 	}
 	li.task-list-item input[type="checkbox"] {
 		margin-right: 0.5em;
+	}
+
+	/* Images */
+	img {
+		border-radius: 4px;
+	}
+
+	/* KaTeX display math overflow */
+	.katex-display {
+		overflow-x: auto;
+		overflow-y: hidden;
 	}
 }
