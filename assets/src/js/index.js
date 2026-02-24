@@ -18,4 +18,5 @@ import "./enhanced/link.js";
 import "./enhanced/textarea.js";
 import "./layout/header/logo.js";
 import "./layout/header/search.js";
+import "./markdown.js";
 import "./shortcut.js";

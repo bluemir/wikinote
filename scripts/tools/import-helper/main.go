@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/fs"
 	"os"
@@ -9,18 +10,30 @@ import (
 )
 
 func main() {
+	output := flag.String("o", "", "output file path (e.g. assets/src/js/index.js)")
+	flag.Parse()
+
+	if *output == "" || flag.NArg() != 1 {
+		fmt.Fprintln(os.Stderr, "usage: import-helper -o <output-file> <source-dir>")
+		os.Exit(1)
+	}
+
+	dir := flag.Arg(0)
+	outputAbs, _ := filepath.Abs(*output)
+
 	jsFiles := []string{}
 
-	if err := filepath.Walk("assets/src/js", func(path string, info fs.FileInfo, err error) error {
+	if err := filepath.Walk(dir, func(path string, info fs.FileInfo, err error) error {
 		if !strings.HasSuffix(path, ".js") {
 			return nil
 		}
 
-		path = strings.TrimPrefix(path, "assets/src/js/")
-
-		if path == "index.js" { // remove self reference
+		abs, _ := filepath.Abs(path)
+		if abs == outputAbs { // remove self reference
 			return nil
 		}
+
+		path = strings.TrimPrefix(path, dir+"/")
 
 		jsFiles = append(jsFiles, path)
 
@@ -37,7 +50,12 @@ func main() {
 
 	data := strings.Join(lines, "\n")
 
-	if err := os.WriteFile("assets/src/js/index.js", []byte(data), 0644); err != nil {
+	existing, err := os.ReadFile(*output)
+	if err == nil && string(existing) == data {
+		return // content unchanged, skip write to preserve timestamp
+	}
+
+	if err := os.WriteFile(*output, []byte(data), 0644); err != nil {
 		panic(err)
 	}
 }

@@ -27,7 +27,7 @@ build/$(APP_NAME): $(GO_SOURCES) $(MAKEFILE_LIST) | fmt vet test runtime/tools/g
 .PHONY: prod
 prod: build/$(APP_NAME)-$(VERSION) ## Build web app (prod mode, minified + embedded)
 
-build/$(APP_NAME)-$(VERSION): $(GO_SOURCES) $(MAKEFILE_LIST) | fmt vet gen test runtime/tools/go
+build/$(APP_NAME)-$(VERSION): $(GO_SOURCES) $(MAKEFILE_LIST) assets/dist/js/index.js | fmt vet gen test runtime/tools/go
 	mkdir -p build
 	go build -v \
 		-trimpath \
@@ -40,9 +40,7 @@ build/$(APP_NAME)-$(VERSION): $(GO_SOURCES) $(MAKEFILE_LIST) | fmt vet gen test 
 		$(OPTIONAL_BUILD_ARGS) \
 		-o $@ .
 
-.PHONY: gen
-gen: runtime/tools/esbuild ## Run go generate
-	PATH=$(shell pwd)/runtime/tools:$(PATH) go generate -tags prod -x ./...
+gen: ## Run go generate (file-based, see web.mk)
 
 build-tools: runtime/tools/go runtime/tools/govulncheck runtime/tools/gosec
 runtime/tools/go:

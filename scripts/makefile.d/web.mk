@@ -12,13 +12,16 @@ build/docker-image: $(JS_SOURCES) $(CSS_SOURCES) $(HTML_SOURCES)
 ## js import helper
 OPTIONAL_CLEAN += assets/src/js/index.js
 assets/src/js/index.js: $(JS_SOURCES) scripts/tools/import-helper/*
-	go run ./scripts/tools/import-helper
+	go run ./scripts/tools/import-helper -o $@ assets/src/js
 
 ## dev build
 build/$(APP_NAME): assets/src/js/index.js
 
-## prod build: esbuild runs via go:generate in assets/embed_on.go
-gen: assets/src/js/index.js
+## prod build: esbuild runs via go:generate in assets/prod.go
+assets/dist/js/index.js: $(JS_SOURCES) $(CSS_SOURCES) assets/src/js/index.js | runtime/tools/esbuild
+	PATH=$(shell pwd)/runtime/tools:$(PATH) go generate -tags prod -x ./...
+
+gen: assets/dist/js/index.js
 
 ## resolve dependency
 OPTIONAL_CLEAN += node_modules
