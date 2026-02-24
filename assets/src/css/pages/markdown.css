@@ -39,4 +39,10 @@
 	table th, table td {
 		border: 1px solid var(--gray);
 	}
+	li.task-list-item {
+		list-style-type: none;
+	}
+	li.task-list-item input[type="checkbox"] {
+		margin-right: 0.5em;
+	}
 }

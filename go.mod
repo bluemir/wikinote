@@ -3,6 +3,7 @@ module github.com/bluemir/wikinote
 go 1.25.0
 
 require (
+	github.com/FurqanSoftware/goldmark-katex v0.0.0-20250906161933-da324498b7cf
 	github.com/alecthomas/kingpin/v2 v2.4.0
 	github.com/cockroachdb/errors v1.12.0
 	github.com/gin-contrib/location v1.0.3
@@ -12,6 +13,7 @@ require (
 	github.com/rs/xid v1.6.0
 	github.com/sirupsen/logrus v1.9.4
 	github.com/stretchr/testify v1.11.1
+	github.com/yuin/goldmark v1.7.16
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/sqlite v1.6.0
 	gorm.io/gorm v1.31.1
@@ -19,6 +21,7 @@ require (
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
+	github.com/bluele/gcache v0.0.2 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect
 	github.com/bytedance/sonic/loader v0.5.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
@@ -33,6 +36,7 @@ require (
 	github.com/gorilla/sessions v1.4.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
+	github.com/lithdew/quickjs v0.0.0-20200714182134-aaa42285c9d2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
@@ -57,7 +61,6 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
-	github.com/gomarkdown/markdown v0.0.0-20260217112301-37c66b85d6ab
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect

@@ -14,6 +14,7 @@ import "./components/switch/switch.js";
 import "./components/textarea/textarea.js";
 import "./enhanced/button.js";
 import "./enhanced/form.js";
+import "./enhanced/link.js";
 import "./enhanced/textarea.js";
 import "./layout/header/logo.js";
 import "./layout/header/search.js";

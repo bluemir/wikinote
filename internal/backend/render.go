@@ -1,25 +1,33 @@
 package backend
 
 import (
-	"github.com/gomarkdown/markdown"
-	"github.com/gomarkdown/markdown/html"
-	"github.com/gomarkdown/markdown/parser"
+	"bytes"
+
+	katex "github.com/FurqanSoftware/goldmark-katex"
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/extension"
+	"github.com/yuin/goldmark/parser"
+	"github.com/yuin/goldmark/renderer/html"
 )
 
 func (backend *Backend) Render(input []byte) ([]byte, error) {
-	extensions := 0 |
-		parser.CommonExtensions |
-		parser.Footnotes |
-		parser.FencedCode |
-		parser.Autolink |
-		parser.AutoHeadingIDs |
-		parser.Tables |
-		parser.Strikethrough
+	md := goldmark.New(
+		goldmark.WithExtensions(
+			extension.GFM,
+			extension.Footnote,
+			&katex.Extender{},
+		),
+		goldmark.WithParserOptions(
+			parser.WithAutoHeadingID(),
+		),
+		goldmark.WithRendererOptions(
+			html.WithUnsafe(),
+		),
+	)
 
-	return markdown.Render(
-		parser.NewWithExtensions(extensions).Parse(input),
-		html.NewRenderer(html.RendererOptions{
-			Flags: html.CommonFlags | html.HrefTargetBlank,
-		}),
-	), nil
+	var buf bytes.Buffer
+	if err := md.Convert(input, &buf); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
