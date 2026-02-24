@@ -2,7 +2,7 @@
 
 //go:generate sh -c "cd .. && go run ./scripts/tools/import-helper"
 //go:generate mkdir -p dist/js dist/css
-//go:generate esbuild src/js/index.js --outdir=dist/js/ --bundle --minify --format=esm --external:lit-html --external:bm.js/bm.module.js
+//go:generate esbuild src/js/index.js --outdir=dist/js/ --bundle --minify --format=esm --alias:@=./src/js --external:lit-html --external:bm.js/bm.module.js
 //go:generate esbuild src/css/page.css --outdir=dist/css/ --bundle --minify
 //go:generate esbuild src/css/element.css --outdir=dist/css/ --bundle --minify
 
