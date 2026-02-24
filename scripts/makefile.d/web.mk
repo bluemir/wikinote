@@ -19,7 +19,7 @@ build/$(APP_NAME): assets/src/js/index.js
 
 ## prod build: esbuild runs via go:generate in assets/prod.go
 assets/dist/js/index.js: $(JS_SOURCES) $(CSS_SOURCES) assets/src/js/index.js | runtime/tools/esbuild
-	PATH=$(shell pwd)/runtime/tools:$(PATH) go generate -tags prod -x ./...
+	go generate -tags prod -x ./...
 
 gen: assets/dist/js/index.js
 

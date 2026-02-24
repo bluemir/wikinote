@@ -8,7 +8,8 @@ deploy: build/docker-image.pushed ## Deploy webapp
 	#   kubectl kustermize deploy | kubectl apply -f -
 
 install: build/$(APP_NAME)-$(VERSION) ## Install binary to local system
-	cp $< $(HOME)/.local/bin/$(APP_NAME)
+	cp $< $(HOME)/.local/bin/$(APP_NAME)-$(VERSION)
+	ln -sf $(APP_NAME)-$(VERSION) $(HOME)/.local/bin/$(APP_NAME)
 
 tools: runtime/tools/kubectl
 runtime/tools/kubectl:
