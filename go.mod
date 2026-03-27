@@ -1,6 +1,6 @@
 module github.com/bluemir/wikinote
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/FurqanSoftware/goldmark-katex v0.0.0-20250906161933-da324498b7cf
@@ -18,6 +18,8 @@ require (
 	gorm.io/driver/sqlite v1.6.0
 	gorm.io/gorm v1.31.1
 )
+
+require github.com/evanw/esbuild v0.27.4 // indirect
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -82,3 +84,5 @@ require (
 	golang.org/x/text v0.34.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )
+
+tool github.com/evanw/esbuild/cmd/esbuild

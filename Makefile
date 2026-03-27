@@ -6,8 +6,11 @@ APP_NAME=$(notdir $(IMPORT_PATH))
 
 export PATH:=./runtime/tools:${PATH}
 
+
 # go build args
 OPTIONAL_BUILD_ARGS?=
+
+export GOTOOLCHAIN=go1.26.0+auto
 
 # Make version check
 MIN_MAKE_VERSION := 4.3

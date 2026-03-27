@@ -18,7 +18,7 @@ assets/src/js/index.js: $(JS_SOURCES) scripts/tools/import-helper/*
 build/$(APP_NAME): assets/src/js/index.js
 
 ## prod build: esbuild runs via go:generate in assets/prod.go
-assets/dist/js/index.js: $(JS_SOURCES) $(CSS_SOURCES) assets/src/js/index.js | runtime/tools/esbuild
+assets/dist/js/index.js: $(JS_SOURCES) $(CSS_SOURCES) assets/src/js/index.js
 	go generate -tags prod -x ./...
 
 gen: assets/dist/js/index.js
@@ -36,11 +36,7 @@ package-lock.json: package.json | runtime/tools/npm
 
 build/docker-image: package.json
 
-## Go esbuild (npm/npx 대신 사용)
-runtime/tools/esbuild:
-	GOBIN=$(shell pwd)/runtime/tools go install github.com/evanw/esbuild/cmd/esbuild@latest
-
-build-tools: runtime/tools/esbuild runtime/tools/npm
+build-tools: runtime/tools/npm
 runtime/tools/npm:
 	@which $(notdir $@)
 
